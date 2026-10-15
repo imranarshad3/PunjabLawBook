@@ -1,0 +1,106 @@
+{
+  "verifiedAt": "2026-10-13",
+  "featured": [
+    {
+      "id": 6078,
+      "name": "ASSISTANT DIRECTOR LEGAL-CNF (BS-17) | MCQs GUIDE",
+      "url": "/products/6078",
+      "image": "/images/book-6078.webp",
+      "price": 1700.0,
+      "inStock": true,
+      "purchasable": true
+    },
+    {
+      "id": 5966,
+      "name": "Civil Judge-cum-Judicial Magistrate Guide 2026",
+      "url": "/products/5966",
+      "image": "/images/book-5966.webp",
+      "price": 3570.0,
+      "inStock": true,
+      "purchasable": true
+    },
+    {
+      "id": 5327,
+      "name": "Pakistan Penal Code 1860 Urdu, مجموعہ تعزیرات پاکستان, Urdu , ppc",
+      "url": "/products/5327",
+      "image": "/images/book-5327.webp",
+      "price": 3000.0,
+      "inStock": true,
+      "purchasable": true
+    },
+    {
+      "id": 4661,
+      "name": "Additional District & Sessions Judge (AD & SJ) Judicial Guide 2026",
+      "url": "/products/4661",
+      "image": "/images/book-4661.webp",
+      "price": 4800.0,
+      "inStock": true,
+      "purchasable": true
+    },
+    {
+      "id": 2557,
+      "name": "MUSLIM FAMILY LAWS,PLBH",
+      "url": "/products/2557",
+      "image": "/images/book-2557.webp",
+      "price": 250.0,
+      "inStock": true,
+      "purchasable": true
+    },
+    {
+      "id": 767,
+      "name": "Assistant District Public Prosecutor, MCQs ADPP, DDPP, DPG, APG, DPP MCQs with Bare Act By Mushtaq Ahmad Mohal KLR Kausar PLBH",
+      "url": "/products/767",
+      "image": "/images/book-767.webp",
+      "price": 500.0,
+      "inStock": true,
+      "purchasable": true
+    }
+  ],
+  "bestsellers": [
+    {
+      "id": 3712,
+      "name": "AI FOR LAWYERS BY DR BAKHT MUNIR PLBH PUNJAB LAW BOOK HOUSE",
+      "url": "/products/3712",
+      "image": "/images/book-3712.webp",
+      "price": 2000.0,
+      "inStock": true,
+      "purchasable": true
+    },
+    {
+      "id": 6537,
+      "name": "Annual Law Digest",
+      "url": "/products/6537",
+      "image": "/images/book-6537.webp",
+      "price": 500.0,
+      "inStock": true,
+      "purchasable": true
+    },
+    {
+      "id": 253,
+      "name": "The Pakistan Penal Code 1860, by M. Akram Qureshi ppc",
+      "url": "/products/253",
+      "image": "/images/book-253.webp",
+      "price": 1000.0,
+      "inStock": true,
+      "purchasable": true
+    },
+    {
+      "id": 403,
+      "name": "The Qanun e Shahadat Order 1984, Bare Act, Syed Naveed Abbas, PLBH qso",
+      "url": "/products/403",
+      "image": "/images/book-403.webp",
+      "price": 1000.0,
+      "inStock": true,
+      "purchasable": true
+    },
+    {
+      "id": 5926,
+      "name": "Punjab sales tax on services act 2012 , Also for enforcement officer punjab revenue authority",
+      "url": "/products/5926",
+      "image": "/images/book-5926.webp",
+      "price": 700.0,
+      "inStock": true,
+      "purchasable": true
+    }
+  ]
+}

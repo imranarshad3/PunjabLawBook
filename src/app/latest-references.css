@@ -1,0 +1,594 @@
+/* Latest individually supplied Most Popular and Judicial Examination references. */
+.popular-final {
+  background:
+    radial-gradient(ellipse at 45% 10%, #f4edda66, transparent 50%), #faf7f0;
+  padding: 32px 0 45px;
+}
+.popular-header-layout {
+  display: grid;
+  grid-template-columns: 0.85fr 1.45fr;
+  gap: 25px;
+  align-items: stretch;
+  min-height: 255px;
+  margin-bottom: 21px;
+}
+.popular-final .bestsellers-heading {
+  padding: 20px 0 10px;
+  max-width: 510px;
+}
+.popular-final .bestsellers-heading h2 {
+  font-size: clamp(2.5rem, 4.05vw, 4rem);
+  line-height: 1.04;
+  font-weight: 600;
+  letter-spacing: -1.5px;
+}
+.popular-final .bestsellers-heading > p:last-child {
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  max-width: 440px;
+  margin-top: 15px;
+}
+.popular-editorial-banner {
+  position: relative;
+  min-height: 260px;
+  background: #002d23;
+  border-radius: 0 10px 10px 0;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 7% 100%);
+  overflow: hidden;
+}
+.popular-editorial-banner:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    #003428 0%,
+    #003428 44%,
+    #003428cc 58%,
+    transparent 78%
+  );
+  pointer-events: none;
+}
+.popular-editorial-banner > img {
+  object-fit: cover;
+  object-position: right center;
+  width: 66% !important;
+  left: auto !important;
+}
+.popular-banner-copy {
+  position: relative;
+  z-index: 1;
+  padding: 57px 0 30px 11%;
+  color: #f1cf8d;
+}
+.popular-banner-copy > p:first-child {
+  font: 600 1.0625rem/1.7 var(--serif);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+.popular-banner-copy > span {
+  display: block;
+  width: 32px;
+  height: 1px;
+  background: #c7a36a;
+  margin: 16px 0;
+}
+.popular-banner-copy > p:last-child {
+  font: 1.25rem/1.45 var(--serif);
+  color: #f2eedf;
+}
+.popular-final .bestseller-topics {
+  padding-bottom: 24px;
+  margin-bottom: 0;
+  min-height: 69px;
+  border-bottom: 1px solid #ddd3c0;
+  padding-right: 340px;
+  align-content: flex-start;
+}
+.popular-final .bestseller-topics a {
+  padding: 10px 16px;
+  background: #fffdf660;
+  border-color: #ded3bf;
+}
+.popular-final .bestseller-topics .active,
+.popular-final .bestseller-topics a:hover {
+  background: #003c2c;
+  color: #fff;
+}
+.popular-final .carousel-actions {
+  top: -60px;
+}
+.popular-final .bestseller-track {
+  padding-top: 19px;
+  gap: 22px;
+}
+.popular-final .catalogue-note {
+  margin-top: 12px;
+  font-size: 0.8125rem;
+}
+
+.exam-final {
+  padding: 0;
+  background:
+    linear-gradient(
+      90deg,
+      #002b20ee 0%,
+      #002b20 61%,
+      #f7eddb 67%,
+      #f7eddb 100%
+    ),
+    url("/images/exam-library-edge.webp") left center/auto 100% no-repeat;
+  overflow: hidden;
+}
+.exam-final .exam-grid {
+  grid-template-columns: 1.22fr 1fr 0.83fr;
+  gap: 0;
+  align-items: stretch;
+  min-height: 535px;
+}
+.exam-final .exam-copy {
+  align-self: center;
+  padding: 43px 15px 42px 0;
+  position: relative;
+  z-index: 1;
+}
+.exam-final .exam-copy .eyebrow {
+  font:
+    600 0.8125rem/1.5 var(--sans),
+    sans-serif;
+  letter-spacing: 3px;
+  color: #dfc582;
+  margin-bottom: 24px;
+  gap: 14px;
+}
+.exam-final .exam-copy .eyebrow:before {
+  width: 35px;
+}
+.exam-final .exam-copy .eyebrow:after {
+  display: none;
+}
+.exam-final .exam-pretitle {
+  font:
+    1.4375rem/1.4 var(--sans),
+    sans-serif;
+  color: #e3e9dd;
+  margin-bottom: 13px;
+}
+.exam-final .exam-copy h2 {
+  font-size: clamp(2.5rem, 3.5vw, 3.8125rem);
+  line-height: 1.12;
+  font-weight: 600;
+  letter-spacing: -1px;
+  color: #e9c071;
+  white-space: nowrap;
+}
+.exam-final .exam-copy h2 span {
+  color: #fffdf0;
+}
+.exam-final .exam-copy > p:last-of-type {
+  font-size: 0.875rem;
+  line-height: 1.8;
+  max-width: 400px;
+  margin-top: 23px;
+  color: #e0e7d9;
+}
+.exam-final .hero-buttons {
+  flex-wrap: nowrap;
+  gap: 16px;
+  margin-top: 26px;
+}
+.exam-final .hero-buttons .button {
+  font-family: var(--sans);
+  font-size: 0.8125rem;
+  min-height: 47px;
+  padding: 12px 17px;
+  gap: 10px;
+  white-space: nowrap;
+}
+.exam-final .button-outline {
+  color: #efd797;
+  border-color: #bd9456;
+}
+.exam-assurances {
+  display: flex;
+  align-items: center;
+  margin-top: 35px;
+  color: #f0efdf;
+  gap: 13px;
+  font:
+    0.8125rem/1.3 var(--sans),
+    sans-serif;
+}
+.exam-assurances span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.exam-assurances span + span {
+  border-left: 1px solid #a58c51;
+  padding-left: 13px;
+}
+.exam-assurances .icon {
+  width: 24px;
+  height: 24px;
+  color: #d8b36c;
+  stroke-width: 1.3;
+}
+.exam-final .exam-presentation {
+  position: relative;
+  transform: none;
+  padding: 0;
+  filter: none;
+  max-width: none;
+  min-height: 535px;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+.exam-final .exam-presentation > img {
+  width: 100% !important;
+  height: 100% !important;
+  max-height: none;
+  object-fit: cover;
+  object-position: right center;
+}
+.exam-final .exam-features {
+  grid-column: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  gap: 29px;
+  border: 0;
+  border-radius: 0;
+  background:
+    linear-gradient(#f7eddb 35%, #f7eddbc9),
+    url("/images/exam-courthouse.webp") bottom right/100% auto no-repeat;
+  padding: 55px 0 75px 25px;
+  position: relative;
+}
+.exam-final .exam-features > div {
+  gap: 16px;
+  align-items: flex-start;
+}
+.exam-final .exam-features .medallion {
+  width: 62px;
+  height: 62px;
+  border: 2px solid #b78e49;
+  background: #003e2b;
+  color: #e1c277;
+  box-shadow: 0 4px 8px #66532a15;
+}
+.exam-final .exam-features .medallion .icon {
+  width: 30px;
+  height: 30px;
+}
+.exam-final .exam-features h3 {
+  font-size: 1.4375rem;
+  line-height: 1.2;
+  color: #173b2b;
+  margin-top: 2px;
+}
+.exam-final .exam-features p {
+  font-size: 0.8125rem;
+  line-height: 1.65;
+  color: #667061;
+  margin-top: 8px;
+}
+@media (min-width: 1700px) {
+  .popular-header-layout {
+    min-height: 285px;
+  }
+  .popular-editorial-banner {
+    min-height: 285px;
+  }
+  .popular-banner-copy {
+    padding-top: 61px;
+  }
+  .exam-final .exam-grid,
+  .exam-final .exam-presentation {
+    min-height: 590px;
+  }
+  .exam-final .exam-copy h2 {
+    font-size: 3.9375rem;
+  }
+  .exam-final .exam-copy > p:last-of-type {
+    font-size: 1rem;
+  }
+  .exam-final .hero-buttons .button {
+    font-size: 0.875rem;
+  }
+  .exam-final .exam-features h3 {
+    font-size: 1.5625rem;
+  }
+  .exam-final .exam-features p {
+    font-size: 0.9375rem;
+  }
+  .exam-assurances {
+    font-size: 0.8125rem;
+  }
+}
+@media (max-width: 1200px) {
+  .popular-final .bestseller-topics {
+    padding-right: 0;
+    margin-bottom: 63px;
+  }
+  .popular-final .carousel-actions {
+    top: -61px;
+  }
+  .popular-banner-copy > p:first-child {
+    font-size: 0.875rem;
+  }
+  .popular-banner-copy > p:last-child {
+    font-size: 1.125rem;
+  }
+  .popular-editorial-banner > img {
+    width: 90% !important;
+  }
+  .popular-final .bestsellers-heading h2 {
+    font-size: 3rem;
+  }
+  .popular-final .bestsellers-heading > p:last-child {
+    font-size: 0.875rem;
+  }
+  .exam-final .exam-grid {
+    grid-template-columns: 1.2fr 1fr;
+  }
+  .exam-final .exam-copy {
+    padding-block: 40px;
+  }
+  .exam-final .exam-copy h2 {
+    font-size: 3.1875rem;
+  }
+  .exam-final .exam-features {
+    grid-column: 1/-1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 27px 20px;
+    gap: 18px;
+    background: #f7eddb;
+  }
+  .exam-final .exam-features .medallion {
+    width: 49px;
+    height: 49px;
+  }
+  .exam-final .exam-features .medallion .icon {
+    width: 25px;
+    height: 25px;
+  }
+  .exam-final .exam-features > div {
+    gap: 12px;
+  }
+  .exam-final .exam-features h3 {
+    font-size: 1.25rem;
+  }
+  .exam-final .exam-features p {
+    font-size: 0.8125rem;
+  }
+  .exam-final .exam-presentation {
+    min-height: 500px;
+  }
+  .exam-final {
+    background: linear-gradient(90deg, #002b20 69%, #f7eddb 69%);
+  }
+  .exam-final .hero-buttons .button {
+    font-size: 0.8125rem;
+    padding-inline: 14px;
+  }
+}
+@media (max-width: 800px) {
+  .popular-header-layout {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  .popular-final .bestsellers-heading {
+    padding-top: 6px;
+    max-width: 600px;
+  }
+  .popular-final .bestsellers-heading h2 {
+    font-size: 3rem;
+  }
+  .popular-final .bestsellers-heading > p:last-child {
+    max-width: 540px;
+  }
+  .popular-editorial-banner {
+    min-height: 210px;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 4% 100%);
+  }
+  .popular-banner-copy {
+    padding: 32px 0 25px 8%;
+  }
+  .popular-banner-copy > p:first-child {
+    font-size: 1rem;
+  }
+  .popular-banner-copy > p:last-child {
+    font-size: 1.1875rem;
+  }
+  .exam-final .exam-copy h2 {
+    font-size: 2.4375rem;
+    white-space: normal;
+  }
+  .exam-final .exam-pretitle {
+    font-size: 1.25rem;
+  }
+  .exam-final .exam-copy > p:last-of-type {
+    font-size: 0.8125rem;
+  }
+  .exam-final .hero-buttons {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .exam-final .hero-buttons .button {
+    width: 100%;
+    max-width: 260px;
+    justify-content: space-between;
+  }
+  .exam-assurances {
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 23px;
+  }
+  .exam-assurances span + span {
+    padding-left: 0;
+    border: 0;
+  }
+  .exam-final .exam-features {
+    grid-template-columns: 1fr;
+    padding: 28px 22px;
+  }
+  .exam-final .exam-features h3 {
+    font-size: 1.4375rem;
+  }
+  .exam-final .exam-features p {
+    font-size: 0.875rem;
+  }
+  .exam-final .exam-features > div {
+    gap: 20px;
+  }
+  .exam-final .exam-presentation {
+    min-height: 520px;
+  }
+}
+@media (max-width: 480px) {
+  .popular-final {
+    padding-block: 34px;
+  }
+  .popular-final .bestsellers-heading h2 {
+    font-size: 2.6875rem;
+  }
+  .popular-final .bestsellers-heading > p:last-child {
+    font-size: 0.875rem;
+  }
+  .popular-editorial-banner {
+    min-height: 190px;
+  }
+  .popular-banner-copy {
+    padding: 28px 0 25px 9%;
+  }
+  .popular-banner-copy > p:first-child {
+    font-size: 0.8125rem;
+    letter-spacing: 1px;
+  }
+  .popular-banner-copy > p:last-child {
+    font-size: 0.9375rem;
+  }
+  .popular-banner-copy > span {
+    margin-block: 12px;
+    width: 24px;
+  }
+  .popular-editorial-banner:after {
+    background: linear-gradient(
+      90deg,
+      #003428 0%,
+      #003428eb 32%,
+      #00342830 60%,
+      transparent
+    );
+  }
+  .popular-editorial-banner > img {
+    width: 95% !important;
+    object-position: 75% center;
+  }
+  .popular-final .bestseller-topics {
+    padding-bottom: 19px;
+    margin-bottom: 70px;
+    min-height: 0;
+  }
+  .popular-final .bestseller-topics a {
+    padding: 9px 12px;
+  }
+  .popular-final .carousel-actions {
+    top: -68px;
+  }
+  .exam-final {
+    background: #002b20;
+  }
+  .exam-final .exam-grid {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+  .exam-final .exam-copy {
+    padding: 42px 20px 15px;
+  }
+  .exam-final .exam-copy .eyebrow {
+    font-size: 0.8125rem;
+    letter-spacing: 2.5px;
+    margin-bottom: 20px;
+  }
+  .exam-final .exam-copy h2 {
+    font-size: 2.6875rem;
+    white-space: normal;
+    line-height: 1.12;
+  }
+  .exam-final .exam-pretitle {
+    font-size: 1.3125rem;
+  }
+  .exam-final .exam-copy > p:last-of-type {
+    font-size: 0.875rem;
+    line-height: 1.8;
+    max-width: 340px;
+  }
+  .exam-final .hero-buttons {
+    gap: 11px;
+  }
+  .exam-final .hero-buttons .button {
+    max-width: 100%;
+    font-size: 0.875rem;
+    min-height: 49px;
+    padding-inline: 19px;
+  }
+  .exam-assurances {
+    font-size: 0.8125rem;
+    gap: 12px;
+  }
+  .exam-assurances .icon {
+    width: 21px;
+    height: 21px;
+  }
+  .exam-assurances span {
+    gap: 6px;
+  }
+  .exam-final .exam-presentation {
+    min-height: 395px;
+    height: 395px;
+  }
+  .exam-final .exam-presentation > img {
+    object-fit: cover;
+    object-position: center;
+  }
+  .exam-final .exam-features {
+    padding: 35px 22px 55px;
+    background:
+      linear-gradient(#f7eddb 40%, #f7eddbdd),
+      url("/images/exam-courthouse.webp") bottom right/100% auto no-repeat;
+  }
+  .exam-final .exam-features .medallion {
+    width: 58px;
+    height: 58px;
+  }
+  .exam-final .exam-features h3 {
+    font-size: 1.4375rem;
+  }
+  .exam-final .exam-features p {
+    font-size: 0.8125rem;
+  }
+}
+@media (max-width: 350px) {
+  .exam-final .exam-copy h2 {
+    font-size: 2.375rem;
+  }
+  .exam-assurances {
+    gap: 10px;
+  }
+  .exam-assurances span {
+    font-size: 0.8125rem;
+    gap: 4px;
+  }
+  .exam-assurances .icon {
+    width: 19px;
+  }
+  .popular-final .bestsellers-heading h2 {
+    font-size: 2.4375rem;
+  }
+}

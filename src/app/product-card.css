@@ -1,0 +1,684 @@
+/* Product card — the single source for .book-card styling (featured grid and
+   bestseller carousel). Breakpoint sizing for small screens stays in globals.css. */
+.book-card {
+  --card-line: #eadfca;
+  position: relative;
+  border: 1px solid var(--card-line);
+  border-radius: 16px;
+  background: #fffefa;
+  overflow: hidden;
+  box-shadow:
+    0 1px 2px #3b2a1008,
+    0 8px 24px -12px #3b2a1026;
+  transition:
+    transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 0.35s,
+    border-color 0.35s;
+}
+/* Gold hairline that draws in across the top on hover. */
+.book-card:before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  z-index: 2;
+  background: linear-gradient(90deg, transparent, #c9a25c, transparent);
+  transform: scaleX(0);
+  transition: transform 0.45s;
+}
+.book-card:hover {
+  transform: translateY(-6px);
+  border-color: #d9c296;
+  box-shadow:
+    0 2px 4px #3b2a100d,
+    0 24px 44px -18px #3b2a1047;
+}
+.book-card:hover:before {
+  transform: scaleX(1);
+}
+
+/* Cover plinth: warm light with a soft floor shadow under the book. */
+.book-image {
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 38%, #fffdf7, transparent),
+    linear-gradient(180deg, #f6efe1, #ece2cd);
+  border-bottom: 1px solid var(--card-line);
+}
+.book-image:after {
+  content: "";
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  bottom: 11px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, #3b2a1033, transparent);
+  pointer-events: none;
+}
+.book-image img {
+  filter: drop-shadow(0 10px 10px #2b1f0c2e) drop-shadow(0 2px 2px #2b1f0c1f);
+  transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.book-card:hover .book-image img {
+  transform: translateY(-4px) scale(1.03);
+}
+
+.stock-chip {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px 5px 8px;
+  border-radius: 999px;
+  background: #fffdf8e8;
+  border: 1px solid #e3d5b8;
+  backdrop-filter: blur(6px);
+  font: 600 0.8125rem/1 var(--sans);
+  letter-spacing: 0.1px;
+  color: #1f4a3a;
+}
+.stock-chip:before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #1f9d5c;
+  box-shadow: 0 0 0 3px #1f9d5c26;
+}
+.stock-chip.is-unavailable {
+  color: #7a5a2c;
+}
+.stock-chip.is-unavailable:before {
+  background: #c49a4c;
+  box-shadow: 0 0 0 3px #c49a4c26;
+}
+
+.wishlist-button {
+  width: 34px;
+  height: 34px;
+  right: 10px;
+  top: 10px;
+  background: #fffdf8e8;
+  border: 1px solid #e3d5b8;
+  backdrop-filter: blur(6px);
+  color: #7a5a2c;
+  box-shadow: 0 2px 6px #3b2a1014;
+  transition:
+    transform 0.2s,
+    background 0.2s,
+    color 0.2s;
+}
+.wishlist-button:hover {
+  transform: scale(1.08);
+  color: #a3362a;
+}
+.wishlist-button.is-saved {
+  background: #a3362a;
+  border-color: #a3362a;
+  color: #fff;
+}
+
+.book-details {
+  padding: 16px 16px 16px;
+}
+.book-details h3 {
+  font: 600 1.0625rem/1.3 var(--serif);
+  letter-spacing: -0.2px;
+  color: #14231d;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.book-details h3 a {
+  transition: color 0.2s;
+}
+.book-details h3 a:hover {
+  color: #0d4233;
+}
+.book-credit {
+  font: 600 0.8125rem/1.5 var(--sans);
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+  color: #a17c3e;
+  margin: 0 0 14px;
+}
+
+/* Price sits on a hairline rule; the currency is set smaller. */
+.price {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin-top: auto;
+  margin-bottom: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #efe6d4;
+  font: 700 1.375rem/1 var(--serif);
+  color: #0f3328;
+}
+.price > span {
+  font: 600 0.8125rem/1 var(--sans);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #a17c3e;
+}
+
+/* Actions: add-to-cart (or quantity stepper) beside a round WhatsApp button. */
+.cart-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.book-actions {
+  flex-direction: row;
+  align-items: stretch;
+  gap: 8px;
+}
+.cart-add,
+.cart-stepper {
+  flex: 1;
+  min-width: 0;
+  height: 46px;
+  border-radius: 12px;
+}
+.book-actions .cart-add {
+  width: auto;
+  min-height: 0;
+  padding: 0 10px;
+  gap: 8px;
+  border: 1px solid #0a3b2e;
+  background: linear-gradient(180deg, #11523f, #0a3b2e);
+  color: #fff;
+  font: 600 0.8125rem/1 var(--sans);
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 #ffffff1f,
+    0 8px 16px -10px #0a3b2eb3;
+}
+.book-actions .cart-add:hover {
+  transform: none;
+  filter: none;
+  color: #fff;
+  background: linear-gradient(180deg, #146149, #0d4636);
+}
+.book-actions .cart-add .icon {
+  color: #f0d290;
+}
+.cart-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px;
+  background: #f4efe3;
+  border: 1px solid #e2d4b6;
+  animation: stepper-in 0.25s ease-out;
+}
+@keyframes stepper-in {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+}
+.cart-stepper button {
+  width: 38px;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 9px;
+  background: #fff;
+  color: #0d4233;
+  cursor: pointer;
+  box-shadow: 0 1px 2px #3b2a101f;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+.cart-stepper button:hover:not(:disabled) {
+  background: #0d4233;
+  color: #f2d390;
+}
+.cart-stepper button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.cart-stepper button .icon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.2;
+}
+.cart-stepper output {
+  font: 700 1rem/1 var(--sans);
+  color: #0f3328;
+  min-width: 2ch;
+  text-align: center;
+}
+.whatsapp-button {
+  flex: 0 0 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid #cfe3d6;
+  background: #f1f8f3;
+  color: #128047;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    transform 0.2s;
+}
+.whatsapp-button:hover {
+  background: #1fa855;
+  border-color: #1fa855;
+  color: #fff;
+  transform: translateY(-1px);
+}
+.whatsapp-button .icon {
+  width: 20px;
+  height: 20px;
+}
+.cart-continue {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  background: #fbf3e2;
+  border: 1px dashed #d9bf88;
+  font: 600 0.8125rem/1.2 var(--sans);
+  color: #7a5520;
+  animation: stepper-in 0.25s ease-out;
+  transition: background 0.2s;
+}
+.cart-continue:hover {
+  background: #f6e8cb;
+}
+.cart-continue .icon {
+  width: 14px;
+  height: 14px;
+}
+
+@media (hover: none) {
+  .book-card:hover,
+  .book-card:hover .book-image img {
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .book-card,
+  .book-card:hover,
+  .book-card:hover .book-image img {
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Featured books: four cards led by full-bleed studio product shots. */
+.featured-grid {
+  align-items: start; /* an expanded cart row grows its own card, not its neighbours */
+}
+.featured-grid .book-card {
+  border-radius: 20px;
+}
+.featured-grid .book-image {
+  height: auto;
+  aspect-ratio: 9 / 11;
+  border-bottom: 1px solid #c9a25c80;
+  overflow: hidden;
+  background: #06120e;
+}
+/* Gilt inner frame over the studio photograph. */
+.featured-grid .book-image:after,
+.showcase-media:before {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  height: auto;
+  z-index: 1;
+  border: 1px solid #e3c27f4d;
+  border-radius: 12px;
+  background: none;
+  pointer-events: none;
+  transition: border-color 0.5s;
+}
+.featured-grid .book-card:hover .book-image:after,
+.showcase-card:hover .showcase-media:before {
+  border-color: #e3c27fa6;
+}
+.featured-grid .stock-chip {
+  left: 18px;
+  top: 18px;
+}
+.featured-grid .wishlist-button {
+  right: 18px;
+  top: 18px;
+}
+.featured-grid .book-details {
+  background: linear-gradient(180deg, #fffefa, #fbf6ea);
+}
+.featured-grid .book-image > a {
+  inset: 0;
+}
+.featured-grid .book-image img {
+  object-fit: cover;
+  object-position: center;
+  filter: none;
+  transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.featured-grid .book-card:hover .book-image img {
+  transform: scale(1.05);
+}
+.featured-grid .book-details {
+  padding: 20px 20px 22px;
+}
+.featured-grid .book-details h3 {
+  font-size: 1.1875rem;
+  min-height: 2.6em;
+}
+.featured-grid .price {
+  font-size: 1.5rem;
+}
+
+/* Showcase card (Most Popular): image and title; actions reveal on hover. */
+.showcase-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  scroll-snap-align: start;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #fffefa;
+  border: 1px solid #eadfca;
+  box-shadow:
+    0 1px 2px #3b2a1008,
+    0 10px 28px -14px #3b2a1033;
+  transition:
+    transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 0.4s,
+    border-color 0.4s;
+}
+.showcase-card:hover,
+.showcase-card:focus-within {
+  transform: translateY(-6px);
+  border-color: #d9c296;
+  box-shadow:
+    0 2px 4px #3b2a100d,
+    0 28px 48px -20px #3b2a1059;
+}
+.showcase-media {
+  position: relative;
+  aspect-ratio: 9 / 11;
+  overflow: hidden;
+  background: #06120e;
+  border-bottom: 1px solid #c9a25c80;
+}
+.showcase-link {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+.showcase-media img {
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.showcase-card:hover .showcase-media img {
+  transform: scale(1.06);
+}
+/* Store covers without a photograph sit on the warm plinth instead of cropping. */
+.showcase-media.is-cover {
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 40%, #fffdf7, transparent),
+    linear-gradient(180deg, #f6efe1, #e8dcc3);
+}
+.showcase-media.is-cover img {
+  object-fit: contain;
+  padding: 28px 48px;
+  filter: drop-shadow(0 14px 14px #2b1f0c33);
+}
+/* Darkening veil so the actions read against any photograph. */
+.showcase-media:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    0deg,
+    #00241ccc 0%,
+    #00241c40 45%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+.showcase-card:hover .showcase-media:after,
+.showcase-card:focus-within .showcase-media:after {
+  opacity: 1;
+}
+.showcase-actions {
+  position: absolute;
+  inset: auto 0 22px;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  pointer-events: none;
+}
+.showcase-action {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #fffdf8;
+  color: #0d4233;
+  box-shadow: 0 12px 26px -10px #000000b3;
+  opacity: 0;
+  transform: translateY(14px);
+  pointer-events: auto;
+  transition:
+    opacity 0.35s,
+    transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1),
+    background 0.2s,
+    color 0.2s;
+}
+.showcase-action.is-whatsapp {
+  transition-delay: 0.05s, 0.05s, 0s, 0s;
+}
+.showcase-card:hover .showcase-action,
+.showcase-card:focus-within .showcase-action {
+  opacity: 1;
+  transform: none;
+}
+.showcase-action .icon {
+  width: 22px;
+  height: 22px;
+}
+.showcase-action.is-buy:hover {
+  background: #0d4233;
+  color: #f2d390;
+}
+.showcase-action.is-whatsapp:hover {
+  background: #1fa855;
+  color: #fff;
+}
+.showcase-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 18px 18px 20px;
+  text-align: center;
+  background: linear-gradient(180deg, #fffefa, #fbf6ea);
+}
+.showcase-credit {
+  margin: 0 0 6px;
+  font: 600 0.8125rem/1.4 var(--sans);
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+  color: #a17c3e;
+}
+.showcase-card .showcase-title {
+  margin: 0;
+  font: 600 1.125rem/1.3 var(--serif);
+  letter-spacing: -0.2px;
+  color: #14231d;
+  text-align: center;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  min-height: 2.6em;
+}
+/* Price centred between two short gold rules. */
+.showcase-price {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin: 12px 0 0;
+  font: 700 1.25rem/1 var(--serif);
+  color: #0f3328;
+}
+.showcase-price > span {
+  font: 600 0.8125rem/1 var(--sans);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #a17c3e;
+}
+.showcase-price:before,
+.showcase-price:after {
+  content: "";
+  align-self: center;
+  width: 22px;
+  height: 1px;
+  margin: 0 8px;
+  background: #c9a25c;
+}
+.showcase-title a {
+  transition: color 0.2s;
+}
+.showcase-title a:hover {
+  color: #0d4233;
+}
+
+@media (max-width: 600px) {
+  /* Let the next card peek so the carousel reads as swipeable. */
+  .bestseller-track {
+    grid-auto-columns: 78%;
+  }
+  .showcase-card .showcase-title {
+    font-size: 1rem;
+  }
+}
+/* Touch screens have no hover: keep the actions visible. */
+@media (hover: none) {
+  .showcase-media:after {
+    opacity: 0.85;
+    background: linear-gradient(0deg, #00241c99 0%, transparent 40%);
+  }
+  .showcase-action {
+    opacity: 1;
+    transform: none;
+    width: 46px;
+    height: 46px;
+  }
+  .showcase-card:hover,
+  .showcase-card:hover .showcase-media img {
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .showcase-card,
+  .showcase-media img,
+  .showcase-action {
+    transition: none;
+  }
+  .showcase-card:hover,
+  .showcase-card:hover .showcase-media img {
+    transform: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .book-details h3 {
+    font-size: 0.9375rem;
+  }
+  .price {
+    font-size: 1.125rem;
+    padding-top: 10px;
+    margin-bottom: 10px;
+  }
+  .stock-chip {
+    left: 7px;
+    top: 7px;
+    padding: 4px 8px 4px 6px;
+    font-size: 0.8125rem;
+  }
+  .wishlist-button {
+    width: 30px;
+    height: 30px;
+    right: 7px;
+    top: 7px;
+  }
+  .featured-grid .book-image:after {
+    inset: 5px;
+    border-radius: 10px;
+  }
+  .featured-grid .stock-chip {
+    left: 10px;
+    top: 10px;
+  }
+  .featured-grid .wishlist-button {
+    right: 10px;
+    top: 10px;
+  }
+  .book-credit {
+    font-size: 0.8125rem;
+    letter-spacing: 0.8px;
+  }
+  .featured-grid .book-details {
+    padding: 12px;
+  }
+  .featured-grid .book-details h3 {
+    font-size: 0.9375rem;
+    min-height: 2.6em;
+  }
+  .featured-grid .book-image {
+    height: auto;
+  }
+  .featured-grid .price {
+    font-size: 1.125rem;
+  }
+  .cart-add,
+  .cart-stepper {
+    height: 40px;
+  }
+  .book-actions .cart-add {
+    font-size: 0.8125rem;
+    gap: 6px;
+    padding: 0 6px;
+  }
+  .book-actions .cart-add .icon {
+    width: 15px;
+    height: 15px;
+  }
+  .cart-stepper button {
+    width: 30px;
+  }
+  .whatsapp-button {
+    flex-basis: 40px;
+    height: 40px;
+  }
+  .cart-continue {
+    font-size: 0.8125rem;
+    padding: 8px 6px;
+  }
+}
