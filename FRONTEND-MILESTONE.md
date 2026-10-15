@@ -8,7 +8,7 @@ Help, Delivery, Returns, Privacy, Terms, saved books, a book bag, checkout previ
 account preview, registration preview, password recovery preview, and a branded 404.
 All product and site navigation stays on this application. Optional WhatsApp,
 telephone and map actions remain external. No link navigates to the legacy website.
-
+sss
 ## Implemented interactions
 
 - Navbar autocomplete with cover thumbnails, author/subject matching, keyboard
