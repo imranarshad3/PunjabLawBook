@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { PageIntro } from "@/components/page-intro";
 import { Icon } from "@/components/ui";
-import { categories, products } from "@/data/products";
+import { getCatalogue } from "@/lib/catalogue";
 export const metadata: Metadata = {
   title: "Explore Collections | Punjab Law Book House",
 };
@@ -43,7 +43,8 @@ const copy: Record<string, { image: string; description: string }> = {
       "Tax legislation and references for your study and professional collection.",
   },
 };
-export default function CollectionsPage() {
+export default async function CollectionsPage() {
+  const { products, categories } = await getCatalogue();
   return (
     <main id="main" className="inner-page">
       <PageIntro

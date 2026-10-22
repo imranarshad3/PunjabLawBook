@@ -2,11 +2,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCart, setCartQuantity } from "./cart-state";
-import { products } from "@/data/products";
+import { useCatalogue } from "./catalogue-context";
 import { titleFor } from "./book-card";
 import { Icon } from "./ui";
 export function CartPage() {
   const cart = useCart();
+  const { products } = useCatalogue();
   const lines = cart.flatMap((item) => {
     const book = products.find((book) => book.id === item.id);
     return book ? [{ book, quantity: item.quantity }] : [];

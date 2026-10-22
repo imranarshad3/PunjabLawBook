@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { ClerkProvider } from "@clerk/nextjs";
+import { CatalogueProvider } from "@/components/catalogue-context";
+import { getCatalogue } from "@/lib/catalogue";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import "./revised-sections.css";
@@ -34,10 +37,23 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const catalogue = await getCatalogue();
   return (
-    <html lang="en" className={`${serif.variable} ${sans.variable}`}>
-      <body>{children}</body>
-    </html>
+    <ClerkProvider
+      appearance={{
+        variables: {
+          colorPrimary: "#17402f",
+          borderRadius: "0.625rem",
+          fontFamily: "var(--font-body), Arial, sans-serif",
+        },
+      }}
+    >
+      <html lang="en" className={`${serif.variable} ${sans.variable}`}>
+        <body>
+          <CatalogueProvider value={catalogue}>{children}</CatalogueProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

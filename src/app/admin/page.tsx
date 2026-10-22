@@ -1,12 +1,7 @@
-import type { Metadata } from "next";
+import { Suspense } from "react";
 import { AdminWorkspace } from "./workspace";
-import "./admin.css";
-
-export const metadata: Metadata = {
-  title: "Admin Studio | Punjab Law Book House",
-  robots: { index: false, follow: false },
-};
+import AdminLoading from "./loading";
 
 export default function AdminPage() {
-  return <AdminWorkspace />;
+  return <Suspense fallback={<AdminLoading />}><AdminWorkspace view="Dashboard" /></Suspense>;
 }

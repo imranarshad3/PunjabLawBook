@@ -8,9 +8,14 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "check:homepage": "node scripts/check-homepage.cjs"
+    "check:homepage": "node scripts/check-homepage.cjs",
+    "check:admin": "node scripts/check-admin.cjs",
+    "db:apply": "bash scripts/db-apply.sh",
+    "db:seed": "bash scripts/db-apply.sh --seed"
   },
   "dependencies": {
+    "@clerk/nextjs": "^7.9.19",
+    "@supabase/supabase-js": "^2.118.0",
     "next": "16.4.0",
     "react": "19.3.0",
     "react-dom": "19.3.0"

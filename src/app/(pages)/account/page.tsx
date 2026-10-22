@@ -14,7 +14,7 @@ export default function Page() {
         eyebrow="YOUR PERSONAL LEGAL BOOKSHELF"
         title="Welcome back"
         accent="to your next chapter."
-        description="A dedicated space for your reading journey. Account services will open in the next milestone."
+        description="A dedicated space for your reading journey. Sign in to pick up where you left off."
       />
       <AccountPreview />
       <section className="container account-shortcuts">

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Icon } from "./ui";
+import { recordEnquiry } from "@/lib/storefront";
 export function EnquiryForm({ request = false }: { request?: boolean }) {
   const [ready, setReady] = useState(false);
   const [message, setMessage] = useState("");
@@ -16,6 +17,15 @@ export function EnquiryForm({ request = false }: { request?: boolean }) {
           : `Enquiry from ${data.get("name")}\nTopic: ${data.get("topic")}\n${data.get("message")}`;
         setMessage(text);
         setReady(true);
+        // Keep a record in the admin inbox; WhatsApp stays the reply channel.
+        void recordEnquiry({
+          customer_name: String(data.get("name") || "Unknown"),
+          book_title: (data.get("title") as string) || (data.get("topic") as string) || null,
+          phone: (data.get("phone") as string) || null,
+          email: (data.get("email") as string) || null,
+          quantity: Number(data.get("quantity")) || null,
+          message: text,
+        });
       }}
     >
       <p className="shop-kicker">

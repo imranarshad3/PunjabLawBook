@@ -12,7 +12,7 @@ export default function Page() {
         eyebrow="FIND YOUR WAY BACK"
         title="Every chapter"
         accent="can begin again."
-        description="A dedicated place to recover access to your account, ready for account activation in the next milestone."
+        description="A dedicated place to recover access to your account. We will email you a reset code."
       />
       <AccountPreview mode="reset" />
     </main>

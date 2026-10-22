@@ -3,7 +3,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { products } from "@/data/products";
+import { useCatalogue } from "./catalogue-context";
 import { titleFor, creditFor } from "./book-card";
 import { Icon } from "./ui";
 
@@ -32,6 +32,7 @@ export function NavbarSearch() {
   const id = useId();
   const router = useRouter();
   const term = query.trim().toLowerCase();
+  const { products } = useCatalogue();
   const matches = products.filter((book) =>
     `${book.name} ${titleFor(book)} ${creditFor(book)} ${book.category}`
       .toLowerCase()

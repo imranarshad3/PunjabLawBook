@@ -1,11 +1,12 @@
 "use client";
 import Link from "next/link";
 import { useSavedBooks } from "./cart-state";
-import { products } from "@/data/products";
+import { useCatalogue } from "./catalogue-context";
 import { BookCard } from "./book-card";
 import { Icon } from "./ui";
 export function SavedBooks() {
   const saved = useSavedBooks();
+  const { products } = useCatalogue();
   const books = products.filter((book) => saved.includes(book.id));
   return (
     <section className="container collection-directory">

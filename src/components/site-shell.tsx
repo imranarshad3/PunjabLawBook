@@ -1,10 +1,10 @@
 import Link from "next/link";
+import catalogue from "@/data/catalogue.json";
 import { Brand, Icon } from "./ui";
 import { DesktopNavigation } from "./premium-navigation";
 import { NavbarSearch } from "./navbar-search";
 import { HeaderCart } from "./header-cart";
 import { MobileMenu } from "./store-interactions";
-import catalogue from "@/data/catalogue.json";
 export function SiteHeader() {
   return (
     <>

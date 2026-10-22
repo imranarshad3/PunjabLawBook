@@ -1,7 +1,6 @@
 "use client";
 import { useSyncExternalStore } from "react";
-import { products } from "@/data/products";
-const validIds = new Set(products.map((book) => book.id));
+const isValidId = (id: number) => Number.isSafeInteger(id) && id > 0;
 const KEY = "plbh-book-bag-v1";
 export type CartItem = { id: number; quantity: number };
 let snapshot = "[]";
@@ -32,7 +31,7 @@ export function parseCart(value: string): CartItem[] {
         if (
           !item ||
           typeof item !== "object" ||
-          !validIds.has(item.id) ||
+          !isValidId(item.id) ||
           !Number.isInteger(item.quantity) ||
           item.quantity < 1 ||
           item.quantity > 99 ||
@@ -51,7 +50,7 @@ export function useCart() {
   return parseCart(useSyncExternalStore(subscribe, read, () => "[]"));
 }
 export function setCartQuantity(id: number, quantity: number) {
-  if (!validIds.has(id) || !Number.isFinite(quantity)) return;
+  if (!isValidId(id) || !Number.isFinite(quantity)) return;
   const items = parseCart(read()).filter((item) => item.id !== id);
   if (quantity >= 1)
     items.push({ id, quantity: Math.min(99, Math.floor(quantity)) });
@@ -84,7 +83,7 @@ function parseSaved(value: string): number[] {
       ? [
           ...new Set(
             items.filter(
-              (id): id is number => typeof id === "number" && validIds.has(id),
+              (id): id is number => typeof id === "number" && isValidId(id),
             ),
           ),
         ]
@@ -97,7 +96,7 @@ export function useSavedBooks() {
   return parseSaved(useSyncExternalStore(subscribe, readSaved, () => "[]"));
 }
 export function toggleSavedBook(id: number) {
-  if (!validIds.has(id)) return;
+  if (!isValidId(id)) return;
   const ids = parseSaved(readSaved());
   savedSnapshot = JSON.stringify(
     ids.includes(id) ? ids.filter((value) => value !== id) : [...ids, id],

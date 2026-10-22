@@ -5,7 +5,7 @@ import { SiteHeader, SiteFooter } from "@/components/site-shell";
 import { BookCard, ShowcaseCard } from "@/components/book-card";
 import { Button, Icon, SectionHeading, type IconName } from "@/components/ui";
 import { Newsletter } from "@/components/store-interactions";
-import catalogue from "@/data/catalogue.json";
+import { getCatalogue } from "@/lib/catalogue";
 
 // Premium concept shots built from PLBH_20_Premium_Law_Book_Images by
 // scripts/make-premium-shots.py.
@@ -132,7 +132,8 @@ const features: { icon: IconName; title: string; description: string }[] = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const catalogue = await getCatalogue();
   const exam = catalogue.featured.find((book) => book.id === 5966)!;
   return (
     <>

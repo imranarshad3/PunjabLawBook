@@ -12,7 +12,7 @@ export default function Page() {
         eyebrow="BECOME PART OF THE BOOKSHOP"
         title="A place for your books."
         accent="A chapter of your own."
-        description="Your account will bring together your orders, addresses and personal details. Account services are planned for our next milestone."
+        description="Your account brings together your orders, addresses and personal details."
       />
       <AccountPreview mode="register" />
     </main>

@@ -5,8 +5,7 @@ import Link from "next/link";
 import { BookCard, titleFor } from "./book-card";
 import { SortDropdown } from "./sort-dropdown";
 import { Icon } from "./ui";
-import { products, categories } from "@/data/products";
-import { collections } from "@/data/collections";
+import { useCatalogue } from "./catalogue-context";
 
 export function ProductCatalogue({
   initialQuery,
@@ -17,6 +16,7 @@ export function ProductCatalogue({
   initialCategory: string;
   collection?: string;
 }) {
+  const { products, categories, collections } = useCatalogue();
   const collectionInfo = collection ? collections[collection] : undefined;
   const selectedProducts = collectionInfo
     ? products.filter((book) => collectionInfo.ids.includes(book.id))

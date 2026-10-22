@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { products } from "@/data/products";
+import { getCatalogue } from "@/lib/catalogue";
 import { BookCard, titleFor, creditFor } from "@/components/book-card";
 import { ProductGallery, ProductPurchase } from "@/components/product-purchase";
 import { Icon } from "@/components/ui";
 
 type Props = { params: Promise<{ id: string }> };
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const { products } = await getCatalogue();
   return products.map((book) => ({ id: String(book.id) }));
 }
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
+  const { products } = await getCatalogue();
   const book = products.find((book) => String(book.id) === id);
   return {
     title: book
@@ -21,6 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 export default async function ProductPage({ params }: Props) {
   const { id } = await params;
+  const { products } = await getCatalogue();
   const book = products.find((book) => String(book.id) === id);
   if (!book) notFound();
   const related = [
