@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable @typescript-eslint/no-require-imports -- CommonJS build script. */
 /**
  * Generates supabase/seed.sql from the repository catalogue so the database
  * starts with the same titles, subjects and collections the storefront shows.

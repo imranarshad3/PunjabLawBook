@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { CatalogueProvider } from "@/components/catalogue-context";
 import { getCatalogue } from "@/lib/catalogue";
+import { siteUrl } from "@/lib/site";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import "./revised-sections.css";
@@ -24,16 +25,32 @@ const sans = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Punjab Law Book House | Law Books & Judicial Exam Guides",
+  // Resolves relative Open Graph and canonical URLs. Set NEXT_PUBLIC_SITE_URL.
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Punjab Law Book House | Law Books & Judicial Exam Guides",
+    template: "%s | Punjab Law Book House",
+  },
   description:
     "Explore law books, bare acts, legal commentaries and judicial examination guides from Punjab Law Book House, Lahore.",
-  robots: { index: false, follow: false },
+  alternates: { canonical: "/" },
+  // The storefront is public; /admin and the signed-in areas set their own
+  // noindex, and robots.ts disallows them.
+  robots: { index: true, follow: true },
   openGraph: {
     title: "Punjab Law Book House",
     description:
       "Knowledge builds a fairer Pakistan. Explore legal books and examination guides.",
+    url: "/",
+    siteName: "Punjab Law Book House",
     type: "website",
     locale: "en_PK",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Punjab Law Book House",
+    description:
+      "Knowledge builds a fairer Pakistan. Explore legal books and examination guides.",
   },
 };
 

@@ -150,8 +150,8 @@ export function CartPage() {
               Continue browsing
             </Link>
             <small>
-              No order has been placed. Checkout is a preview until ordering is
-              activated.
+              Nothing is charged online. You confirm the order at checkout and pay
+              on delivery.
             </small>
           </aside>
         </div>

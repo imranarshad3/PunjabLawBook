@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSession } from "@clerk/nextjs";
-import { createClerkSupabaseClient } from "@/lib/supabase";
+import { createClerkSupabaseClient, supabaseConfigured } from "@/lib/supabase";
 import { revalidateCatalogue } from "./actions";
 import { products as fallbackBooks } from "@/data/products";
 
@@ -18,6 +18,9 @@ export type AdminBook = {
   uuid?: string;
   stock: number | null;
   stockStatus: string;
+  author: string;
+  isbn: string;
+  publisher: string;
   status: string;
   categoryId?: string;
 };
@@ -33,6 +36,9 @@ type BookRow = {
   stock: number | null;
   stock_status: string;
   status: string;
+  author: string | null;
+  isbn: string | null;
+  publisher: string | null;
   categories: { id: string; name: string } | null;
 };
 
@@ -49,6 +55,9 @@ const toBook = (row: BookRow): AdminBook => ({
   uuid: row.id,
   stock: row.stock,
   stockStatus: row.stock_status,
+  author: row.author || "",
+  isbn: row.isbn || "",
+  publisher: row.publisher || "",
   status: row.status,
 });
 
@@ -58,6 +67,9 @@ const asFallback = (): AdminBook[] =>
     stock: null,
     stockStatus: book.inStock ? "untracked" : "out_of_stock",
     status: "published",
+    author: "",
+    isbn: "",
+    publisher: "",
   }));
 
 /** Reads the admin tables through Clerk-authenticated RLS. */
@@ -76,24 +88,25 @@ export function useAdminData() {
   const [orderItems, setOrderItems] = useState<RecordRow[]>([]);
   const [media, setMedia] = useState<RecordRow[]>([]);
   const [tick, setTick] = useState(0);
-  const [loading, setLoading] = useState(true);
+  // Nothing to load when Supabase is not configured.
+  const [loading, setLoading] = useState(supabaseConfigured);
   const [error, setError] = useState("");
   const [live, setLive] = useState(false);
+  /** Tables whose query was refused or failed, so the UI never reports an
+      empty table when it actually could not read one. */
+  const [failures, setFailures] = useState<string[]>([]);
 
   const getToken = useCallback(async () => (session ? session.getToken() : null), [session]);
 
   useEffect(() => {
     const client = createClerkSupabaseClient(getToken);
-    if (!client) {
-      setLoading(false);
-      return;
-    }
+    if (!client) return;
     let cancelled = false;
     (async () => {
       const [book, order, customer, enquiry, promotion, banner, page, member, setting, categoryList, items, assets] = await Promise.all([
         client
           .from("books")
-          .select("id, legacy_id, title, price, cover_url, stock, stock_status, status, categories(id, name)")
+          .select("id, legacy_id, title, author, isbn, publisher, price, cover_url, stock, stock_status, status, categories(id, name)")
           .order("title"),
         client.from("orders").select("*").order("placed_at", { ascending: false }).limit(200),
         client.from("customers").select("*").order("created_at", { ascending: false }).limit(200),
@@ -108,23 +121,43 @@ export function useAdminData() {
         client.from("media_assets").select("*, books(title)").order("created_at", { ascending: false }).limit(200),
       ]);
       if (cancelled) return;
+      const refused: string[] = [];
+      const messages: string[] = [];
+      /** Unwraps one result, recording the table when the query was refused. */
+      const rows = <T,>(label: string, result: { data: unknown; error: { message: string } | null }) => {
+        if (result.error) {
+          refused.push(label);
+          messages.push(`${label}: ${result.error.message}`);
+        }
+        return (result.data as T[]) || [];
+      };
+
       if (book.error) {
-        setError(book.error.message);
+        refused.push("books");
+        messages.push(`books: ${book.error.message}`);
       } else if (book.data?.length) {
         setBooks((book.data as unknown as BookRow[]).map(toBook));
         setLive(true);
       }
-      setOrders((order.data as RecordRow[]) || []);
-      setCustomers((customer.data as RecordRow[]) || []);
-      setEnquiries((enquiry.data as RecordRow[]) || []);
-      setPromotions((promotion.data as RecordRow[]) || []);
-      setBanners((banner.data as RecordRow[]) || []);
-      setPages((page.data as RecordRow[]) || []);
-      setTeam((member.data as RecordRow[]) || []);
-      setSettings((setting.data as RecordRow) || null);
-      setCategoryRows((categoryList.data as { id: string; name: string }[]) || []);
-      setOrderItems((items.data as RecordRow[]) || []);
-      setMedia((assets.data as RecordRow[]) || []);
+      setOrders(rows<RecordRow>("orders", order));
+      setCustomers(rows<RecordRow>("customers", customer));
+      setEnquiries(rows<RecordRow>("enquiries", enquiry));
+      setPromotions(rows<RecordRow>("promotions", promotion));
+      setBanners(rows<RecordRow>("content banners", banner));
+      setPages(rows<RecordRow>("content pages", page));
+      setTeam(rows<RecordRow>("team", member));
+      setCategoryRows(rows<{ id: string; name: string }>("categories", categoryList));
+      setOrderItems(rows<RecordRow>("order items", items));
+      setMedia(rows<RecordRow>("media", assets));
+      if (setting.error) {
+        refused.push("store settings");
+        messages.push(`store settings: ${setting.error.message}`);
+        setSettings(null);
+      } else {
+        setSettings((setting.data as RecordRow) || null);
+      }
+      setFailures(refused);
+      setError(messages.join(" · "));
       setLoading(false);
     })();
     return () => {
@@ -209,6 +242,6 @@ export function useAdminData() {
   return {
     books, categories, orders, customers, enquiries, promotions,
     banners, pages, team, settings, categoryRows, orderItems, media,
-    loading, error, live, reload, save, remove, adjustStock, uploadImage,
+    loading, error, live, failures, reload, save, remove, adjustStock, uploadImage,
   };
 }

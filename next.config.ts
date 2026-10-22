@@ -6,8 +6,16 @@ const nextConfig: NextConfig = {
     const development = process.env.NODE_ENV !== "production";
     // Next's cached HTML contains inline hydration scripts. Nonce-based CSP
     // requires dynamic rendering; keep this static-compatible policy explicit.
-    // Clerk serves its JS, API and CAPTCHA challenge from these hosts.
-    const clerk = "https://*.clerk.accounts.dev https://*.clerk.com";
+    // Clerk serves its JS, API and CAPTCHA challenge from these hosts. A
+    // development instance uses *.clerk.accounts.dev; a production instance
+    // serves from clerk.<your-domain>, so that host must be allowed too or
+    // Clerk is blocked in production. Set NEXT_PUBLIC_CLERK_DOMAIN to it.
+    const clerkDomain = process.env.NEXT_PUBLIC_CLERK_DOMAIN;
+    const clerk = [
+      "https://*.clerk.accounts.dev",
+      "https://*.clerk.com",
+      ...(clerkDomain ? [`https://${clerkDomain}`] : []),
+    ].join(" ");
     const captcha = "https://challenges.cloudflare.com";
     // Supabase REST/Realtime for this project.
     const supabase = "https://*.supabase.co wss://*.supabase.co";

@@ -73,7 +73,7 @@ export function CheckoutPreview() {
           <span>01</span> Book bag
         </Link>
         <span aria-current="step">
-          <b>02</b> Checkout preview
+          <b>02</b> Checkout
         </span>
         <span>
           <b>03</b> Confirmation
@@ -82,7 +82,7 @@ export function CheckoutPreview() {
       {lines.length === 0 ? (
         <div className="empty-bag">
           <h2>A good book is the first step.</h2>
-          <p>Your book bag is empty. Find a title to preview your order.</p>
+          <p>Your book bag is empty. Find a title to start an order.</p>
           <Link className="button button-green" href="/products">
             Explore books <Icon name="arrow" />
           </Link>

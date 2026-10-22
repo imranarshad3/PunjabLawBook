@@ -195,18 +195,21 @@ export function RecordsPanel({
                           <button
                             className="plbh-admin-icon-button"
                             aria-label="Edit record"
+                            title="Edit"
                             onClick={() => onEdit(row)}
                           >
-                            <Glyph name="settings" size={15} />
+                            <Glyph name="pencil" size={16} />
                           </button>
                         )}
                         {onDelete && (
                           <button
                             className="plbh-admin-icon-button"
+                            data-tone="danger"
                             aria-label="Delete record"
+                            title="Delete"
                             onClick={() => onDelete(row)}
                           >
-                            ×
+                            <Glyph name="trash" size={16} />
                           </button>
                         )}
                       </div>

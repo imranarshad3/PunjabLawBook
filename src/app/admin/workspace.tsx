@@ -4,17 +4,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { UserButton, useUser } from "@clerk/nextjs";
-import { products, type Product } from "@/data/products";
+
 import { collections } from "@/data/collections";
 import catalogue from "@/data/catalogue.json";
 import { Glyph } from "./icons";
-import { navigation, viewPath, type View } from "./navigation";
+import { viewPath, type View } from "./navigation";
+import { AdminShell, subtitles } from "./shell";
 import { ProductDetails } from "./product-details";
 import { useAdminData } from "./use-admin-data";
 import { RecordsPanel } from "./records";
 import { EntityForm, type EntityKey } from "./entity-form";
-import type { RecordRow } from "./use-admin-data";
+import type { AdminBook, RecordRow } from "./use-admin-data";
 
 const recordViews = ["Orders", "Customers", "Promotions", "Book Enquiries", "Website Content", "Team & Access"];
 const recordEntity: Record<string, EntityKey> = {
@@ -31,12 +31,17 @@ const recordTable: Record<string, string> = {
 };
 const money = (amount: number) =>
   new Intl.NumberFormat("en-PK", { maximumFractionDigits: 2 }).format(amount);
-const categoryCounts = [...new Set(products.map((b) => b.category))]
-  .map((name) => ({
-    name,
-    count: products.filter((b) => b.category === name).length,
-  }))
-  .sort((a, b) => b.count - a.count);
+/** Joins table names for prose: "a, b and c". */
+/* Category illustrations from the approved Categories design. Mapped by exact
+   name only: this store's subjects are law categories, so most fall back to the
+   neutral mark rather than borrowing an unrelated illustration. */
+const categoryArt: Record<string, string> = Object.fromEntries(
+  ["educational", "fiction", "islamic", "children", "self help", "academic", "science", "history"].map(
+    (name) => [name, `/images/admin/category-${name.replace(" ", "-")}.webp`],
+  ),
+);
+const listed = (names: string[]) =>
+  names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`;
 const contentPages = [
   [
     "Homepage",
@@ -64,104 +69,7 @@ const contentPages = [
   ["Privacy", "/privacy", "The storefront privacy information page."],
   ["Terms", "/terms", "The storefront terms and conditions page."],
 ];
-const pending: Partial<
-  Record<
-    View,
-    {
-      icon: string;
-      title: string;
-      detail: string;
-      link?: string;
-      label?: string;
-      features?: string[];
-    }
-  >
-> = {
-  Promotions: {
-    icon: "wallet",
-    title: "Campaigns are ready when you are.",
-    detail:
-      "Discount codes, seasonal offers and featured placements need a connected database before they can be created or scheduled. The storefront currently shows list prices only.",
-    features: [
-      "Discount codes and coupons",
-      "Seasonal campaign scheduling",
-      "Featured placement on the homepage",
-      "Bundle and bulk pricing",
-      "Campaign performance reporting",
-    ],
-  },
-  "Book Enquiries": {
-    icon: "bag",
-    title: "Your enquiries will have a home here.",
-    detail:
-      "Book requests currently open in WhatsApp. No enquiry records are stored in this website. A connected database is required for a shared inbox, notes, assignments and follow-up history.",
-    link: "/request-a-book",
-    label: "View the book request form",
-    features: [
-      "Centralised enquiry inbox",
-      "Customer contact records",
-      "Assignment and follow-up tracking",
-      "Bulk response capabilities",
-      "Enquiry analytics and reporting",
-    ],
-  },
-  Orders: {
-    icon: "bag",
-    title: "Order tracking is not connected.",
-    detail:
-      "The existing checkout is a preview: it creates no orders and takes no payments. There are no transaction records to display. Order management requires a real ordering workflow.",
-    link: "/checkout",
-    label: "View current checkout",
-    features: [
-      "Order management dashboard",
-      "Fulfillment status tracking",
-      "Payment integration",
-      "Shipping and delivery updates",
-      "Returns and refunds handling",
-    ],
-  },
-  Customers: {
-    icon: "users",
-    title: "A space for your readers.",
-    detail:
-      "Customer accounts are not activated in the current storefront. Connect authentication and a protected customer database to manage real accounts and their history.",
-    features: [
-      "Customer profiles and history",
-      "Order tracking per customer",
-      "Wishlist management",
-      "Customer support tickets",
-      "Communication preferences",
-    ],
-  },
-  "Team & Access": {
-    icon: "users",
-    title: "Secure administration comes first.",
-    detail:
-      "Clerk and database permissions are not connected yet. This read-only interface exposes only the public catalogue. Invitations, roles and privileged actions remain unavailable until server-side authorization is verified.",
-    features: [
-      "Team member invitations",
-      "Role-based access control",
-      "Activity audit logs",
-      "Session management",
-      "Secure sign-out workflows",
-    ],
-  },
-};
 
-const subtitles: Partial<Record<View, string>> = {
-  Books: "Manage your book collection.",
-  Categories: "Manage and organise your book categories.",
-  Orders: "Manage customer orders and track their status.",
-  Customers: "Manage your registered customers.",
-  Inventory: "Track stock levels and manage inventory.",
-  Promotions: "Plan campaigns, offers and featured placements.",
-  "Website Content": "Manage homepage banners, featured sections and content.",
-  Analytics: "Understand how your catalogue performs.",
-  "Media Library": "Every cover asset published on the storefront.",
-  "Book Enquiries": "Follow up on the books your readers ask for.",
-  "Team & Access": "Control who can manage this workspace.",
-  Settings: "Manage your store settings and preferences.",
-};
 
 /* Vertical bar chart of the real catalogue, by subject. */
 function CatalogueChart({ categories, total }: { categories: { name: string; count: number }[]; total: number }) {
@@ -236,17 +144,9 @@ function Composition({ onCategory, categories, total }: { onCategory: (name: str
 export function AdminWorkspace({ view }: { view: View }) {
   const router = useRouter();
   const params = useSearchParams();
-  const { user } = useUser();
   const data = useAdminData();
   const products = data.books;
   const categoryCounts = data.categories;
-  const displayName = user?.fullName || user?.username || "Administrator";
-  const initials = displayName
-    .split(" ")
-    .map((part) => part[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
   const search = params.get("q") || "";
   const category = categoryCounts.some((c) => c.name === params.get("category"))
     ? params.get("category")! : "All categories";
@@ -254,52 +154,16 @@ export function AdminWorkspace({ view }: { view: View }) {
     ? params.get("availability")! : "All availability";
   const sort = ["Price low to high", "Price high to low"].includes(params.get("sort") || "")
     ? params.get("sort")! : "Title A–Z";
-  const [mobile, setMobile] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
-  const [selectedBook, setSelectedBook] = useState<Product | null>(null);
+  const [selectedBook, setSelectedBook] = useState<AdminBook | null>(null);
   const [selectedBooks, setSelectedBooks] = useState<Set<number>>(new Set());
   const [notice, setNotice] = useState("");
   const [editing, setEditing] = useState<{ entity: EntityKey; row?: RecordRow | null } | null>(null);
   const [orderDetail, setOrderDetail] = useState<RecordRow | null>(null);
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [categorySearch, setCategorySearch] = useState("");
   const shortcutsDialog = useRef<HTMLDialogElement>(null);
-  const sidebar = useRef<HTMLElement>(null);
-  const mobileToggle = useRef<HTMLButtonElement>(null);
-  const mainShell = useRef<HTMLDivElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (!mobile) return;
-    const shell = mainShell.current;
-    const toggle = mobileToggle.current;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    shell?.setAttribute("inert", "");
-    const first = sidebar.current?.querySelector<HTMLElement>("a, button");
-    first?.focus();
-    function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") setMobile(false);
-      if (event.key !== "Tab") return;
-      const focusable = [...(sidebar.current?.querySelectorAll<HTMLElement>("a, button") || [])]
-        .filter((element) => element.getClientRects().length > 0);
-      const last = focusable.at(-1);
-      if (event.shiftKey && document.activeElement === focusable[0]) {
-        event.preventDefault(); last?.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault(); focusable[0]?.focus();
-      }
-    }
-    function onResize() { if (window.innerWidth > 760) setMobile(false); }
-    window.addEventListener("keydown", onKey);
-    window.addEventListener("resize", onResize);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      shell?.removeAttribute("inert");
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("resize", onResize);
-      toggle?.focus();
-    };
-  }, [mobile]);
 
   useEffect(() => {
     if (showShortcuts) {
@@ -362,19 +226,14 @@ export function AdminWorkspace({ view }: { view: View }) {
         event.preventDefault();
         setShowShortcuts(true);
       }
-      if ((event.metaKey || event.ctrlKey) && event.key === "b") {
-        event.preventDefault();
-        setCollapsed(!collapsed);
-      }
       if (event.key === "Escape") {
         setShowShortcuts(false);
-        setMobile(false);
         if (selectedBook) setSelectedBook(null);
       }
       const target = event.target;
       if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey ||
           (target instanceof HTMLElement && (target.closest("input, textarea, select, [contenteditable], [role=dialog]") || target.closest("dialog"))) ||
-          selectedBook || showShortcuts || mobile) return;
+          selectedBook || showShortcuts) return;
       if (event.key === "ArrowLeft" && view === "Books" && page > 1) {
         setPage(p => p - 1);
       }
@@ -384,21 +243,12 @@ export function AdminWorkspace({ view }: { view: View }) {
     }
     window.addEventListener("keydown", onGlobalKey);
     return () => window.removeEventListener("keydown", onGlobalKey);
-  }, [view, selectedBook, showShortcuts, mobile, collapsed, page, pageCount, setPage]);
+  }, [view, selectedBook, showShortcuts, page, pageCount, setPage]);
   const setSearch = (value: string) => { updateFilters({ q: value, page: null }); clearSelection(); };
   const setCategory = (value: string) => { updateFilters({ category: value === "All categories" ? null : value, page: null }); clearSelection(); };
   const setAvailability = (value: string) => { updateFilters({ availability: value === "All availability" ? null : value, page: null }); clearSelection(); };
   const setSort = (value: string) => { updateFilters({ sort: value === "Title A–Z" ? null : value, page: null }); clearSelection(); };
   const overview = view === "Dashboard";
-  const bookRow = (book: (typeof products)[number]): RecordRow => ({
-    id: book.uuid || "",
-    title: book.name,
-    price: book.price,
-    stock: book.stock,
-    status: book.status,
-    cover_url: book.image,
-    category_id: book.categoryId ?? null,
-  });
   const liveOrders = data.orders.filter(
     (order) => !["cancelled", "refunded"].includes(String(order.status)),
   );
@@ -451,9 +301,9 @@ export function AdminWorkspace({ view }: { view: View }) {
     const failure = await data.remove(table, id);
     setNotice(failure || `${label} deleted.`);
   }
-  const pendingView = recordViews.includes(view) ? undefined : pending[view];
+  const pendingOrders = data.orders.filter((order) => order.status === "pending").length;
+  const newEnquiries = data.enquiries.filter((enquiry) => enquiry.status === "new").length;
   function navigate(next: View) {
-    setMobile(false);
     setNotice("");
     clearSelection();
     router.push(viewPath(next));
@@ -506,163 +356,52 @@ export function AdminWorkspace({ view }: { view: View }) {
     }
   }, [visible, selectedBooks, setSelectedBooks]);
   return (
-    <div className={`plbh-admin-app ${collapsed ? "plbh-admin-collapsed" : ""}`}>
-      <a className="plbh-admin-skip" href="#admin-main">
-        Skip to admin content
-      </a>
-      <aside ref={sidebar} id="admin-navigation" aria-label="Workspace navigation" className={`plbh-admin-sidebar ${mobile ? "is-open" : ""}`}>
-        <Link href="/admin" className="plbh-admin-brand">
-          <span className="plbh-admin-brand-mark">
-            <Glyph name="book" size={25} />
-          </span>
-          <span className="plbh-admin-brand-name">
-            Punjab Law<span>BOOK HOUSE</span>
-          </span>
-        </Link>
-        <div className="plbh-admin-workspace-label">
-          ADMIN PANEL <span>READ ONLY</span>
-        </div>
-        <button className="plbh-admin-mobile-close plbh-admin-button" onClick={() => setMobile(false)}>Close navigation ×</button>
-        <nav aria-label="Admin navigation">
-          {navigation.map(([name, icon], index) => (
-            <div key={name}>
-              {index === 9 && <div className="plbh-admin-nav-divider">WORKSPACE</div>}
-              <Link
-                href={viewPath(name)}
-                title={collapsed ? name : undefined}
-                className={view === name ? "active" : ""}
-                onClick={() => { setMobile(false); setNotice(""); }}
-                aria-current={view === name ? "page" : undefined}
-              >
-                <Glyph name={icon} />
-                <span>{name}</span>
-              </Link>
-            </div>
-          ))}
-        </nav>
-        <div className="plbh-admin-sidebar-bottom">
-          <div className="plbh-admin-store-card">
-            <span className="plbh-admin-live-dot" /> Your bookstore, online.
-            <p>
-              A collection of knowledge.
-              <br />A new chapter of possibilities.
-            </p>
-            <Link href="/" target="_blank">
-              Visit storefront <Glyph name="external" size={15} />
-            </Link>
-          </div>
-          <div className="plbh-admin-user">
-            <span className="plbh-admin-avatar">{initials}</span>
-            <div>
-              {displayName}<small>{user?.primaryEmailAddress?.emailAddress || "Signed-in administrator"}</small>
-            </div>
-          </div>
-          <Link href="/" className="plbh-admin-exit">
-            <Glyph name="arrow" size={16} /> Exit to storefront
+    <AdminShell
+      view={view}
+      title={overview ? "Welcome Back, Admin!" : view}
+      subtitle={overview ? "Manage your bookstore with ease." : subtitles[view] || "A considered workspace for the business of knowledge."}
+      orderBadge={pendingOrders}
+      enquiryBadge={newEnquiries}
+      actions={
+        <>
+          {(overview || view === "Books" || view === "Analytics" || view === "Inventory" || view === "Media Library") && (
+            <button className="plbh-admin-button" onClick={exportCatalogue}>
+              <Glyph name="down" size={16} /> Export catalogue
+            </button>
+          )}
+          <Link className="plbh-admin-button plbh-admin-button-primary" href="/products" target="_blank">
+            View collection <Glyph name="external" size={15} />
           </Link>
-        </div>
-      </aside>
-      {mobile && (
-        <button
-          className={`plbh-admin-backdrop ${mobile ? "is-visible" : ""}`}
-          aria-label="Close navigation"
-          onClick={() => setMobile(false)}
-        />
-      )}
-      <div ref={mainShell} className="plbh-admin-main">
-        <header className="plbh-admin-topbar">
-          <div className="plbh-admin-breadcrumb">
-            <button
-              ref={mobileToggle}
-              className="plbh-admin-mobile-button plbh-admin-icon-button"
-              aria-label="Open navigation"
-              aria-expanded={mobile}
-              aria-controls="admin-navigation"
-              onClick={() => setMobile(!mobile)}
-            >
-              <Glyph name="menu" />
-            </button>
-            <button className="plbh-admin-collapse-toggle plbh-admin-icon-button" aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} aria-expanded={!collapsed} aria-controls="admin-navigation" onClick={() => setCollapsed(!collapsed)}><Glyph name="menu" /></button>
-            <span>Workspace</span>
-            <span>/</span>
-            <strong>{view}</strong>
-          </div>
-          <div className="plbh-admin-top-actions">
-            <button
-              className="plbh-admin-icon-button"
-              aria-label="Show keyboard shortcuts"
-              onClick={() => setShowShortcuts(true)}
-              title="Keyboard shortcuts (Ctrl+/)"
-            >
-              <Glyph name="settings" size={16} />
-            </button>
-            <span className="plbh-admin-preview-label">
-              <i /> Public catalogue
-            </span>
-            <Link href="/" target="_blank">
-              View store <Glyph name="external" size={14} />
-            </Link>
-            <UserButton />
-          </div>
-        </header>
-        <main className="plbh-admin-content" id="admin-main" tabIndex={-1}>
-          <div className={`plbh-admin-page-heading${overview ? " plbh-admin-hero" : ""}`}>
-            <div>
-              <div className="plbh-admin-eyebrow">
-                PUNJAB LAW BOOK HOUSE · ADMIN PANEL
-              </div>
-              <h1>{overview ? "Welcome Back, Admin!" : view}</h1>
-              <p>
-                {overview
-                  ? "Manage your bookstore with ease."
-                  : subtitles[view] || "A considered workspace for the business of knowledge."}
-              </p>
-            </div>
-            {overview && (
-              <figure className="plbh-admin-hero-quote">
-                <Glyph name="book" size={30} />
-                <blockquote>“Books build brighter Punjab.”</blockquote>
-                <figcaption>
-                  {products.length} titles · {categoryCounts.length} subjects
-                </figcaption>
-              </figure>
-            )}
-            <div className="plbh-admin-heading-actions">
-              {(overview ||
-                view === "Books" ||
-                view === "Analytics" || view === "Inventory" || view === "Media Library") && (
-                <button className="plbh-admin-button" onClick={exportCatalogue}>
-                  <Glyph name="down" size={16} /> Export catalogue
-                </button>
-              )}
-              <Link
-                className="plbh-admin-button plbh-admin-button-primary"
-                href="/products"
-                target="_blank"
-              >
-                View collection <Glyph name="external" size={15} />
-              </Link>
-            </div>
-          </div>
-          <div className="plbh-admin-connection-banner">
-            <span className="plbh-admin-banner-symbol">
-              <Glyph name="settings" size={16} />
-            </span>
-            <div>
-              <strong>{data.live ? "Supabase connected" : "Clerk active · Supabase ready for tables"}</strong>
-              <span>
-                {data.live
-                  ? "Books, categories, orders, customers and enquiries on these pages are read live from your Supabase tables under row level security."
-                  : "Protected by Clerk. Showing the repository catalogue until Supabase returns rows."}
+        </>
+      }
+    >
+          {/* Only shown when something needs attention. A working connection is
+              the normal state and does not need announcing on every page. */}
+          {(data.failures.length > 0 || !data.live) && !data.loading && (
+            <div className={`plbh-admin-connection-banner${data.failures.length ? " is-warning" : ""}`}>
+              <span className="plbh-admin-banner-symbol">
+                <Glyph name="settings" size={16} />
               </span>
+              <div>
+                <strong>
+                  {data.failures.length
+                    ? `${data.failures.length} ${data.failures.length === 1 ? "table" : "tables"} could not be read`
+                    : "Showing the built-in catalogue"}
+                </strong>
+                <span>
+                  {data.failures.length
+                    ? `Supabase refused the read for ${listed(data.failures)}. Those pages are empty because the request was denied, not because the tables are. Check the row level security policies for your admin role.`
+                    : "Your Supabase books table returned no rows, so these pages show the catalogue shipped with the site. Changes you make here will not appear in the shop."}
+                </span>
+              </div>
+              <button
+                className="plbh-admin-text-button"
+                onClick={() => navigate("Settings")}
+              >
+                Connection details <Glyph name="arrow" size={16} />
+              </button>
             </div>
-            <button
-              className="plbh-admin-text-button"
-              onClick={() => navigate("Settings")}
-            >
-              Connection details <Glyph name="arrow" size={16} />
-            </button>
-          </div>
+          )}
           <div className="plbh-admin-context-row">
             <div className="plbh-admin-tabs">
               <span className="plbh-admin-current-tab">
@@ -912,7 +651,7 @@ export function AdminWorkspace({ view }: { view: View }) {
                 </div>
                 <button
                   className="plbh-admin-button plbh-admin-button-primary"
-                  onClick={() => setEditing({ entity: "book" })}
+                  onClick={() => router.push("/admin/books/new")}
                 >
                   <Glyph name="plus" size={15} /> Add book
                 </button>
@@ -1082,27 +821,28 @@ export function AdminWorkspace({ view }: { view: View }) {
                               className="plbh-admin-icon-button"
                               onClick={() => setSelectedBook(book)}
                               aria-label={`Inspect ${book.name}`}
-                              title="Inspect record"
+                              title="View details"
                             >
-                              <Glyph name="arrow" size={15} />
+                              <Glyph name="eye" size={16} />
                             </button>
                             {book.uuid && (
                               <>
                                 <button
                                   className="plbh-admin-icon-button"
-                                  onClick={() => setEditing({ entity: "book", row: bookRow(book) })}
+                                  onClick={() => router.push(`/admin/books/${book.uuid}/edit`)}
                                   aria-label={`Edit ${book.name}`}
                                   title="Edit book"
                                 >
-                                  <Glyph name="settings" size={15} />
+                                  <Glyph name="pencil" size={16} />
                                 </button>
                                 <button
                                   className="plbh-admin-icon-button"
+                                  data-tone="danger"
                                   onClick={() => destroy("books", book.uuid!, book.name)}
                                   aria-label={`Delete ${book.name}`}
                                   title="Delete book"
                                 >
-                                  ×
+                                  <Glyph name="trash" size={16} />
                                 </button>
                               </>
                             )}
@@ -1162,54 +902,64 @@ export function AdminWorkspace({ view }: { view: View }) {
           {view === "Categories" && (
             <>
               <section className="plbh-admin-panel">
-                <div className="plbh-admin-panel-heading">
-                  <div>
-                    <h2>Book subjects</h2>
-                    <p>Categories in your Supabase catalogue.</p>
-                  </div>
+                <div className="plbh-admin-toolbar-row">
+                  <label className="plbh-admin-search">
+                    <Glyph name="search" size={18} />
+                    <input
+                      aria-label="Search categories"
+                      placeholder="Search categories..."
+                      value={categorySearch}
+                      onChange={(event) => setCategorySearch(event.target.value)}
+                    />
+                  </label>
                   <button
                     className="plbh-admin-button plbh-admin-button-primary"
-                    onClick={() => setEditing({ entity: "category" })}
+                    onClick={() => router.push("/admin/categories/new")}
                   >
-                    <Glyph name="plus" size={15} /> Add category
+                    <Glyph name="plus" size={17} /> Add Category
                   </button>
                 </div>
                 <div className="plbh-admin-category-grid">
-                  {categoryCounts.map((c) => {
-                    const record = data.categoryRows.find((row) => row.name === c.name);
-                    return (
-                      <div className="plbh-admin-category-tile" key={c.name}>
-                        <button onClick={() => browseCategory(c.name)}>
-                          <span className="plbh-admin-category-icon">
-                            <Glyph name="book" size={24} />
-                          </span>
-                          <strong>{c.name}</strong>
-                          <span>
-                            {c.count} {c.count === 1 ? "title" : "titles"}
-                          </span>
-                          <Glyph name="arrow" size={17} />
-                        </button>
-                        {record && (
-                          <div className="plbh-admin-tile-actions">
-                            <button
-                              className="plbh-admin-icon-button"
-                              aria-label={`Edit ${c.name}`}
-                              onClick={() => setEditing({ entity: "category", row: record as RecordRow })}
-                            >
-                              <Glyph name="settings" size={14} />
-                            </button>
-                            <button
-                              className="plbh-admin-icon-button"
-                              aria-label={`Delete ${c.name}`}
-                              onClick={() => destroy("categories", record.id, c.name)}
-                            >
-                              ×
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                  {categoryCounts
+                    .filter((c) => c.name.toLowerCase().includes(categorySearch.trim().toLowerCase()))
+                    .map((c) => {
+                      const record = data.categoryRows.find((row) => row.name === c.name);
+                      const art = categoryArt[c.name.toLowerCase()];
+                      return (
+                        <div className="plbh-admin-category-tile" key={c.name}>
+                          <button onClick={() => browseCategory(c.name)}>
+                            <span className="plbh-admin-category-icon">
+                              {art ? (
+                                <Image src={art} alt="" width={256} height={256} />
+                              ) : (
+                                <Glyph name="book" size={46} />
+                              )}
+                            </span>
+                            <strong>{c.name}</strong>
+                            <span>{c.count} {c.count === 1 ? "book" : "books"}</span>
+                          </button>
+                          {record && (
+                            <div className="plbh-admin-tile-actions">
+                              <button
+                                className="plbh-admin-icon-button"
+                                aria-label={`Edit ${c.name}`}
+                                onClick={() => router.push(`/admin/categories/${record.id}/edit`)}
+                              >
+                                <Glyph name="pencil" size={15} />
+                              </button>
+                              <button
+                                className="plbh-admin-icon-button"
+                                data-tone="danger"
+                                aria-label={`Delete ${c.name}`}
+                                onClick={() => destroy("categories", record.id, c.name)}
+                              >
+                                <Glyph name="trash" size={15} />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                 </div>
               </section>
               <section className="plbh-admin-panel plbh-admin-space-top">
@@ -1296,9 +1046,11 @@ export function AdminWorkspace({ view }: { view: View }) {
                       <td><span className={`plbh-admin-badge ${book.inStock ? "delivered" : "cancelled"}`}>{book.inStock ? "In stock" : "Out of stock"}</span></td>
                       <td>{book.stock ?? "Not counted"}</td><td className="plbh-admin-amount">Rs. {money(book.price)}</td>
                       <td><div className="plbh-admin-row-actions">
-                        {book.uuid && <><button className="plbh-admin-icon-button" aria-label={`Remove one from ${book.name}`} title="Remove one" onClick={() => data.adjustStock(book.uuid!, -1, "adjustment")}>−</button>
-                        <button className="plbh-admin-icon-button" aria-label={`Add one to ${book.name}`} title="Restock one" onClick={() => data.adjustStock(book.uuid!, 1, "restock")}>+</button>
-                        <button className="plbh-admin-icon-button" aria-label={`Edit ${book.name}`} title="Edit book" onClick={() => setEditing({ entity: "book", row: bookRow(book) })}><Glyph name="settings" size={15} /></button></>}
+                        {book.uuid && <><button className="plbh-admin-icon-button plbh-admin-stepper" aria-label={`Remove one from ${book.name}`} title="Remove one" onClick={() => data.adjustStock(book.uuid!, -1, "adjustment")}>−</button>
+                        <button className="plbh-admin-icon-button plbh-admin-stepper" aria-label={`Add one to ${book.name}`} title="Restock one" onClick={() => data.adjustStock(book.uuid!, 1, "restock")}>+</button>
+                        <button className="plbh-admin-icon-button" aria-label={`Edit ${book.name}`} title="Edit book" onClick={() => router.push(`/admin/books/${book.uuid}/edit`)}><Glyph name="pencil" size={16} /></button>
+                        <button className="plbh-admin-icon-button" aria-label={`View ${book.name}`} title="View details" onClick={() => setSelectedBook(book)}><Glyph name="eye" size={16} /></button>
+                        <button className="plbh-admin-icon-button" data-tone="danger" aria-label={`Delete ${book.name}`} title="Delete book" onClick={() => destroy("books", book.uuid!, book.name)}><Glyph name="trash" size={16} /></button></>}
                       </div></td>
                     </tr>)}</tbody>
                   </table>
@@ -1459,40 +1211,6 @@ export function AdminWorkspace({ view }: { view: View }) {
               }
             />
           )}
-          {pendingView && (
-            <section className="plbh-admin-panel plbh-admin-empty plbh-admin-unavailable">
-              <span className="plbh-admin-empty-symbol">
-                <Glyph name={pendingView.icon} size={33} />
-              </span>
-              <div className="plbh-admin-eyebrow">CONNECTION REQUIRED</div>
-              <h2>{pendingView.title}</h2>
-              <p>{pendingView.detail}</p>
-              {pendingView.features && (
-                <div className="plbh-admin-feature-list">
-                  {pendingView.features.map((feature, index) => (
-                    <div key={index}>
-                      <span className="plbh-admin-feature-check">✓</span>
-                      <span>{feature}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
-                {pendingView.link && (
-                  <Link
-                    className="plbh-admin-button"
-                    href={pendingView.link}
-                    target="_blank"
-                  >
-                    {pendingView.label} <Glyph name="external" size={14} />
-                  </Link>
-                )}
-                <button className="plbh-admin-button" onClick={() => navigate("Settings")}>
-                  View connection details <Glyph name="arrow" size={15} />
-                </button>
-              </div>
-            </section>
-          )}
           {view === "Settings" && (
             <section className="plbh-admin-panel plbh-admin-settings">
               <div className="plbh-admin-panel-heading">
@@ -1531,15 +1249,33 @@ export function AdminWorkspace({ view }: { view: View }) {
                   <dl className="plbh-admin-settings-list">
                     <div>
                       <dt>Supabase</dt>
-                      <dd><span className="plbh-admin-status-badge plbh-admin-status-pending">Client installed · tables pending</span></dd>
+                      <dd>
+                        {data.failures.length ? (
+                          <span className="plbh-admin-status-badge plbh-admin-badge cancelled">
+                            Connected · {data.failures.length} {data.failures.length === 1 ? "table" : "tables"} refused
+                          </span>
+                        ) : data.live ? (
+                          <span className="plbh-admin-status-badge plbh-admin-status-live">
+                            Connected · reading {products.length} titles under row level security
+                          </span>
+                        ) : (
+                          <span className="plbh-admin-status-badge plbh-admin-status-pending">
+                            Connected · no rows returned yet
+                          </span>
+                        )}
+                      </dd>
                     </div>
                     <div>
                       <dt>Clerk authentication</dt>
-                      <dd><span className="plbh-admin-status-badge plbh-admin-status-live">Connected · admin routes protected</span></dd>
+                      <dd><span className="plbh-admin-status-badge plbh-admin-status-live">Connected · admin routes require a staff account</span></dd>
+                    </div>
+                    <div>
+                      <dt>Ordering</dt>
+                      <dd><span className="plbh-admin-status-badge plbh-admin-status-live">Live · orders written through place_order</span></dd>
                     </div>
                     <div>
                       <dt>Payment gateway</dt>
-                      <dd><span className="plbh-admin-status-badge plbh-admin-status-pending">Not configured</span></dd>
+                      <dd><span className="plbh-admin-status-badge plbh-admin-status-pending">Not configured · cash on delivery</span></dd>
                     </div>
                   </dl>
                 </div>
@@ -1547,10 +1283,10 @@ export function AdminWorkspace({ view }: { view: View }) {
                   <h3>Access & security</h3>
                   <dl className="plbh-admin-settings-list">
                     {[
-                      ["Admin access", "Clerk session required for every /admin route"],
-                      ["Team members", "No team configured"],
-                      ["Audit logs", "Unavailable until authenticated writes are enabled"],
-                      ["Session management", "Not active"],
+                      ["Admin access", "Signed-in Clerk account with a row in admin_members"],
+                      ["Team members", data.team.length ? `${data.team.length} ${data.team.length === 1 ? "member" : "members"} with admin access` : "No team members recorded"],
+                      ["Row level security", "Enabled on every table; writes run as your Clerk user"],
+                      ["Session management", "Handled by Clerk"],
                     ].map(([label, value]) => (
                       <div key={label}>
                         <dt>{label}</dt>
@@ -1563,10 +1299,11 @@ export function AdminWorkspace({ view }: { view: View }) {
                   <h3>Operations</h3>
                   <dl className="plbh-admin-settings-list">
                     {[
-                      ["Ordering", "Checkout preview · no payment or order capture"],
-                      ["Enquiries", "WhatsApp · no CRM integration"],
-                      ["Inventory tracking", "Not recorded in source data"],
-                      ["Media uploads", "Read-only access to existing assets"],
+                      ["Ordering", "Live · orders and stock written by the place_order function"],
+                      ["Payments", "Cash on delivery · no gateway connected"],
+                      ["Enquiries", "Recorded to the enquiries table; WhatsApp remains the reply channel"],
+                      ["Inventory tracking", "Live · movements recorded, stock updated by trigger"],
+                      ["Media uploads", `Live · ${data.media.length} ${data.media.length === 1 ? "asset" : "assets"} in the media bucket`],
                     ].map(([label, value]) => (
                       <div key={label}>
                         <dt>{label}</dt>
@@ -1577,13 +1314,13 @@ export function AdminWorkspace({ view }: { view: View }) {
                 </div>
               </div>
               <div className="plbh-admin-settings-note">
-                <span className="plbh-admin-note-icon">⚙</span>
+                <span className="plbh-admin-note-icon">{data.live ? "✓" : "⚙"}</span>
                 <div>
-                  <strong>Connection setup is in progress</strong>
+                  <strong>{data.live ? "Database and authentication are linked" : "Waiting for the first rows"}</strong>
                   <p>
-                    The database and authentication application must be linked
-                    before team roles, publishing, uploads, private records or
-                    shared settings can be enabled.
+                    {data.live
+                      ? "Clerk signs you in, Supabase sees that session, and row level security decides what you can read and write. Team roles, publishing, uploads, private records and shared settings are all active. The one thing still unconnected is a payment gateway — orders are taken as cash on delivery."
+                      : "Clerk is signing you in and the tables are reachable, but no rows have come back yet, so these pages are showing the catalogue shipped with the site."}
                   </p>
                 </div>
               </div>
@@ -1596,8 +1333,6 @@ export function AdminWorkspace({ view }: { view: View }) {
               <span className="plbh-admin-footer-mark">✧</span>
             </span>
           </footer>
-        </main>
-      </div>
       {notice && (
         <div className="plbh-admin-toast" role="status">
           <span>✓</span>
@@ -1696,6 +1431,6 @@ export function AdminWorkspace({ view }: { view: View }) {
           </div>
         </dialog>
       )}
-    </div>
+    </AdminShell>
   );
 }

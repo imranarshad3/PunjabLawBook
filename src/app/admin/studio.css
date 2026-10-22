@@ -1,0 +1,1135 @@
+/* ============================================================================
+   PLBH Admin Studio — implementation of the approved page designs in
+   PLBH_Premium_Homepage_Implementation_Kit/Full_Resolution_Pages.
+
+   Palette and geometry are sampled from those PNGs rather than estimated:
+   sidebar #0f2f23, active pill #2a4b3e with a gold rail, canvas #f9f7f2,
+   cards #fdfcfa, header band #f3ebde, primary #0f3a2a, 210px sidebar.
+
+   Loaded after admin.css and premium.css; selectors carry the
+   `.plbh-admin-app` prefix so they win on specificity as well as order.
+   ========================================================================= */
+
+.plbh-admin-app {
+  --s-forest: #0f2f23;
+  --s-forest-lift: #2a4b3e;
+  --s-green: #0f3a2a;
+  --s-green-dark: #0a2a1e;
+  --s-green-tint: #e7f1ea;
+
+  --s-gold: #c9a227;
+  --s-gold-rail: #dfbb77;
+  --s-gold-soft: #f6eed9;
+  --s-gold-text: #8a6a1a;
+
+  --s-ink: #1a2420;
+  --s-ink-2: #3f4a45;
+  --s-muted: #6d7873;
+  --s-faint: #98a19c;
+
+  --s-canvas: #f9f7f2;
+  --s-surface: #fdfcfa;
+  --s-band: #f3ebde;
+  --s-rail: #f3f2ee;
+  --s-line: #ece9e2;
+  --s-line-soft: #f2f1eb;
+
+  --s-ok: #1f7a44;      --s-ok-bg: #d8f1dc;
+  --s-info: #2563a8;    --s-info-bg: #dfeffe;
+  --s-warn: #9a6b16;    --s-warn-bg: #feefcf;
+  --s-bad: #c0392f;     --s-bad-bg: #fedddc;
+  --s-off: #6d7873;     --s-off-bg: #f0efeb;
+
+  /* Row-action tiles (sampled from the reference pages). */
+  --s-btn-face: #fcfbf8;
+  --s-btn-line: #eeedeb;
+  --s-icon-ink: #121a22;
+  --s-danger-icon: #e5241f;
+  --s-danger-face: #feeeee;
+  --s-violet: #6b4ea8;  --s-violet-bg: #ece7fa;
+
+  --s-r-card: 0.875rem;
+  --s-r-ctl: 0.625rem;
+  --s-r-pill: 999px;
+
+  --s-sh: 0 0.0625rem 0.125rem rgb(26 36 32 / 0.04);
+  --s-sh-card: 0 0.0625rem 0.1875rem rgb(26 36 32 / 0.05), 0 0.625rem 1.5rem -0.875rem rgb(26 36 32 / 0.14);
+  --s-sh-lift: 0 0.375rem 1rem -0.375rem rgb(26 36 32 / 0.1), 0 1.5rem 2.5rem -1.25rem rgb(15 47 35 / 0.2);
+  --s-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  --s-sidebar: 13.125rem;
+
+  /* Tokens the earlier layers still read. */
+  --plbh-admin-text: var(--s-ink);
+  --plbh-admin-muted: var(--s-muted);
+  --plbh-admin-line: var(--s-line);
+  --plbh-admin-green: var(--s-forest);
+  --plbh-admin-gold: var(--s-gold);
+  --plbh-ink: var(--s-ink);
+  --plbh-ink-soft: var(--s-muted);
+  --plbh-ink-faint: var(--s-faint);
+  --plbh-hair: var(--s-line);
+  --plbh-surface: var(--s-surface);
+  --plbh-forest: var(--s-green);
+  --plbh-gold: var(--s-gold);
+
+  background: var(--s-canvas);
+  color: var(--s-ink);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.plbh-admin-app strong,
+.plbh-admin-app td,
+.plbh-admin-app .plbh-admin-count,
+.plbh-admin-app .plbh-admin-amount,
+.plbh-admin-app .plbh-admin-metric > strong { font-variant-numeric: tabular-nums; }
+
+.plbh-admin-app ::selection { background: var(--s-green-tint); color: var(--s-green); }
+.plbh-admin-app :focus-visible { outline: 0.1875rem solid var(--s-green); outline-offset: 0.125rem; border-radius: 0.375rem; }
+.plbh-admin-app .plbh-admin-sidebar :focus-visible { outline-color: var(--s-gold-rail); }
+.plbh-admin-app .plbh-admin-skip {
+  background: var(--s-forest); color: #fff; font-weight: 600;
+  padding: 0.75rem 1.25rem; border-radius: 0 0 var(--s-r-ctl) 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Sidebar: brand lockup, nav with a gold rail on the active row, serif quote,
+   and the book photograph anchored to the foot.
+   ------------------------------------------------------------------------ */
+
+.plbh-admin-app .plbh-admin-sidebar {
+  width: var(--s-sidebar);
+  padding: 0;
+  border-right: 0;
+  color: #fff;
+  background:
+    linear-gradient(180deg, rgb(15 47 35 / 0) 55%, rgb(15 47 35 / 0.55) 70%, rgb(15 47 35 / 0.1) 100%),
+    url("/images/admin/sidebar-books.webp") bottom center / 100% auto no-repeat,
+    var(--s-forest);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden auto;
+  scrollbar-width: thin;
+}
+.plbh-admin-collapsed .plbh-admin-main { margin-left: var(--s-sidebar); }
+
+.plbh-admin-app .plbh-admin-brand {
+  display: block;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  flex-shrink: 0;
+}
+.plbh-admin-app .plbh-admin-brand img { width: 100%; height: auto; display: block; }
+
+.plbh-admin-app .plbh-admin-sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.0625rem;
+  padding: 0.25rem 0 0;
+  flex-shrink: 0;
+}
+.plbh-admin-app .plbh-admin-sidebar nav a {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.8125rem;
+  min-height: 3rem;
+  padding: 0 1rem;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: 0.005em;
+  color: rgb(255 255 255 / 0.82);
+  transition: background-color 0.2s var(--s-ease), color 0.2s var(--s-ease);
+}
+.plbh-admin-app .plbh-admin-sidebar nav a svg { flex-shrink: 0; opacity: 0.9; }
+.plbh-admin-app .plbh-admin-sidebar nav a > span { flex: 1; min-width: 0; }
+.plbh-admin-app .plbh-admin-sidebar nav a:hover:not(.active) { background: rgb(255 255 255 / 0.06); color: #fff; }
+.plbh-admin-app .plbh-admin-sidebar nav a.active {
+  background: var(--s-forest-lift);
+  color: #fff;
+  font-weight: 500;
+}
+.plbh-admin-app .plbh-admin-sidebar nav a.active::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0.1875rem;
+  background: var(--s-gold-rail);
+}
+.plbh-admin-app .plbh-admin-nav-badge {
+  font-style: normal;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--s-forest);
+  background: var(--s-gold-rail);
+  border-radius: var(--s-r-pill);
+  padding: 0.25rem 0.4375rem;
+  min-width: 1.375rem;
+  text-align: center;
+}
+
+.plbh-admin-app .plbh-admin-sidebar-bottom {
+  margin-top: 1.75rem;
+  padding: 0 1rem 1rem;
+  border: 0;
+  flex: 1;
+}
+.plbh-admin-app .plbh-admin-quote { margin: 0; padding: 0 0 0 0.5rem; position: relative; }
+.plbh-admin-app .plbh-admin-quote::before {
+  content: "✦";
+  position: absolute;
+  top: -0.625rem;
+  left: 0;
+  font-size: 0.5rem;
+  color: var(--s-gold-rail);
+}
+.plbh-admin-app .plbh-admin-quote blockquote {
+  margin: 0;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 0.9375rem;
+  font-style: italic;
+  line-height: 1.55;
+  color: rgb(255 255 255 / 0.92);
+  quotes: "“" "”";
+}
+.plbh-admin-app .plbh-admin-quote blockquote::before { content: open-quote; color: var(--s-gold-rail); }
+.plbh-admin-app .plbh-admin-quote blockquote::after { content: close-quote; color: var(--s-gold-rail); }
+.plbh-admin-app .plbh-admin-quote::after {
+  content: "";
+  display: block;
+  width: 1.75rem;
+  height: 0.125rem;
+  margin-top: 0.75rem;
+  background: var(--s-gold-rail);
+}
+
+/* Not in the approved designs: the account lives in the top bar. */
+.plbh-admin-app .plbh-admin-workspace-label,
+.plbh-admin-app .plbh-admin-nav-divider,
+.plbh-admin-app .plbh-admin-store-card,
+.plbh-admin-app .plbh-admin-user,
+.plbh-admin-app .plbh-admin-exit,
+.plbh-admin-app .plbh-admin-preview-label,
+.plbh-admin-app .plbh-admin-eyebrow,
+.plbh-admin-app .plbh-admin-context-row,
+.plbh-admin-app .plbh-admin-collapse-toggle { display: none; }
+
+.plbh-admin-app .plbh-admin-mobile-close {
+  display: none;
+  background: rgb(255 255 255 / 0.1) !important;
+  border: 0 !important;
+  color: #fff !important;
+  border-radius: var(--s-r-pill) !important;
+  box-shadow: none !important;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+}
+.plbh-admin-app .plbh-admin-backdrop { background: rgb(15 47 35 / 0.5); backdrop-filter: blur(0.25rem); }
+
+/* ---------------------------------------------------------------------------
+   Top bar
+   ------------------------------------------------------------------------ */
+
+.plbh-admin-app .plbh-admin-topbar {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  min-height: 4.25rem;
+  height: auto;
+  padding: 0.75rem 1.375rem;
+  background: var(--s-canvas);
+  border-bottom: 0;
+  backdrop-filter: none;
+  color: var(--s-ink);
+}
+.plbh-admin-app .plbh-admin-menu-button {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  border: 1px solid var(--s-line);
+  border-radius: var(--s-r-ctl);
+  background: var(--s-surface);
+  color: var(--s-ink);
+  box-shadow: var(--s-sh);
+  cursor: pointer;
+  transition: border-color 0.2s var(--s-ease), color 0.2s var(--s-ease);
+}
+.plbh-admin-app .plbh-admin-menu-button:hover { border-color: var(--s-green); color: var(--s-green); }
+
+.plbh-admin-app .plbh-admin-topsearch {
+  display: flex;
+  align-items: center;
+  gap: 0.6875rem;
+  flex: 0 1 30rem;
+  min-width: 0;
+  height: 2.75rem;
+  padding: 0 1.125rem;
+  border-radius: var(--s-r-pill);
+  background: var(--s-surface);
+  border: 1px solid var(--s-line);
+  color: var(--s-faint);
+  box-shadow: var(--s-sh);
+  transition: border-color 0.2s var(--s-ease), box-shadow 0.2s var(--s-ease);
+}
+.plbh-admin-app .plbh-admin-topsearch:focus-within {
+  border-color: var(--s-green);
+  box-shadow: 0 0 0 0.25rem rgb(15 58 42 / 0.09);
+}
+.plbh-admin-app .plbh-admin-topsearch input {
+  flex: 1; min-width: 0; border: 0; background: none; outline: none;
+  font: inherit; font-size: 0.875rem; color: var(--s-ink);
+}
+.plbh-admin-app .plbh-admin-topsearch input::placeholder { color: var(--s-faint); }
+
+.plbh-admin-app .plbh-admin-top-actions { margin-left: auto; display: flex; align-items: center; gap: 0.875rem; }
+
+.plbh-admin-app .plbh-admin-range {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.75rem;
+  padding: 0 0.875rem;
+  border: 1px solid var(--s-line);
+  border-radius: var(--s-r-ctl);
+  background: var(--s-surface);
+  color: var(--s-ink-2);
+  box-shadow: var(--s-sh);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+.plbh-admin-app .plbh-admin-range svg:first-child { color: var(--s-muted); flex-shrink: 0; }
+.plbh-admin-app .plbh-admin-range svg:last-child { color: var(--s-muted); flex-shrink: 0; pointer-events: none; }
+.plbh-admin-app .plbh-admin-range select {
+  appearance: none;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  min-height: 0;
+  height: 2.5rem;
+  padding: 0;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: inherit;
+  cursor: pointer;
+}
+.plbh-admin-app .plbh-admin-range select:focus { box-shadow: none; }
+
+.plbh-admin-app .plbh-admin-bell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--s-line);
+  border-radius: var(--s-r-ctl);
+  background: var(--s-surface);
+  color: var(--s-ink-2);
+  box-shadow: var(--s-sh);
+  cursor: pointer;
+}
+.plbh-admin-app .plbh-admin-bell:hover { border-color: var(--s-green); color: var(--s-green); }
+.plbh-admin-app .plbh-admin-bell em {
+  position: absolute;
+  top: -0.3125rem;
+  right: -0.3125rem;
+  font-style: normal;
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1;
+  min-width: 1.125rem;
+  padding: 0.1875rem;
+  border-radius: var(--s-r-pill);
+  background: #e23b3b;
+  color: #fff;
+  text-align: center;
+  border: 2px solid var(--s-canvas);
+}
+
+.plbh-admin-app .plbh-admin-account { display: flex; align-items: center; gap: 0.625rem; }
+.plbh-admin-app .plbh-admin-account > span {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--s-ink);
+}
+.plbh-admin-app .plbh-admin-account small { font-size: 0.6875rem; font-weight: 400; color: var(--s-muted); }
+
+/* ---------------------------------------------------------------------------
+   Page header band
+   ------------------------------------------------------------------------ */
+
+.plbh-admin-app .plbh-admin-content { padding: 0 1.375rem 2rem; }
+
+.plbh-admin-app .plbh-admin-page-heading {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  min-height: 11rem;
+  margin: 0 0 1.125rem;
+  padding: 1.75rem 1.875rem;
+  border: 0;
+  border-radius: var(--s-r-card);
+  background: var(--s-band);
+  box-shadow: none;
+  overflow: hidden;
+  isolation: isolate;
+}
+.plbh-admin-app .plbh-admin-page-heading::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 72%;
+  z-index: -1;
+  background: var(--plbh-banner) right center / cover no-repeat;
+  mask-image: linear-gradient(90deg, transparent, #000 22%);
+}
+.plbh-admin-app .plbh-admin-page-heading > div:first-child { min-width: 0; }
+
+.plbh-admin-app .plbh-admin-crumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--s-muted);
+  margin-bottom: 0.375rem;
+}
+.plbh-admin-app .plbh-admin-crumbs a { color: var(--s-muted); display: inline-flex; }
+.plbh-admin-app .plbh-admin-crumbs a:hover { color: var(--s-green); }
+.plbh-admin-app .plbh-admin-crumbs span { color: var(--s-ink-2); font-weight: 500; }
+
+.plbh-admin-app .plbh-admin-page-heading h1 {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: clamp(2rem, 1.3rem + 2.4vw, 3.375rem);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.08;
+  color: var(--s-ink);
+  margin: 0;
+  max-width: 18ch;
+}
+.plbh-admin-app .plbh-admin-page-heading p {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: clamp(0.9375rem, 0.85rem + 0.3vw, 1.1875rem);
+  line-height: 1.45;
+  color: var(--s-ink-2);
+  margin: 0.4375rem 0 0;
+  max-width: 48ch;
+}
+.plbh-admin-app .plbh-admin-rule {
+  display: block;
+  width: 3.5rem;
+  height: 0.1875rem;
+  margin-top: 1rem;
+  border-radius: var(--s-r-pill);
+  background: var(--s-gold);
+}
+.plbh-admin-app .plbh-admin-heading-actions { gap: 0.625rem; flex-shrink: 0; }
+
+/* ---------------------------------------------------------------------------
+   Buttons
+   ------------------------------------------------------------------------ */
+
+.plbh-admin-app .plbh-admin-button {
+  min-height: 2.75rem;
+  padding: 0.5rem 1.125rem;
+  border-radius: var(--s-r-ctl);
+  border: 1px solid var(--s-line);
+  background: var(--s-surface);
+  color: var(--s-ink);
+  font-size: 0.875rem !important;
+  font-weight: 600;
+  box-shadow: var(--s-sh);
+  transition: background-color 0.2s var(--s-ease), border-color 0.2s var(--s-ease), color 0.2s var(--s-ease);
+}
+.plbh-admin-app .plbh-admin-button:hover { border-color: var(--s-green); color: var(--s-green); }
+.plbh-admin-app .plbh-admin-button:active { translate: 0 1px; }
+.plbh-admin-app .plbh-admin-button-primary,
+.plbh-admin-app a.plbh-admin-button-primary {
+  background: var(--s-green);
+  border-color: var(--s-green);
+  color: #fff;
+  box-shadow: 0 0.375rem 1rem -0.5rem rgb(15 58 42 / 0.6);
+}
+.plbh-admin-app .plbh-admin-button-primary:hover,
+.plbh-admin-app a.plbh-admin-button-primary:hover { background: var(--s-green-dark); border-color: var(--s-green-dark); color: #fff; }
+
+.plbh-admin-app .plbh-admin-text-button {
+  min-height: 2.25rem; padding-inline: 0.5rem; border: 0; background: none;
+  border-radius: var(--s-r-ctl); color: var(--s-green);
+  font-size: 0.8125rem !important; font-weight: 600;
+}
+.plbh-admin-app .plbh-admin-text-button:hover { background: var(--s-green-tint); }
+
+/* ---------------------------------------------------------------------------
+   Panels, filters and tables
+   ------------------------------------------------------------------------ */
+
+.plbh-admin-app .plbh-admin-panel {
+  background: var(--s-surface);
+  border: 1px solid var(--s-line-soft);
+  border-radius: var(--s-r-card);
+  box-shadow: var(--s-sh-card);
+  overflow: clip;
+}
+.plbh-admin-app .plbh-admin-panel-heading { padding: 1.25rem 1.375rem 0.875rem; gap: 0.875rem; border-bottom: 0; background: none; }
+.plbh-admin-app .plbh-admin-panel-heading h2 {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--s-ink);
+}
+.plbh-admin-app .plbh-admin-panel-heading p { font-size: 0.8125rem; color: var(--s-muted); margin-top: 0.1875rem; }
+.plbh-admin-app .plbh-admin-count {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.25rem; font-weight: 400; color: var(--s-muted);
+  background: none; border-radius: 0; padding: 0; box-shadow: none;
+}
+
+.plbh-admin-app .plbh-admin-search {
+  min-height: 2.875rem;
+  border-radius: var(--s-r-ctl);
+  border: 1px solid var(--s-line);
+  background: var(--s-surface);
+  box-shadow: none;
+  color: var(--s-faint);
+}
+.plbh-admin-app .plbh-admin-search:focus-within { border-color: var(--s-green); box-shadow: 0 0 0 0.25rem rgb(15 58 42 / 0.09); }
+.plbh-admin-app .plbh-admin-search input { font-size: 0.875rem; min-height: 2.875rem; color: var(--s-ink); background: none; }
+.plbh-admin-app .plbh-admin-search input::placeholder { color: var(--s-faint); }
+
+.plbh-admin-app select,
+.plbh-admin-app input[type="text"],
+.plbh-admin-app input[type="number"],
+.plbh-admin-app input[type="url"],
+.plbh-admin-app input[type="email"],
+.plbh-admin-app input[type="date"],
+.plbh-admin-app textarea {
+  min-height: 2.875rem;
+  font-size: 0.875rem;
+  border-radius: var(--s-r-ctl);
+  border: 1px solid var(--s-line);
+  background: var(--s-surface);
+  color: var(--s-ink);
+  box-shadow: none;
+}
+.plbh-admin-app textarea { min-height: 6rem; }
+.plbh-admin-app select:focus,
+.plbh-admin-app input:focus,
+.plbh-admin-app textarea:focus {
+  border-color: var(--s-green);
+  box-shadow: 0 0 0 0.25rem rgb(15 58 42 / 0.09);
+  outline: none;
+}
+.plbh-admin-app input[type="checkbox"] { accent-color: var(--s-green); width: 1rem; height: 1rem; }
+
+.plbh-admin-app .plbh-admin-table-toolbar { padding: 1.25rem 1.375rem; gap: 0.875rem; }
+.plbh-admin-app .plbh-admin-filter-tabs {
+  display: flex; gap: 0.5rem; margin: 0 1.375rem; padding: 0 0 1rem;
+  border: 0; background: none; overflow-x: auto; scrollbar-width: none;
+}
+.plbh-admin-app .plbh-admin-filter-tabs::-webkit-scrollbar { display: none; }
+.plbh-admin-app .plbh-admin-filter-tabs button {
+  display: inline-flex; align-items: center; gap: 0.375rem;
+  min-height: 2.375rem; padding: 0 0.9375rem;
+  border: 1px solid var(--s-line); border-radius: var(--s-r-pill);
+  background: var(--s-surface); color: var(--s-muted);
+  font-size: 0.8125rem; font-weight: 600; white-space: nowrap; flex-shrink: 0;
+  transition: background-color 0.2s var(--s-ease), color 0.2s var(--s-ease), border-color 0.2s var(--s-ease);
+}
+.plbh-admin-app .plbh-admin-filter-tabs button:hover { border-color: var(--s-green); color: var(--s-green); }
+.plbh-admin-app .plbh-admin-filter-tabs button.is-active {
+  background: var(--s-green); border-color: var(--s-green); color: #fff;
+}
+.plbh-admin-app .plbh-admin-filter-tabs button > span { font-size: 0.6875rem; font-weight: 700; opacity: 0.7; }
+
+.plbh-admin-app table { font-size: 0.875rem; border-collapse: collapse; width: 100%; }
+.plbh-admin-app th {
+  position: sticky; top: 0; z-index: 1;
+  background: var(--s-rail);
+  border-bottom: 0;
+  padding: 0.9375rem 1rem;
+  text-align: left;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--s-ink-2);
+  white-space: nowrap;
+}
+.plbh-admin-app th:first-child { padding-left: 1.375rem; }
+.plbh-admin-app th:last-child { padding-right: 1.375rem; }
+.plbh-admin-app td {
+  border-bottom: 1px solid var(--s-line-soft);
+  padding: 0.9375rem 1rem;
+  vertical-align: middle;
+  color: var(--s-ink);
+}
+.plbh-admin-app td:first-child { padding-left: 1.375rem; }
+.plbh-admin-app td:last-child { padding-right: 1.375rem; }
+.plbh-admin-app tbody tr { transition: background-color 0.15s var(--s-ease); }
+.plbh-admin-app tbody tr:hover, .plbh-admin-app tbody tr:focus-within { background: #fbfaf7; }
+.plbh-admin-app tbody tr:last-child td { border-bottom: 0; }
+.plbh-admin-app td small { font-size: 0.75rem; color: var(--s-muted); display: block; }
+.plbh-admin-app .plbh-admin-table-book strong { font-size: 0.875rem; font-weight: 600; color: var(--s-ink); }
+.plbh-admin-app .plbh-admin-table-book img { border-radius: 0.25rem; }
+.plbh-admin-app .plbh-admin-amount { font-weight: 500; color: var(--s-ink) !important; white-space: nowrap; }
+.plbh-admin-app .plbh-admin-order-id { font-size: 0.875rem; font-weight: 600; color: var(--s-ink); }
+.plbh-admin-app .plbh-admin-check-cell { width: 2.75rem; }
+
+/* Row actions, matched to the approved designs: a near-white tile with a
+   hairline edge and near-black strokes, and a bright red trash on a pink
+   ground. Values sampled from 05_Inventory and 06_Website_Content. */
+.plbh-admin-app .plbh-admin-row-actions { display: flex; align-items: center; gap: 0.5rem; }
+.plbh-admin-app .plbh-admin-row-actions .plbh-admin-icon-button,
+.plbh-admin-app .plbh-admin-row-actions a.plbh-admin-icon-button {
+  width: 2.25rem; height: 2.25rem; min-width: 2.25rem; min-height: 2.25rem;
+  display: grid; place-items: center; padding: 0;
+  border: 1px solid var(--s-btn-line);
+  border-radius: 0.5rem;
+  background: var(--s-btn-face);
+  color: var(--s-icon-ink);
+  box-shadow: none;
+  transition: background-color 0.18s var(--s-ease), border-color 0.18s var(--s-ease), color 0.18s var(--s-ease);
+}
+.plbh-admin-app .plbh-admin-row-actions .plbh-admin-icon-button:hover,
+.plbh-admin-app .plbh-admin-row-actions a.plbh-admin-icon-button:hover {
+  background: #fff;
+  border-color: var(--s-green);
+  color: var(--s-green);
+}
+.plbh-admin-app .plbh-admin-row-actions .plbh-admin-icon-button[data-tone="danger"] {
+  color: var(--s-danger-icon);
+  background: var(--s-danger-face);
+  border-color: #f9dedd;
+}
+.plbh-admin-app .plbh-admin-row-actions .plbh-admin-icon-button[data-tone="danger"]:hover {
+  background: #fde1e0;
+  border-color: var(--s-danger-icon);
+  color: var(--s-danger-icon);
+}
+/* Stock steppers sit in the same row and share the tile, but carry a glyph
+   rather than an icon, so they need their own optical sizing. */
+.plbh-admin-app .plbh-admin-row-actions .plbh-admin-stepper {
+  font-size: 1.125rem; font-weight: 600; line-height: 1; padding-bottom: 0.125rem;
+}
+
+.plbh-admin-app .plbh-admin-table-footer,
+.plbh-admin-app .plbh-admin-pagination {
+  padding: 1rem 1.375rem; border-top: 1px solid var(--s-line-soft);
+  background: none; font-size: 0.8125rem; color: var(--s-muted);
+}
+.plbh-admin-app .plbh-admin-footer { border-top: 1px solid var(--s-line-soft); margin-top: 2rem; padding-top: 1.25rem; font-size: 0.75rem; color: var(--s-muted); }
+.plbh-admin-app .plbh-admin-footer-mark { color: var(--s-gold); }
+
+/* ---------------------------------------------------------------------------
+   Status pills
+   ------------------------------------------------------------------------ */
+
+.plbh-admin-app .plbh-admin-badge,
+.plbh-admin-app .plbh-admin-status-badge {
+  display: inline-flex; align-items: center; gap: 0.4375rem; flex: 0 0 auto;
+  min-width: 6.25rem; justify-content: center;
+  border-radius: var(--s-r-ctl);
+  padding: 0.4375rem 0.875rem;
+  font-size: 0.8125rem; font-weight: 600; line-height: 1.2;
+  text-transform: capitalize; white-space: nowrap; border: 0;
+  background: var(--s-warn-bg); color: var(--s-warn); box-shadow: none;
+}
+.plbh-admin-app .plbh-admin-badge i,
+.plbh-admin-app .plbh-admin-status-badge i {
+  display: block; width: 0.4375rem; height: 0.4375rem;
+  border-radius: var(--s-r-pill); background: currentColor; flex-shrink: 0;
+}
+.plbh-admin-app .plbh-admin-badge.delivered,
+.plbh-admin-app .plbh-admin-status-live { background: var(--s-ok-bg); color: var(--s-ok); }
+.plbh-admin-app .plbh-admin-badge.shipped { background: var(--s-info-bg); color: var(--s-info); }
+.plbh-admin-app .plbh-admin-badge.cancelled { background: var(--s-bad-bg); color: var(--s-bad); }
+.plbh-admin-app .plbh-admin-status-pending { background: var(--s-off-bg); color: var(--s-off); }
+
+/* ---------------------------------------------------------------------------
+   KPI / status tiles
+   ------------------------------------------------------------------------ */
+
+.plbh-admin-app .plbh-admin-metrics { gap: 0.875rem; margin-bottom: 1.125rem; }
+.plbh-admin-app .plbh-admin-metric {
+  padding: 1.125rem;
+  border: 1px solid var(--s-line-soft);
+  border-radius: 0.75rem;
+  background: var(--s-surface);
+  box-shadow: var(--s-sh);
+  transition: box-shadow 0.3s var(--s-ease), border-color 0.3s var(--s-ease);
+}
+.plbh-admin-app .plbh-admin-metric:hover { box-shadow: var(--s-sh-lift); border-color: var(--s-line); }
+.plbh-admin-app .plbh-admin-metric-icon {
+  width: 2.75rem; height: 2.75rem; display: grid; place-items: center;
+  border-radius: 0.75rem; background: var(--s-green-tint); color: var(--s-green);
+  border: 0; box-shadow: none;
+}
+.plbh-admin-app .plbh-admin-metric-icon.tone-1 { background: var(--s-warn-bg); color: var(--s-warn); }
+.plbh-admin-app .plbh-admin-metric-icon.tone-2 { background: var(--s-info-bg); color: var(--s-info); }
+.plbh-admin-app .plbh-admin-metric-icon.tone-3 { background: var(--s-violet-bg); color: var(--s-violet); }
+.plbh-admin-app .plbh-admin-metric > strong {
+  display: block;
+  font-size: 1.875rem; font-weight: 700; letter-spacing: -0.02em;
+  line-height: 1.1; color: var(--s-ink); margin: 0.875rem 0 0;
+}
+.plbh-admin-app .plbh-admin-metric-label { display: block; font-size: 0.8125rem; font-weight: 500; color: var(--s-muted); margin-top: 0.3125rem; }
+.plbh-admin-app .plbh-admin-metric p { font-size: 0.75rem; color: var(--s-faint); margin-top: 0.4375rem; }
+
+/* ---------------------------------------------------------------------------
+   Category cards
+   ------------------------------------------------------------------------ */
+
+.plbh-admin-app .plbh-admin-category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+  gap: 1rem;
+  padding: 0 1.375rem 1.375rem;
+}
+.plbh-admin-app .plbh-admin-category-grid button,
+.plbh-admin-app .plbh-admin-category-tile {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 0;
+  padding: 1.25rem 1.25rem 1.5rem;
+  background: var(--s-surface);
+  border: 1px solid var(--s-line-soft);
+  border-radius: var(--s-r-card);
+  box-shadow: var(--s-sh);
+  text-align: center;
+  transition: border-color 0.3s var(--s-ease), box-shadow 0.3s var(--s-ease), transform 0.3s var(--s-ease);
+}
+.plbh-admin-app .plbh-admin-category-grid button:hover {
+  border-color: var(--s-line); box-shadow: var(--s-sh-lift); transform: translateY(-0.125rem);
+}
+.plbh-admin-app .plbh-admin-category-icon {
+  width: 9.5rem; height: 9.5rem;
+  border-radius: var(--s-r-pill);
+  overflow: hidden;
+  border: 0; background: none; margin-bottom: 1rem;
+  display: grid; place-items: center;
+}
+.plbh-admin-app .plbh-admin-category-icon img { width: 100%; height: 100%; object-fit: cover; }
+.plbh-admin-app .plbh-admin-category-grid strong {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.375rem; font-weight: 600; letter-spacing: -0.01em; color: #15332a;
+}
+.plbh-admin-app .plbh-admin-category-grid button > span:nth-of-type(2) { font-size: 0.875rem; color: var(--s-muted); margin-top: 0.25rem; }
+
+/* ---------------------------------------------------------------------------
+   Horizontal section tabs (Website Content, Settings)
+   ------------------------------------------------------------------------ */
+
+.plbh-admin-app .plbh-admin-section-tabs {
+  display: flex; gap: 0; margin-bottom: 1.125rem; padding: 0 0.5rem;
+  background: var(--s-surface);
+  border: 1px solid var(--s-line-soft);
+  border-radius: var(--s-r-card);
+  box-shadow: var(--s-sh-card);
+  overflow-x: auto; scrollbar-width: none;
+}
+.plbh-admin-app .plbh-admin-section-tabs::-webkit-scrollbar { display: none; }
+.plbh-admin-app .plbh-admin-section-tabs button {
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.625rem;
+  flex: 1 0 auto; min-height: 4.0625rem; padding: 0 1.5rem;
+  border: 0; background: none; cursor: pointer;
+  font-size: 0.9375rem; font-weight: 500; color: var(--s-muted); white-space: nowrap;
+  transition: color 0.2s var(--s-ease);
+}
+.plbh-admin-app .plbh-admin-section-tabs button svg { color: var(--s-muted); transition: color 0.2s var(--s-ease); }
+.plbh-admin-app .plbh-admin-section-tabs button:hover { color: var(--s-ink); }
+.plbh-admin-app .plbh-admin-section-tabs button.is-active { color: var(--s-ink); font-weight: 700; }
+.plbh-admin-app .plbh-admin-section-tabs button.is-active svg { color: var(--s-gold); }
+.plbh-admin-app .plbh-admin-section-tabs button.is-active::after {
+  content: ""; position: absolute; inset: auto 1.25rem 0 1.25rem;
+  height: 0.1875rem; border-radius: var(--s-r-pill) var(--s-r-pill) 0 0; background: var(--s-gold);
+}
+
+/* ---------------------------------------------------------------------------
+   Content rows (Website Content banners)
+   ------------------------------------------------------------------------ */
+
+.plbh-admin-app .plbh-admin-content-grid { display: flex; flex-direction: column; gap: 0.75rem; padding: 0 1.375rem 1.375rem; }
+.plbh-admin-app .plbh-admin-content-grid article {
+  display: grid;
+  grid-template-columns: 2.75rem 12.5rem minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 0.875rem 1.125rem;
+  background: var(--s-surface);
+  border: 1px solid var(--s-line-soft);
+  border-radius: var(--s-r-card);
+  box-shadow: var(--s-sh);
+  text-align: left;
+  transition: border-color 0.3s var(--s-ease), box-shadow 0.3s var(--s-ease);
+}
+.plbh-admin-app .plbh-admin-content-grid article:hover { border-color: var(--s-line); box-shadow: var(--s-sh-card); }
+.plbh-admin-app .plbh-admin-content-grid h3 {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.0625rem; font-weight: 700; color: var(--s-ink); line-height: 1.35;
+}
+.plbh-admin-app .plbh-admin-content-grid p { font-size: 0.8125rem; color: var(--s-muted); line-height: 1.5; margin-top: 0.1875rem; }
+.plbh-admin-app .plbh-admin-row-index { font-size: 0.8125rem; font-weight: 600; color: var(--s-muted); text-align: center; }
+
+/* ---------------------------------------------------------------------------
+   Forms, upload, settings
+   ------------------------------------------------------------------------ */
+
+.plbh-admin-app .plbh-admin-field-label {
+  display: block; font-size: 0.875rem; font-weight: 600; color: var(--s-ink); margin-bottom: 0.5rem;
+}
+.plbh-admin-app .plbh-admin-field-label em { font-style: normal; color: #d14343; margin-left: 0.1875rem; }
+.plbh-admin-app .plbh-admin-settings-section,
+.plbh-admin-app .plbh-admin-editorial,
+.plbh-admin-app .plbh-admin-readiness {
+  background: var(--s-surface); border: 1px solid var(--s-line-soft);
+  border-radius: var(--s-r-card); color: var(--s-ink);
+}
+.plbh-admin-app .plbh-admin-settings-list > div { font-size: 0.875rem; padding-block: 0.9375rem; border-color: var(--s-line-soft); }
+.plbh-admin-app .plbh-admin-settings-list dt { font-weight: 600; color: var(--s-ink); }
+.plbh-admin-app .plbh-admin-settings-list dd { color: var(--s-muted); overflow-wrap: anywhere; }
+.plbh-admin-app .plbh-admin-settings-note {
+  background: var(--s-rail); border: 1px solid var(--s-line-soft);
+  border-radius: var(--s-r-ctl); color: var(--s-muted); font-size: 0.8125rem;
+}
+.plbh-admin-app .plbh-admin-upload {
+  border: 1.5px dashed var(--s-line); border-radius: var(--s-r-card);
+  background: #fcfbf8; text-align: center;
+}
+.plbh-admin-app .plbh-admin-upload small { color: var(--s-faint); }
+.plbh-admin-app .plbh-admin-upload-button {
+  border-radius: var(--s-r-ctl); border: 0; background: var(--s-green); color: #fff; font-weight: 600;
+}
+.plbh-admin-app .plbh-admin-upload-button:hover { background: var(--s-green-dark); }
+.plbh-admin-app .plbh-admin-ready-mark { background: var(--s-ok-bg); color: var(--s-ok); border: 0; border-radius: var(--s-r-pill); }
+.plbh-admin-app .plbh-admin-wait-mark { background: var(--s-warn-bg); color: var(--s-warn); border: 0; border-radius: var(--s-r-pill); }
+.plbh-admin-app .plbh-admin-readiness-items strong,
+.plbh-admin-app .plbh-admin-collection-shortcuts strong { font-size: 0.875rem; font-weight: 600; color: var(--s-ink); }
+.plbh-admin-app .plbh-admin-readiness-items small,
+.plbh-admin-app .plbh-admin-collection-shortcuts small { font-size: 0.8125rem; color: var(--s-muted); }
+
+/* ---------------------------------------------------------------------------
+   Charts, media, empty states
+   ------------------------------------------------------------------------ */
+
+.plbh-admin-app .plbh-admin-chart-grid { gap: 0.875rem; }
+.plbh-admin-app .plbh-admin-bar-track { background: var(--s-rail); height: 0.375rem; border-radius: var(--s-r-pill); }
+.plbh-admin-app .plbh-admin-bar-value { background: var(--s-green); border-radius: var(--s-r-pill); }
+.plbh-admin-app .plbh-admin-chart-unit { font-size: 0.75rem; font-weight: 600; color: var(--s-muted); }
+.plbh-admin-app .plbh-admin-composition button { border-radius: var(--s-r-ctl); border: 0; background: none; font-size: 0.8125rem; color: var(--s-ink); }
+.plbh-admin-app .plbh-admin-composition button:hover { background: var(--s-rail); }
+
+.plbh-admin-app .plbh-admin-media-grid { gap: 1rem; padding: 0 1.375rem 1.375rem; }
+.plbh-admin-app .plbh-admin-media-grid article {
+  background: var(--s-surface); border: 1px solid var(--s-line-soft);
+  border-radius: var(--s-r-card); box-shadow: var(--s-sh); text-align: left;
+}
+.plbh-admin-app .plbh-admin-media-grid h3 { font-family: var(--font-serif), Georgia, serif; font-size: 0.9375rem; font-weight: 600; color: var(--s-ink); }
+.plbh-admin-app .plbh-admin-media-grid p { font-size: 0.75rem; color: var(--s-muted); }
+.plbh-admin-app .plbh-admin-media-preview, .plbh-admin-app .plbh-admin-cover-wrapper { background: var(--s-rail); border-radius: 0; }
+
+.plbh-admin-app .plbh-admin-unavailable, .plbh-admin-app .plbh-admin-empty {
+  background: var(--s-surface); padding: clamp(2.5rem, 6vw, 3.5rem) clamp(1.25rem, 4vw, 2.5rem);
+}
+.plbh-admin-app .plbh-admin-unavailable h2 {
+  font-family: var(--font-serif), Georgia, serif; font-size: clamp(1.5rem, 1.3rem + 0.8vw, 1.875rem);
+  font-weight: 700; color: var(--s-ink); max-width: 26ch;
+}
+.plbh-admin-app .plbh-admin-unavailable p, .plbh-admin-app .plbh-admin-empty p { font-size: 0.875rem; color: var(--s-muted); max-width: 56ch; }
+.plbh-admin-app .plbh-admin-empty-symbol {
+  width: 3.75rem; height: 3.75rem; border-radius: var(--s-r-pill); border: 0;
+  background: var(--s-green-tint); color: var(--s-green); margin-bottom: 1.25rem;
+}
+.plbh-admin-app .plbh-admin-feature-list > div {
+  font-size: 0.875rem; padding: 0.75rem 0.875rem; background: var(--s-surface);
+  border: 1px solid var(--s-line-soft); border-radius: var(--s-r-ctl); color: var(--s-ink);
+}
+.plbh-admin-app .plbh-admin-feature-check { color: var(--s-green); }
+
+.plbh-admin-app .plbh-admin-connection-banner {
+  background: var(--s-gold-soft); border: 1px solid rgb(201 162 39 / 0.3);
+  border-radius: var(--s-r-ctl); padding: 0.875rem 1rem; margin-bottom: 1.125rem; box-shadow: none;
+}
+.plbh-admin-app .plbh-admin-connection-banner strong { font-size: 0.8125rem; font-weight: 700; color: var(--s-gold-text); }
+.plbh-admin-app .plbh-admin-connection-banner > div > span { font-size: 0.75rem; color: #7b6225; }
+.plbh-admin-app .plbh-admin-banner-symbol { background: rgb(201 162 39 / 0.2); color: var(--s-gold-text); border: 0; border-radius: var(--s-r-ctl); }
+.plbh-admin-app .plbh-admin-connection-banner.is-warning { background: #fdf3f2; border-color: #f3d6d3; }
+.plbh-admin-app .plbh-admin-connection-banner.is-warning strong { color: var(--s-bad); }
+.plbh-admin-app .plbh-admin-connection-banner.is-warning > div > span { color: #9b4038; }
+.plbh-admin-app .plbh-admin-connection-banner.is-warning .plbh-admin-banner-symbol { background: rgb(192 57 47 / 0.12); color: var(--s-bad); }
+.plbh-admin-app .plbh-admin-connection-banner.is-warning .plbh-admin-text-button { color: var(--s-bad); }
+
+.plbh-admin-app .plbh-admin-toast {
+  background: var(--s-forest); color: #fff; border: 0; border-radius: var(--s-r-ctl);
+  box-shadow: var(--s-sh-lift); font-size: 0.8125rem; font-weight: 500;
+}
+
+/* Dialogs render in the top layer, outside .plbh-admin-app. */
+.plbh-admin-detail-dialog, .plbh-admin-shortcuts-dialog {
+  border: 1px solid #ece9e2; border-radius: 1rem; background: #fdfcfa; color: #1a2420;
+  box-shadow: 0 1.5rem 3.5rem -1.25rem rgb(15 47 35 / 0.3);
+}
+.plbh-admin-detail-dialog::backdrop, .plbh-admin-shortcuts-dialog::backdrop { background: rgb(15 47 35 / 0.5); backdrop-filter: blur(0.25rem); }
+.plbh-admin-detail-info h3 { font-family: var(--font-serif), Georgia, serif; font-size: 1.5rem; font-weight: 700; color: #1a2420; }
+.plbh-admin-detail-pricing { padding: 1rem; background: #f3f2ee; border: 1px solid #f2f1eb; border-radius: 0.625rem; }
+.plbh-admin-price { font-family: var(--font-serif), Georgia, serif; font-size: 1.5rem; font-weight: 700; color: #1a2420; }
+.plbh-admin-detail-note { background: #e7f1ea; border: 1px solid rgb(15 58 42 / 0.16); border-radius: 0.625rem; }
+.plbh-admin-detail-note strong { color: #0f3a2a; font-size: 0.8125rem; }
+.plbh-admin-detail-note p { color: #40594d; font-size: 0.8125rem; }
+.plbh-admin-note-icon { background: rgb(15 58 42 / 0.12); color: #0f3a2a; border-radius: 999px; }
+.plbh-admin-detail-section h4 { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #6d7873; }
+.plbh-admin-dialog-actions { border-top: 1px solid #f2f1eb; }
+.plbh-admin-form-error { color: #c0392f; background: #fedddc; border: 1px solid rgb(192 57 47 / 0.2); border-radius: 0.625rem; font-size: 0.8125rem; }
+.plbh-admin-shortcuts-list kbd { background: #f3f2ee; border: 1px solid #ece9e2; border-radius: 0.375rem; padding: 0.25rem 0.5rem; font-size: 0.6875rem; font-weight: 600; color: #1a2420; }
+.plbh-admin-loading h1 { font-family: var(--font-serif), Georgia, serif; font-weight: 700; }
+.plbh-admin-loading-bar { background: #ece9e2; height: 0.1875rem; border-radius: 999px; }
+.plbh-admin-loading-progress { background: #0f3a2a; }
+
+/* Access denied screen (rendered instead of the console shell). */
+.plbh-admin-denied {
+  min-height: 100dvh; display: grid; align-content: center; justify-items: center; gap: 1rem;
+  padding: clamp(2rem, 8vw, 5rem) 1.5rem; text-align: center;
+  background: #f9f7f2; color: #1a2420; font-family: var(--font-body), Arial, sans-serif;
+}
+.plbh-admin-denied h1 { font-family: var(--font-serif), Georgia, serif; font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2.125rem); font-weight: 700; margin: 0; max-width: 20ch; }
+.plbh-admin-denied p { margin: 0; max-width: 46ch; color: #6d7873; line-height: 1.6; }
+.plbh-admin-denied > div { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; margin-top: 0.5rem; }
+.plbh-admin-denied a {
+  display: inline-flex; align-items: center; min-height: 2.75rem; padding-inline: 1.25rem;
+  border-radius: 0.625rem; font-size: 0.875rem; font-weight: 600; background: #0f3a2a; color: #fff;
+}
+.plbh-admin-denied a + a { background: #fdfcfa; color: #1a2420; border: 1px solid #ece9e2; }
+
+/* ---------------------------------------------------------------------------
+   Responsive
+   ------------------------------------------------------------------------ */
+
+@media (min-width: 761px) {
+  .plbh-admin-app .plbh-admin-sidebar { width: var(--s-sidebar); padding: 0; }
+  .plbh-admin-app .plbh-admin-main { margin-left: var(--s-sidebar); }
+  .plbh-admin-collapsed .plbh-admin-sidebar { width: 0; border: 0; }
+  .plbh-admin-collapsed .plbh-admin-main { margin-left: 0; }
+}
+@media (max-width: 1200px) {
+  .plbh-admin-app .plbh-admin-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .plbh-admin-app .plbh-admin-range { display: none; }
+}
+@media (max-width: 900px) {
+  .plbh-admin-app .plbh-admin-content-grid article { grid-template-columns: 2rem 8rem minmax(0, 1fr); row-gap: 0.75rem; }
+}
+@media (max-width: 760px) {
+  .plbh-admin-app .plbh-admin-mobile-close { display: grid; position: absolute; top: 0.75rem; right: 0.75rem; z-index: 2; }
+  .plbh-admin-app .plbh-admin-content { padding: 0 0.875rem 2rem; }
+  .plbh-admin-app .plbh-admin-topbar { padding: 0.625rem 0.875rem; gap: 0.625rem; min-height: 3.75rem; }
+  .plbh-admin-app .plbh-admin-account > span { display: none; }
+  .plbh-admin-app .plbh-admin-page-heading { min-height: 0; padding: 1.25rem; flex-direction: column; align-items: flex-start; }
+  .plbh-admin-app .plbh-admin-page-heading::after { width: 100%; opacity: 0.35; mask-image: none; }
+  .plbh-admin-app .plbh-admin-page-heading h1 { max-width: 100%; }
+  .plbh-admin-app .plbh-admin-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .plbh-admin-app .plbh-admin-panel-heading,
+  .plbh-admin-app .plbh-admin-table-toolbar,
+  .plbh-admin-app .plbh-admin-category-grid,
+  .plbh-admin-app .plbh-admin-content-grid,
+  .plbh-admin-app .plbh-admin-media-grid { padding-inline: 0.875rem; }
+  .plbh-admin-app .plbh-admin-filter-tabs { margin-inline: 0.875rem; }
+  .plbh-admin-app th:first-child, .plbh-admin-app td:first-child { padding-left: 0.875rem; }
+  .plbh-admin-app th:last-child, .plbh-admin-app td:last-child { padding-right: 0.875rem; }
+  .plbh-admin-app .plbh-admin-table-footer, .plbh-admin-app .plbh-admin-pagination { padding-inline: 0.875rem; }
+  .plbh-admin-app .plbh-admin-section-tabs button { min-height: 3.25rem; padding-inline: 1rem; font-size: 0.875rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .plbh-admin-app *, .plbh-admin-app *::before, .plbh-admin-app *::after {
+    animation-duration: 0.01ms !important; transition-duration: 0.01ms !important;
+  }
+}
+
+/* Toolbar row above a card grid (Categories, Inventory). */
+.plbh-admin-app .plbh-admin-toolbar-row {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 1.375rem 1.375rem 1.125rem; flex-wrap: wrap;
+}
+.plbh-admin-app .plbh-admin-toolbar-row .plbh-admin-search { flex: 1 1 20rem; min-width: 0; border-radius: var(--s-r-pill); padding-inline: 1.125rem; }
+.plbh-admin-app .plbh-admin-toolbar-row .plbh-admin-button { flex-shrink: 0; padding-inline: 1.375rem; }
+
+.plbh-admin-app .plbh-admin-category-tile { position: relative; }
+.plbh-admin-app .plbh-admin-category-tile > button {
+  display: flex; flex-direction: column; align-items: center; width: 100%;
+  border: 0; background: none; padding: 0; cursor: pointer; text-align: center;
+}
+.plbh-admin-app .plbh-admin-tile-actions {
+  position: absolute; right: 0.875rem; bottom: 1rem;
+  display: flex; gap: 0.375rem; opacity: 0; transition: opacity 0.2s var(--s-ease);
+}
+.plbh-admin-app .plbh-admin-category-tile:hover .plbh-admin-tile-actions,
+.plbh-admin-app .plbh-admin-category-tile:focus-within .plbh-admin-tile-actions { opacity: 1; }
+.plbh-admin-app .plbh-admin-tile-actions .plbh-admin-icon-button {
+  width: 2rem; height: 2rem; min-width: 2rem; min-height: 2rem;
+  display: grid; place-items: center; border: 1px solid var(--s-btn-line);
+  border-radius: 0.5rem; background: var(--s-btn-face); color: var(--s-icon-ink);
+}
+.plbh-admin-app .plbh-admin-tile-actions .plbh-admin-icon-button:hover { background: #fff; border-color: var(--s-green); color: var(--s-green); }
+.plbh-admin-app .plbh-admin-tile-actions .plbh-admin-icon-button[data-tone="danger"] { color: var(--s-danger-icon); background: var(--s-danger-face); border-color: #f9dedd; }
+.plbh-admin-app .plbh-admin-tile-actions .plbh-admin-icon-button[data-tone="danger"]:hover { background: #fde1e0; border-color: var(--s-danger-icon); }
+.plbh-admin-app .plbh-admin-category-icon > svg { color: var(--s-gold); opacity: 0.75; }
+.plbh-admin-app .plbh-admin-category-tile .plbh-admin-category-icon:not(:has(img)) { background: var(--s-band); }
+
+/* ---------------------------------------------------------------------------
+   Record forms — step rail plus form panel, per Full_Resolution_Pages/01.
+   ------------------------------------------------------------------------ */
+
+.plbh-admin-app .plbh-admin-form-layout {
+  display: grid;
+  grid-template-columns: 19rem minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+.plbh-admin-app .plbh-admin-form-layout-narrow { grid-template-columns: minmax(0, 1fr); max-width: 60rem; }
+
+.plbh-admin-app .plbh-admin-steps { padding: 0.75rem; display: flex; flex-direction: column; gap: 0.25rem; }
+.plbh-admin-app .plbh-admin-steps button {
+  display: flex; align-items: flex-start; gap: 0.875rem; width: 100%;
+  padding: 0.875rem; border: 0; border-radius: var(--s-r-ctl);
+  background: none; text-align: left; cursor: pointer;
+  transition: background-color 0.2s var(--s-ease);
+}
+.plbh-admin-app .plbh-admin-steps button:hover:not(.is-active) { background: var(--s-rail); }
+.plbh-admin-app .plbh-admin-steps button.is-active { background: var(--s-band); }
+.plbh-admin-app .plbh-admin-step-number {
+  display: grid; place-items: center; flex-shrink: 0;
+  width: 2rem; height: 2rem; border-radius: var(--s-r-pill);
+  border: 1px solid var(--s-line); background: var(--s-surface);
+  font-size: 0.8125rem; font-weight: 700; color: var(--s-muted);
+}
+.plbh-admin-app .plbh-admin-steps button.is-active .plbh-admin-step-number {
+  background: var(--s-green); border-color: var(--s-green); color: #fff;
+}
+.plbh-admin-app .plbh-admin-steps strong { display: block; font-size: 0.875rem; font-weight: 600; color: var(--s-ink); line-height: 1.35; }
+.plbh-admin-app .plbh-admin-steps small { display: block; font-size: 0.75rem; color: var(--s-muted); line-height: 1.45; margin-top: 0.125rem; }
+
+.plbh-admin-app .plbh-admin-form-panel { padding-bottom: 0; }
+.plbh-admin-app .plbh-admin-form-split {
+  display: grid; grid-template-columns: minmax(0, 1fr) 23rem;
+  gap: 1.75rem; padding: 0 1.375rem 1.25rem;
+}
+.plbh-admin-app .plbh-admin-form-fields > .plbh-admin-field + .plbh-admin-field { margin-top: 1.125rem; }
+.plbh-admin-app .plbh-admin-field { position: relative; min-width: 0; }
+.plbh-admin-app .plbh-admin-field input,
+.plbh-admin-app .plbh-admin-field select,
+.plbh-admin-app .plbh-admin-field textarea { width: 100%; }
+.plbh-admin-app .plbh-admin-field-hint { display: block; font-size: 0.75rem; color: var(--s-muted); margin-top: 0.4375rem; }
+.plbh-admin-app .plbh-admin-counter {
+  position: absolute; right: 0.75rem; bottom: 0.625rem;
+  font-size: 0.75rem; color: var(--s-faint); pointer-events: none;
+}
+
+.plbh-admin-app .plbh-admin-cover-panel {
+  border: 1px solid var(--s-line-soft); border-radius: var(--s-r-card);
+  padding: 1.125rem; background: var(--s-surface);
+}
+.plbh-admin-app .plbh-admin-cover-panel .plbh-admin-field-label + .plbh-admin-upload { margin-bottom: 1.25rem; }
+.plbh-admin-app .plbh-admin-cover-panel > .plbh-admin-field-label:not(:first-child) { margin-top: 0.25rem; }
+.plbh-admin-app .plbh-admin-upload {
+  display: flex; flex-direction: column; align-items: center; gap: 0.3125rem;
+  padding: 1.75rem 1.25rem; margin-bottom: 1rem;
+}
+.plbh-admin-app .plbh-admin-upload > svg { color: var(--s-faint); margin-bottom: 0.375rem; }
+.plbh-admin-app .plbh-admin-upload > img { border-radius: 0.375rem; margin-bottom: 0.5rem; width: auto; height: 8rem; object-fit: contain; }
+.plbh-admin-app .plbh-admin-upload strong { font-size: 0.9375rem; font-weight: 600; color: var(--s-ink); }
+.plbh-admin-app .plbh-admin-upload small { font-size: 0.75rem; color: var(--s-muted); }
+.plbh-admin-app .plbh-admin-upload .plbh-admin-upload-button {
+  margin-top: 0.875rem; width: 100%; justify-content: center; cursor: pointer;
+  display: inline-flex; align-items: center; min-height: 2.75rem;
+  font-size: 0.875rem; font-weight: 600;
+}
+
+.plbh-admin-app .plbh-admin-gallery { display: flex; flex-wrap: wrap; gap: 0.625rem; }
+.plbh-admin-app .plbh-admin-gallery-add {
+  display: grid; place-items: center; gap: 0.1875rem;
+  width: 5.5rem; height: 5.5rem; cursor: pointer;
+  border: 1.5px dashed var(--s-line); border-radius: var(--s-r-ctl);
+  background: #fcfbf8; color: var(--s-faint);
+}
+.plbh-admin-app .plbh-admin-gallery-add:hover { border-color: var(--s-green); color: var(--s-green); }
+.plbh-admin-app .plbh-admin-gallery-add small { font-size: 0.6875rem; }
+.plbh-admin-app .plbh-admin-gallery-item { position: relative; width: 5.5rem; height: 5.5rem; }
+.plbh-admin-app .plbh-admin-gallery-item img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--s-r-ctl); }
+.plbh-admin-app .plbh-admin-gallery-item button {
+  position: absolute; top: -0.4375rem; right: -0.4375rem;
+  width: 1.375rem; height: 1.375rem; display: grid; place-items: center;
+  border: 1px solid var(--s-line); border-radius: var(--s-r-pill);
+  background: var(--s-surface); color: var(--s-ink); font-size: 0.875rem;
+  line-height: 1; cursor: pointer; box-shadow: var(--s-sh-card);
+}
+.plbh-admin-app .plbh-admin-gallery-item button:hover { border-color: var(--s-danger-icon); color: var(--s-danger-icon); }
+
+.plbh-admin-app .plbh-admin-tag-list { display: flex; flex-wrap: wrap; gap: 0.375rem; margin: 0.5rem 0 0; padding: 0; list-style: none; }
+.plbh-admin-app .plbh-admin-tag-list li {
+  display: inline-flex; align-items: center; gap: 0.375rem;
+  padding: 0.25rem 0.5rem 0.25rem 0.625rem; border-radius: var(--s-r-pill);
+  background: var(--s-green-tint); color: var(--s-green);
+  font-size: 0.75rem; font-weight: 600;
+}
+.plbh-admin-app .plbh-admin-tag-list button { border: 0; background: none; color: inherit; cursor: pointer; font-size: 0.875rem; line-height: 1; padding: 0; }
+
+.plbh-admin-app .plbh-admin-form-row {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.125rem 1.25rem; padding: 1.25rem 1.375rem 0;
+  border-top: 1px solid var(--s-line-soft);
+}
+.plbh-admin-app .plbh-admin-form-row-single { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); border-top: 0; padding-top: 1.125rem; }
+.plbh-admin-app .plbh-admin-form-row-wide { grid-template-columns: minmax(0, 1fr); border-top: 0; padding-top: 1.125rem; }
+.plbh-admin-app .plbh-admin-form-row + .plbh-admin-form-row { border-top: 0; padding-top: 0; }
+
+.plbh-admin-app .plbh-admin-icon-picker { border: 0; margin: 1.25rem 0 0; padding: 0 1.375rem; }
+.plbh-admin-app .plbh-admin-icon-picker > div { display: flex; flex-wrap: wrap; gap: 0.625rem; margin-top: 0.75rem; }
+.plbh-admin-app .plbh-admin-icon-picker label {
+  display: grid; justify-items: center; gap: 0.3125rem; cursor: pointer;
+  width: 6rem; padding: 0.625rem; border-radius: var(--s-r-ctl);
+  border: 1px solid var(--s-line-soft); background: var(--s-surface);
+  transition: border-color 0.2s var(--s-ease), background-color 0.2s var(--s-ease);
+}
+.plbh-admin-app .plbh-admin-icon-picker label:hover { border-color: var(--s-line); }
+.plbh-admin-app .plbh-admin-icon-picker label.is-active { border-color: var(--s-green); background: var(--s-green-tint); }
+.plbh-admin-app .plbh-admin-icon-picker img { width: 3.5rem; height: 3.5rem; border-radius: var(--s-r-pill); object-fit: cover; }
+.plbh-admin-app .plbh-admin-icon-none { display: grid; place-items: center; width: 3.5rem; height: 3.5rem; border-radius: var(--s-r-pill); background: var(--s-band); color: var(--s-gold); }
+.plbh-admin-app .plbh-admin-icon-picker small { font-size: 0.6875rem; color: var(--s-muted); text-align: center; }
+
+.plbh-admin-app .plbh-admin-form-actions {
+  display: flex; justify-content: flex-end; gap: 0.75rem;
+  margin-top: 1.5rem; padding: 1.125rem 1.375rem;
+  border-top: 1px solid var(--s-line-soft);
+}
+.plbh-admin-app .plbh-admin-form-panel .plbh-admin-form-error { margin: 0 1.375rem 1rem; padding: 0.75rem 0.875rem; }
+
+@media (max-width: 1100px) {
+  .plbh-admin-app .plbh-admin-form-layout { grid-template-columns: minmax(0, 1fr); }
+  .plbh-admin-app .plbh-admin-steps { flex-direction: row; overflow-x: auto; scrollbar-width: none; }
+  .plbh-admin-app .plbh-admin-steps button { flex: 0 0 auto; min-width: 14rem; }
+  .plbh-admin-app .plbh-admin-form-split { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 760px) {
+  .plbh-admin-app .plbh-admin-form-row,
+  .plbh-admin-app .plbh-admin-form-row-single { grid-template-columns: minmax(0, 1fr); }
+  .plbh-admin-app .plbh-admin-form-split,
+  .plbh-admin-app .plbh-admin-form-row,
+  .plbh-admin-app .plbh-admin-icon-picker,
+  .plbh-admin-app .plbh-admin-form-actions { padding-inline: 0.875rem; }
+  .plbh-admin-app .plbh-admin-form-actions .plbh-admin-button { flex: 1; justify-content: center; }
+}

@@ -3,11 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
-import type { Product } from "@/data/products";
+
 import { collections } from "@/data/collections";
 import { Glyph } from "./icons";
+import type { AdminBook } from "./use-admin-data";
 
-export function ProductDetails({ book, onClose }: { book: Product; onClose: () => void }) {
+export function ProductDetails({ book, onClose }: { book: AdminBook; onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const node = dialog.current;
@@ -61,9 +62,10 @@ export function ProductDetails({ book, onClose }: { book: Product; onClose: () =
                   ["Book ID", `PLBH-${book.id}`],
                   ["Category", book.category],
                   ["Availability", book.inStock ? "In stock" : "Out of stock"],
-                  ["Stock quantity", "Not recorded in source data"],
-                  ["ISBN / edition", "Not recorded in source data"],
-                  ["Author / publisher", "Not recorded as structured fields"],
+                  ["Stock quantity", book.stock === null || book.stock === undefined ? "Not counted" : String(book.stock)],
+                  ["ISBN", book.isbn || "Not set"],
+                  ["Author", book.author || "Not set"],
+                  ["Publisher", book.publisher || "Not set"],
                 ].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
               </dl>
             </div>

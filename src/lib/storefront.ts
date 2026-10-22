@@ -29,7 +29,11 @@ export async function placeOrder(
   return { orderNumber: row?.order_number as string, total: Number(row?.total) };
 }
 
-/** Records a book enquiry. Failures stay silent: WhatsApp remains the fallback. */
+/**
+ * Records a book enquiry. WhatsApp stays the reply channel, so a failure here
+ * never blocks the customer -- but it is reported rather than swallowed, because
+ * a silently dropped enquiry is indistinguishable from one nobody sent.
+ */
 export async function recordEnquiry(payload: {
   customer_name: string;
   book_title?: string | null;
@@ -39,6 +43,11 @@ export async function recordEnquiry(payload: {
   message?: string | null;
   source?: "website" | "whatsapp";
 }) {
-  if (!supabase) return;
-  await supabase.from("enquiries").insert({ source: "website", ...payload });
+  if (!supabase) return { error: "Supabase is not configured." };
+  const { error } = await supabase.from("enquiries").insert({ source: "website", ...payload });
+  if (error) {
+    console.error("[enquiry] not recorded:", error.message);
+    return { error: error.message };
+  }
+  return {};
 }

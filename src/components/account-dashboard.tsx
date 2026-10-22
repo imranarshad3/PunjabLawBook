@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useClerk, useSession, useUser } from "@clerk/nextjs";
-import { createClerkSupabaseClient } from "@/lib/supabase";
+import { createClerkSupabaseClient, supabaseConfigured } from "@/lib/supabase";
 import { useCatalogue } from "./catalogue-context";
 import { useSavedBooks, useCart } from "./cart-state";
 import { titleFor } from "./book-card";
@@ -40,13 +40,14 @@ export function AccountDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [lines, setLines] = useState<OrderLine[]>([]);
   const [open, setOpen] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Nothing to load when Supabase is not configured.
+  const [loading, setLoading] = useState(supabaseConfigured);
 
   const getToken = useCallback(async () => (session ? session.getToken() : null), [session]);
 
   useEffect(() => {
     const client = createClerkSupabaseClient(getToken);
-    if (!client) return setLoading(false);
+    if (!client) return;
     let cancelled = false;
     (async () => {
       const [orderResult, lineResult] = await Promise.all([
