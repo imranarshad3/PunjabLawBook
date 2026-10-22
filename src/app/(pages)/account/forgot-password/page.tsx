@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { PageIntro } from "@/components/page-intro";
 import { AccountPreview } from "@/components/account-preview";
 export const metadata: Metadata = {
@@ -14,7 +15,9 @@ export default function Page() {
         accent="can begin again."
         description="A dedicated place to recover access to your account. We will email you a reset code."
       />
-      <AccountPreview mode="reset" />
+      <Suspense fallback={null}>
+        <AccountPreview mode="reset" />
+      </Suspense>
     </main>
   );
 }

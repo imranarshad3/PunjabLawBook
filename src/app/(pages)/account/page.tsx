@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { PageIntro } from "@/components/page-intro";
 import { AccountPreview } from "@/components/account-preview";
@@ -16,7 +17,9 @@ export default function Page() {
         accent="to your next chapter."
         description="A dedicated space for your reading journey. Sign in to pick up where you left off."
       />
-      <AccountPreview />
+      <Suspense fallback={null}>
+        <AccountPreview />
+      </Suspense>
       <section className="container account-shortcuts">
         <Link href="/cart">
           <Icon name="cart" />

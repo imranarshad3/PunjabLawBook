@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useClerk, useSignIn, useSignUp, useUser } from "@clerk/nextjs";
 import { Icon } from "./ui";
@@ -28,6 +28,10 @@ export function AccountPreview({
   const signin = mode === "signin",
     reset = mode === "reset";
   const router = useRouter();
+  // Clerk appends `__clerk_ticket` to the redirect URL of an invitation email.
+  // Its presence means the email address is already verified, so the usual
+  // confirmation-code step is skipped.
+  const ticket = useSearchParams().get("__clerk_ticket");
   const { isLoaded: userLoaded, isSignedIn, user } = useUser();
   const { signOut } = useClerk();
   const { signIn } = useSignIn();
@@ -81,12 +85,18 @@ export function AccountPreview({
         setStatus(`We sent a reset code to ${email}. Enter it with your new password.`);
       } else {
         const [firstName, ...rest] = name.trim().split(" ").filter(Boolean);
-        const created = await signUp.create({
-          emailAddress: email,
-          password,
+        const names = {
           ...(firstName ? { firstName } : {}),
           ...(rest.length ? { lastName: rest.join(" ") } : {}),
-        });
+        };
+        if (ticket) {
+          const accepted = await signUp.create({ strategy: "ticket", ticket, password, ...names });
+          if (accepted.error) return setError(readError(accepted.error as MaybeClerkError));
+          await signUp.finalize();
+          router.push("/account");
+          return;
+        }
+        const created = await signUp.create({ emailAddress: email, password, ...names });
         if (created.error) return setError(readError(created.error as MaybeClerkError));
         const sent = await signUp.verifications.sendEmailCode();
         if (sent.error) return setError(readError(sent.error as MaybeClerkError));
@@ -100,7 +110,9 @@ export function AccountPreview({
     }
   }
 
-  const heading = awaitingCode
+  const heading = ticket && mode === "register"
+    ? "You have been invited."
+    : awaitingCode
     ? "Check your email."
     : reset
       ? "A fresh start."
@@ -108,7 +120,9 @@ export function AccountPreview({
         ? "Welcome back."
         : "Your next chapter starts here.";
 
-  const intro = awaitingCode
+  const intro = ticket && mode === "register"
+    ? "Choose a password to accept your invitation. Your email address is already confirmed."
+    : awaitingCode
     ? status
     : reset
       ? "Enter your email and we will send you a reset code."
@@ -116,7 +130,9 @@ export function AccountPreview({
         ? "Your books, your orders, your own corner of the bookshop."
         : "A place to keep your reading journey together.";
 
-  const action = awaitingCode
+  const action = ticket && mode === "register"
+    ? "Accept the invitation"
+    : awaitingCode
     ? reset
       ? "Set a new password"
       : "Confirm your email"
@@ -200,7 +216,7 @@ export function AccountPreview({
                     />
                   </label>
                 )}
-                {!awaitingCode && (
+                {!awaitingCode && !ticket && (
                   <label>
                     Email address
                     <input

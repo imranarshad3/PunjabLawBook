@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { PageIntro } from "@/components/page-intro";
 import { AccountPreview } from "@/components/account-preview";
 export const metadata: Metadata = {
@@ -14,7 +15,9 @@ export default function Page() {
         accent="A chapter of your own."
         description="Your account brings together your orders, addresses and personal details."
       />
-      <AccountPreview mode="register" />
+      <Suspense fallback={null}>
+        <AccountPreview mode="register" />
+      </Suspense>
     </main>
   );
 }

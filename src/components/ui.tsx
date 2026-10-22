@@ -21,6 +21,8 @@ export type IconName =
   | "chat"
   | "whatsapp"
   | "menu"
+  | "shield"
+  | "sparkle"
   | "cart-plus"
   | "plus"
   | "minus";
@@ -124,6 +126,18 @@ const paths: Record<IconName, ReactNode> = {
       <path d="M14 8v5m-2.5-2.5h5" />
       <circle cx="9" cy="21" r="1" />
       <circle cx="19" cy="21" r="1" />
+    </>
+  ),
+  shield: (
+    <>
+      <path d="M12 2.75 4.75 5.5v5.75c0 4.4 3 8.2 7.25 9.75 4.25-1.55 7.25-5.35 7.25-9.75V5.5Z" />
+      <path d="m9.25 11.75 2 2 3.5-3.75" />
+    </>
+  ),
+  sparkle: (
+    <>
+      <path d="M12 3.25 13.6 9l5.65 1.6-5.65 1.6L12 17.9l-1.6-5.7L4.75 10.6 10.4 9Z" />
+      <path d="M18.5 3v2.6M17.2 4.3h2.6" />
     </>
   ),
   plus: <path d="M12 5v14M5 12h14" />,

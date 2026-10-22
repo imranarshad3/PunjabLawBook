@@ -9,6 +9,7 @@ import { useCatalogue } from "./catalogue-context";
 import { useSavedBooks, useCart } from "./cart-state";
 import { titleFor } from "./book-card";
 import { Icon } from "./ui";
+import { useAdminAccess } from "./use-admin-access";
 
 type Order = {
   id: string;
@@ -29,6 +30,17 @@ const money = (value: unknown) =>
 const when = (value: string) =>
   new Date(value).toLocaleDateString("en-PK", { day: "numeric", month: "long", year: "numeric" });
 
+/**
+ * A quiet membership tier: it recognises returning readers without inventing a
+ * loyalty programme the shop does not actually run. Thresholds are in rupees.
+ */
+function tierFor(orders: number, spent: number) {
+  if (orders >= 10 || spent >= 50000) return { name: "Bench Member", note: "Our most read-with" };
+  if (orders >= 4 || spent >= 15000) return { name: "Advocate", note: "A shelf well built" };
+  if (orders >= 1) return { name: "Reader", note: "The collection has begun" };
+  return { name: "Guest", note: "Your first chapter awaits" };
+}
+
 export function AccountDashboard() {
   const { user } = useUser();
   const { session } = useSession();
@@ -36,6 +48,7 @@ export function AccountDashboard() {
   const { products } = useCatalogue();
   const saved = useSavedBooks();
   const cart = useCart();
+  const admin = useAdminAccess();
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [lines, setLines] = useState<OrderLine[]>([]);
@@ -70,12 +83,17 @@ export function AccountDashboard() {
     .filter((order) => !["cancelled", "refunded"].includes(order.status))
     .reduce((sum, order) => sum + Number(order.total || 0), 0);
   const firstName = user?.firstName || user?.fullName?.split(" ")[0] || "there";
+  const tier = tierFor(orders.length, spent);
+  const canInvite = admin.role === "owner" || admin.role === "admin";
 
   return (
     <div className="container account-dashboard">
       <section className="account-hero">
-        <div>
-          <p className="shop-kicker">YOUR PERSONAL LEGAL BOOKSHELF</p>
+        <div className="account-hero-copy">
+          <p className="shop-kicker">
+            <Icon name="sparkle" />
+            YOUR PERSONAL LEGAL BOOKSHELF
+          </p>
           <h2>
             Welcome back, <em>{firstName}</em>.
           </h2>
@@ -93,18 +111,55 @@ export function AccountDashboard() {
           </div>
         </div>
         <figure className="account-identity">
-          {user?.imageUrl ? (
-            <Image src={user.imageUrl} alt="" width={64} height={64} unoptimized />
-          ) : (
-            <span className="account-initials">{firstName.slice(0, 2).toUpperCase()}</span>
-          )}
+          <span className="account-identity-ring">
+            {user?.imageUrl ? (
+              <Image src={user.imageUrl} alt="" width={72} height={72} unoptimized />
+            ) : (
+              <span className="account-initials">{firstName.slice(0, 2).toUpperCase()}</span>
+            )}
+          </span>
           <figcaption>
             <strong>{user?.fullName || firstName}</strong>
             <span>{user?.primaryEmailAddress?.emailAddress}</span>
             <small>Member since {user?.createdAt ? when(String(user.createdAt)) : "today"}</small>
           </figcaption>
+          <p className="account-tier">
+            <Icon name="check" />
+            <span>
+              <strong>{tier.name}</strong>
+              {tier.note}
+            </span>
+          </p>
         </figure>
       </section>
+
+      {admin.isAdmin && (
+        <section className="account-admin-band">
+          <span className="account-admin-mark">
+            <Icon name="shield" />
+          </span>
+          <div>
+            <p className="account-admin-role">
+              Staff access{admin.role ? ` · ${admin.role}` : ""}
+            </p>
+            <h3>The Admin Studio is open to you.</h3>
+            <p>
+              Books, orders, inventory, enquiries and the people who run them — the
+              whole shop, behind one door.
+            </p>
+          </div>
+          <div className="account-admin-actions">
+            <Link className="button button-gold" href="/admin">
+              Open Admin Studio <Icon name="arrow" />
+            </Link>
+            {canInvite && (
+              <Link className="button button-ghost" href="/admin/team">
+                Invite a teammate
+              </Link>
+            )}
+          </div>
+        </section>
+      )}
 
       <section className="account-stats">
         {([

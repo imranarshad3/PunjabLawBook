@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
 
 import { collections } from "@/data/collections";
 import catalogue from "@/data/catalogue.json";
@@ -14,6 +15,7 @@ import { ProductDetails } from "./product-details";
 import { useAdminData } from "./use-admin-data";
 import { RecordsPanel } from "./records";
 import { EntityForm, type EntityKey } from "./entity-form";
+import { TeamInvites } from "./team-invites";
 import type { AdminBook, RecordRow } from "./use-admin-data";
 
 const recordViews = ["Orders", "Customers", "Promotions", "Book Enquiries", "Website Content", "Team & Access"];
@@ -145,6 +147,11 @@ export function AdminWorkspace({ view }: { view: View }) {
   const router = useRouter();
   const params = useSearchParams();
   const data = useAdminData();
+  const { userId } = useAuth();
+  // The caller's own row in admin_members decides which team controls they see.
+  const myRole =
+    (data.team.find((member) => member.clerk_user_id === userId)?.role as string | undefined) ??
+    null;
   const products = data.books;
   const categoryCounts = data.categories;
   const search = params.get("q") || "";
@@ -1157,6 +1164,7 @@ export function AdminWorkspace({ view }: { view: View }) {
               </section>
             </div>
           )}
+          {view === "Team & Access" && <TeamInvites role={myRole} />}
           {recordViews.includes(view) && (
             <RecordsPanel
               view={view}
