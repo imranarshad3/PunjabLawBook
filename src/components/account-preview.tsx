@@ -29,8 +29,9 @@ export function AccountPreview({
     reset = mode === "reset";
   const router = useRouter();
   // Clerk appends `__clerk_ticket` to the redirect URL of an invitation email.
-  // Its presence means the email address is already verified, so the usual
-  // confirmation-code step is skipped.
+  // It carries the (already verified) email address, so neither flow asks for
+  // one: a new recipient only chooses a password, and a recipient who already
+  // has an account is signed straight in.
   const ticket = useSearchParams().get("__clerk_ticket");
   const { isLoaded: userLoaded, isSignedIn, user } = useUser();
   const { signOut } = useClerk();
@@ -71,12 +72,19 @@ export function AccountPreview({
         router.push("/account");
       }
       // ---------------------------------------------------- first steps
-      else if (signin) {
+      else if (signin && ticket) {
+        const accepted = await signIn.ticket({ ticket });
+        if (accepted.error) return setError(readError(accepted.error as MaybeClerkError));
+        await signIn.finalize();
+        router.push("/account");
+      } else if (signin) {
+        if (!email.trim()) return setError("Enter the email address you signed up with.");
         const attempt = await signIn.password({ identifier: email, password });
         if (attempt.error) return setError(readError(attempt.error as MaybeClerkError));
         await signIn.finalize();
         router.push("/account");
       } else if (reset) {
+        if (!email.trim()) return setError("Enter the email address you signed up with.");
         const created = await signIn.create({ identifier: email });
         if (created.error) return setError(readError(created.error as MaybeClerkError));
         const sent = await signIn.resetPasswordEmailCode.sendCode();
@@ -110,7 +118,7 @@ export function AccountPreview({
     }
   }
 
-  const heading = ticket && mode === "register"
+  const heading = ticket && !reset
     ? "You have been invited."
     : awaitingCode
     ? "Check your email."
@@ -120,8 +128,10 @@ export function AccountPreview({
         ? "Welcome back."
         : "Your next chapter starts here.";
 
-  const intro = ticket && mode === "register"
-    ? "Choose a password to accept your invitation. Your email address is already confirmed."
+  const intro = ticket && signin
+    ? "You already have an account with us. Accept the invitation to add your new access."
+    : ticket && mode === "register"
+      ? "Choose a password to accept your invitation. Your email address is already confirmed."
     : awaitingCode
     ? status
     : reset
@@ -130,7 +140,7 @@ export function AccountPreview({
         ? "Your books, your orders, your own corner of the bookshop."
         : "A place to keep your reading journey together.";
 
-  const action = ticket && mode === "register"
+  const action = ticket && !reset
     ? "Accept the invitation"
     : awaitingCode
     ? reset
@@ -243,7 +253,7 @@ export function AccountPreview({
                     />
                   </label>
                 )}
-                {(!reset || awaitingCode) && (
+                {(!reset || awaitingCode) && !(signin && ticket) && (
                   <label>
                     {awaitingCode && reset ? "New password" : "Password"}
                     <input
