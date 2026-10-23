@@ -266,7 +266,7 @@ export function AdminShell({
               {enquiryBadge > 0 && <em>{enquiryBadge}</em>}
             </button>
             <div className="plbh-admin-account">
-              {hydrated && <UserButton />}
+              {hydrated && <UserButton appearance={{ elements: { userButtonAvatarBox: "plbh-admin-user-avatar", userButtonTrigger: "plbh-admin-user-trigger" } }} />}
               <span>
                 {displayName}
                 <small>Administrator</small>

@@ -700,8 +700,8 @@
   color: #3f7049;
   border: 1px solid #cfe3cd;
 }
-.plbh-admin-top-actions .cl-userButtonAvatarBox { width: 2rem; height: 2rem; }
-.plbh-admin-top-actions .cl-userButtonTrigger:focus-visible { outline: 2px solid #2d6b52; outline-offset: 2px; }
+.plbh-admin-top-actions .plbh-admin-user-avatar { width: 2rem; height: 2rem; }
+.plbh-admin-top-actions .plbh-admin-user-trigger:focus-visible { outline: 2px solid #2d6b52; outline-offset: 2px; }
 
 /* Entity form dialog + tile actions */
 .plbh-admin-entity-form { padding: 0.5rem 0.25rem 1.5rem; }
