@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ClerkFailed, ClerkLoaded, ClerkLoading, SignIn, SignUp, useUser } from "@clerk/nextjs";
 import { accountReturnTo } from "@/lib/account-navigation";
+import { siteUrl } from "@/lib/site";
 import { Icon } from "./ui";
 import { AccountDashboard } from "./account-dashboard";
 
@@ -27,7 +28,7 @@ const appearance = {
 export function AccountPreview({ mode = "signin" }: { mode?: "signin" | "register" | "reset" }) {
   const searchParams = useSearchParams();
   const { isLoaded, isSignedIn } = useUser();
-  const returnTo = accountReturnTo(searchParams.get("redirect_url"));
+  const returnTo = accountReturnTo(searchParams.get("redirect_url"), siteUrl);
   const navigation = new URLSearchParams({ redirect_url: returnTo });
   const ticket = searchParams.get("__clerk_ticket");
   if (ticket) navigation.set("__clerk_ticket", ticket);
@@ -50,7 +51,7 @@ export function AccountPreview({ mode = "signin" }: { mode?: "signin" | "registe
           <Link href={signInUrl} aria-current={mode !== "register" ? "page" : undefined}>Sign in</Link>
           <Link href={signUpUrl} aria-current={mode === "register" ? "page" : undefined}>Create account</Link>
         </nav>
-        {mode === "reset" && <p>Enter your email and continue, then choose “Forgot password?” to recover your account.</p>}
+        {mode === "reset" && <p>Enter your email, then choose “Forgot password?” to recover your account.</p>}
         <ClerkLoading><p role="status">Loading secure account access…</p></ClerkLoading>
         <ClerkFailed><p role="alert">Account access could not load. Refresh the page or contact our team for help.</p><Link href="/contact">Contact support</Link></ClerkFailed>
         <ClerkLoaded>
