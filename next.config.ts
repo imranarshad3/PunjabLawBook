@@ -23,9 +23,11 @@ const nextConfig: NextConfig = {
     const csp = [
       "default-src 'self'",
       `script-src 'self' 'unsafe-inline' ${clerk} ${captcha}${development ? " 'unsafe-eval'" : ""}`,
-      "style-src 'self' 'unsafe-inline'",
+      // Embedded authentication/inspection UI can request Google Fonts at
+      // runtime; allow only the stylesheet host and its font-file CDN.
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       `img-src 'self' data: blob: ${clerk} https://*.supabase.co`,
-      "font-src 'self'",
+      "font-src 'self' https://fonts.gstatic.com",
       `connect-src 'self' ${clerk} ${supabase}${development ? " ws: wss:" : ""}`,
       "worker-src 'self' blob:",
       "object-src 'none'",
