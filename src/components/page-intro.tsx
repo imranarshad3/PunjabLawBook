@@ -24,8 +24,7 @@ export function PageIntro({
           <p className="shop-kicker">{eyebrow}</p>
           <h1>
             {title}
-            <br />
-            <em>{accent}</em>
+            {accent && <><br /><em>{accent}</em></>}
           </h1>
           <p>{description}</p>
         </div>

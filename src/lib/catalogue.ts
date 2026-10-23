@@ -15,7 +15,37 @@ export type Product = {
   inStock: boolean;
   purchasable: boolean;
   category: string;
+  uuid?: string;
+  gallery?: { url: string; alt: string }[];
+  reviews?: { id: string; customer_name: string; rating: number; title: string; body: string; created_at: string }[];
 };
+
+export type ProductExtras = {
+  uuid?: string;
+  gallery: { url: string; alt: string }[];
+  reviews: NonNullable<Product["reviews"]>;
+};
+
+export async function getProductExtras(legacyId: number): Promise<ProductExtras> {
+  "use cache";
+  cacheTag(CATALOGUE_TAG);
+  cacheLife("hours");
+  if (!supabase) return { gallery: [], reviews: [] };
+  const { data, error } = await supabase.from("books").select(
+    "id, book_images(image_url, alt_text, sort_order), book_reviews(id, customer_name, rating, title, body, created_at)",
+  ).eq("legacy_id", legacyId).maybeSingle();
+  if (error || !data) return { gallery: [], reviews: [] };
+  const row = data as unknown as {
+    id: string;
+    book_images: { image_url: string; alt_text: string | null; sort_order: number }[];
+    book_reviews: NonNullable<Product["reviews"]>;
+  };
+  return {
+    uuid: row.id,
+    gallery: [...(row.book_images || [])].sort((a, b) => a.sort_order - b.sort_order).map((image) => ({ url: image.image_url, alt: image.alt_text || "Book detail" })),
+    reviews: (row.book_reviews || []).sort((a, b) => b.created_at.localeCompare(a.created_at)),
+  };
+}
 
 export type Catalogue = {
   products: Product[];
@@ -25,6 +55,7 @@ export type Catalogue = {
   bestsellers: Product[];
   verifiedAt: string;
   source: "supabase" | "repository";
+  sections: Record<string, { title: string; subtitle: string | null; active: boolean }>;
 };
 
 type Row = {
@@ -40,7 +71,7 @@ const toProduct = (row: Row): Product => ({
   id: row.legacy_id ?? 0,
   name: row.title,
   url: `/products/${row.legacy_id}`,
-  image: row.cover_url || "/images/book-placeholder.webp",
+  image: row.cover_url || "/images/book-placeholder.svg",
   price: Number(row.price),
   inStock: row.stock_status !== "out_of_stock",
   purchasable: row.stock_status !== "out_of_stock",
@@ -55,6 +86,7 @@ const fallback = (): Catalogue => ({
   bestsellers: catalogueJson.bestsellers as unknown as Product[],
   verifiedAt: catalogueJson.verifiedAt,
   source: "repository",
+  sections: {},
 });
 
 /**
@@ -75,11 +107,11 @@ export async function getCatalogue(): Promise<Catalogue> {
       .eq("status", "published")
       .not("legacy_id", "is", null)
       .order("title"),
-    supabase.from("featured_sections").select("key, featured_section_books(sort_order, books(legacy_id))"),
+    supabase.from("featured_sections").select("key, title, subtitle, active, featured_section_books(sort_order, books(legacy_id))"),
     supabase.from("collections").select("slug, title, description, collection_books(sort_order, books(legacy_id))"),
   ]);
 
-  if (books.error || !books.data?.length) return fallback();
+  if (books.error) return fallback();
 
   const products = (books.data as unknown as Row[]).map(toProduct);
   const byId = new Map(products.map((product) => [product.id, product]));
@@ -94,20 +126,25 @@ export async function getCatalogue(): Promise<Catalogue> {
       .map((entry) => byId.get(entry.books?.legacy_id ?? -1))
       .filter((product): product is Product => Boolean(product)) || [];
 
-  const collections: Catalogue["collections"] = {};
+  // Keep repository-defined routes available even when the live database is
+  // only partially seeded. Header and mobile navigation both link to these
+  // stable slugs; an empty live row should not turn a working route into a
+  // 404 or an empty collection page.
+  const collections: Catalogue["collections"] = { ...staticCollections };
   for (const row of ((collectionRows.data || []) as unknown as {
     slug: string;
     title: string;
     description: string | null;
     collection_books: { sort_order: number; books: { legacy_id: number } | null }[];
   }[])) {
+    const ids = row.collection_books
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((entry) => entry.books?.legacy_id)
+      .filter((id): id is number => typeof id === "number");
     collections[row.slug] = {
       title: row.title,
-      description: row.description || "",
-      ids: row.collection_books
-        .sort((a, b) => a.sort_order - b.sort_order)
-        .map((entry) => entry.books?.legacy_id)
-        .filter((id): id is number => typeof id === "number"),
+      description: row.description || collections[row.slug]?.description || "",
+      ids: ids.length ? ids : collections[row.slug]?.ids || [],
     };
   }
 
@@ -117,10 +154,11 @@ export async function getCatalogue(): Promise<Catalogue> {
   return {
     products,
     categories: [...new Set(products.map((product) => product.category))],
-    collections: Object.keys(collections).length ? collections : staticCollections,
+    collections,
     featured: featured.length ? featured : products.slice(0, 6),
     bestsellers: bestsellers.length ? bestsellers : products.slice(6, 12),
     verifiedAt: catalogueJson.verifiedAt,
     source: "supabase",
+    sections: Object.fromEntries((sections.data || []).map((entry) => [entry.key, { title: entry.title, subtitle: entry.subtitle, active: entry.active }])),
   };
 }

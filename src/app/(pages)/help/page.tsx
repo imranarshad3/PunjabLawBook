@@ -1,3 +1,4 @@
+import { CmsPage } from "@/components/cms-page";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageIntro } from "@/components/page-intro";
@@ -36,11 +37,11 @@ const answers = [
       ],
       [
         "How do I pay for my books?",
-        "Online payment is not active yet. Payment options and the final total will be available after checkout is connected.",
+        "Checkout currently accepts cash-on-delivery orders. The team confirms delivery arrangements by phone. Online card payments are not enabled.",
       ],
       [
         "Are prices and availability current?",
-        "The displayed catalogue is a selection checked on 13 October 2026. Our team can help confirm a title’s details; online ordering is not active yet.",
+        "Prices and availability come from the live catalogue. The team can help confirm an edition or language before you order.",
       ],
     ],
   },
@@ -49,16 +50,16 @@ const answers = [
     items: [
       [
         "Where can I see my previous orders?",
-        "Account access and order history will be available when account services open. There are no online orders to view on this website yet.",
+        "Sign in to My Account to view orders placed while you were signed in. Open an order to see its books, totals, delivery details and status.",
       ],
       [
         "Can I change an order or ask about a return?",
-        "Contact our team with your order number as soon as possible. Online orders are not active on this website yet. Our returns information will be finalized before ordering opens.",
+        "Contact our team with your order number as soon as possible. Changes and return requests must be confirmed by the team before you send any books back.",
       ],
     ],
   },
 ];
-export default function HelpPage() {
+function HelpPage() {
   return (
     <main id="main" className="inner-page">
       <PageIntro
@@ -105,4 +106,8 @@ export default function HelpPage() {
       </section>
     </main>
   );
+}
+
+export default function PublishedPage() {
+  return <CmsPage path="/help"><HelpPage /></CmsPage>;
 }

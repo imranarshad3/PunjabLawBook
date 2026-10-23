@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import catalogue from "@/data/catalogue.json";
 import { Brand, Icon } from "./ui";
 import { DesktopNavigation } from "./premium-navigation";
@@ -23,15 +24,15 @@ export function SiteHeader() {
               <Icon name="truck" />
               Delivering across Pakistan
             </span>
-            <Link href="tel:+923080060188">
+            <Link href="tel:+923334222005">
               <Icon name="phone" />
-              For enquiries: +92 308 0060188
+              For enquiries: +92 333 4222005
             </Link>
           </div>
         </div>
         <div className="container navigation">
           <Brand />
-          <DesktopNavigation />
+          <Suspense fallback={<nav aria-label="Main navigation"><Link href="/products">Bookshop</Link></nav>}><DesktopNavigation /></Suspense>
           <NavbarSearch />
           <div className="header-actions">
             <Link
@@ -66,7 +67,7 @@ export function SiteFooter() {
             Legal books, guides and professional resources. Supporting study,
             practice and a deeper understanding of the law.
           </p>
-          <Link className="text-link" href="https://wa.me/923080060188">
+          <Link className="text-link" href="https://wa.me/923334222005">
             <Icon name="whatsapp" />
             Talk to us on WhatsApp
           </Link>
@@ -76,12 +77,12 @@ export function SiteFooter() {
           <Link href="/">Home</Link>
           <Link href="/products">All Books</Link>
           <Link href="/products">Browse the Collection</Link>
-          <Link href="/products?category=Exam+Guides">Exam Guides</Link>
+          <Link href="/collections/exam-guides">Exam Guides</Link>
           <Link href="/about">About Us</Link>
         </div>
         <div>
           <h2>Book Categories</h2>
-          <Link href="/products?category=Exam+Guides">Exam Guides</Link>
+          <Link href="/collections/exam-guides">Exam Guides</Link>
           <Link href={`/collections/students`}>LLB Books</Link>
           <Link href={`/collections/bare-acts`}>Bare Acts</Link>
           <Link href={`/collections/legal-reference`}>Manuals</Link>
@@ -112,17 +113,13 @@ export function SiteFooter() {
               Lahore, Pakistan
             </span>
           </p>
-          <Link href="tel:+923080060188">
+          <Link href="tel:+923334222005">
             <Icon name="phone" />
-            +92 308 0060188
+            +92 333 4222005
           </Link>
-          <Link href="tel:+924237242304">
-            <Icon name="phone" />
-            +92 42 37242304
-          </Link>
-          <Link href="/contact">
+          <Link href="mailto:civilcriminallawbook@gmail.com">
             <Icon name="mail" />
-            <span>Contact our team</span>
+            <span>civilcriminallawbook@gmail.com</span>
           </Link>
         </div>
       </div>

@@ -132,7 +132,7 @@ export function Newsletter() {
   );
 }
 
-// Local book-bag quantities persist on this device; ordering is not active.
+// Local book-bag quantities persist on this device until checkout is completed.
 export function CartActions({
   id,
   title,

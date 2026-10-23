@@ -16,10 +16,10 @@ type Invitation = {
 };
 
 const ROLES = [
-  ["editor", "Editor — add and edit books, orders and content"],
-  ["viewer", "Viewer — read-only access to the studio"],
-  ["admin", "Admin — everything, including inviting teammates"],
-  ["owner", "Owner — full control (owners only)"],
+  ["editor", "Editor", "Can add and edit books, orders and content."],
+  ["viewer", "Viewer", "Can view studio information without changing it."],
+  ["admin", "Admin", "Can manage the studio and invite teammates."],
+  ["owner", "Owner", "Full workspace control, including team access."],
 ] as const;
 
 const when = (value: string | null) =>
@@ -46,18 +46,21 @@ export function TeamInvites({ role }: { role: string | null }) {
   const getToken = useCallback(async () => (session ? session.getToken() : null), [session]);
 
   const load = useCallback(async () => {
-    const client = createClerkSupabaseClient(getToken);
-    if (!client) return;
+    const token = await getToken();
+    const client = createClerkSupabaseClient(async () => token);
+    if (!client) return [];
     const { data } = await client
       .from("admin_invitations")
       .select("id, email, full_name, role, status, created_at, accepted_at")
       .order("created_at", { ascending: false })
       .limit(50);
-    setInvites((data as Invitation[]) || []);
+    return (data as Invitation[]) || [];
   }, [getToken]);
 
   useEffect(() => {
-    void load();
+    let active = true;
+    void load().then((rows) => { if (active) setInvites(rows); });
+    return () => { active = false; };
   }, [load]);
 
   async function invite(event: React.FormEvent) {
@@ -80,7 +83,7 @@ export function TeamInvites({ role }: { role: string | null }) {
       setSent(`Invitation emailed to ${email}.`);
       setEmail("");
       setFullName("");
-      await load();
+      setInvites(await load());
     } catch {
       setError("The invitation could not be sent. Check your connection and try again.");
     } finally {
@@ -95,7 +98,7 @@ export function TeamInvites({ role }: { role: string | null }) {
       setError(payload.error || "That invitation could not be revoked.");
       return;
     }
-    await load();
+    setInvites(await load());
   }
 
   const pending = invites.filter((invite) => invite.status === "pending");
@@ -103,14 +106,19 @@ export function TeamInvites({ role }: { role: string | null }) {
   return (
     <section className="plbh-invite">
       <header className="plbh-invite-head">
-        <div>
-          <h2>Invite a teammate</h2>
-          <p>
+        <div className="plbh-invite-heading">
+          <span className="plbh-invite-icon"><Glyph name="users" size={19} /></span>
+          <div>
+            <span className="plbh-invite-eyebrow">TEAM MANAGEMENT</span>
+            <h2>Invite a teammate</h2>
+            <p>
             We email an invitation link. When they accept and create their account, the
             studio access you chose is applied automatically.
-          </p>
+            </p>
+          </div>
         </div>
         <span className="plbh-invite-count">
+          <Glyph name="mail" size={14} />
           {pending.length} pending
         </span>
       </header>
@@ -147,10 +155,13 @@ export function TeamInvites({ role }: { role: string | null }) {
                 ),
               )}
             </select>
+            <small className="plbh-invite-role-note" aria-live="polite">
+              {ROLES.find(([value]) => value === invitedRole)?.[2]}
+            </small>
           </label>
           <button type="submit" disabled={busy}>
             <Glyph name="mail" size={16} />
-            {busy ? "Sending…" : "Send invitation"}
+            {busy ? "Sending…" : "Send invite"}
           </button>
         </form>
       ) : (
@@ -174,8 +185,8 @@ export function TeamInvites({ role }: { role: string | null }) {
                 <strong>{invitation.full_name || invitation.email}</strong>
                 {invitation.full_name && <small>{invitation.email}</small>}
               </span>
-              <span className="plbh-invite-role">{invitation.role}</span>
-              <span className="plbh-invite-status">{invitation.status}</span>
+              <span className="plbh-invite-role"><Glyph name="users" size={13} />{invitation.role}</span>
+              <span className="plbh-invite-status"><i aria-hidden="true" />{invitation.status}</span>
               <span className="plbh-invite-date">
                 {invitation.status === "accepted"
                   ? `Joined ${when(invitation.accepted_at)}`

@@ -1,14 +1,15 @@
+import { CmsPage } from "@/components/cms-page";
 import type { Metadata } from "next";
 import { InformationPage } from "@/components/information-page";
 export const metadata: Metadata = {
   title: "Privacy Information | Punjab Law Book House",
 };
-export default function Page() {
+function Page() {
   return (
     <InformationPage
       title="Privacy information."
       accent="Your browsing, explained."
-      intro="A plain-language description of the information used by this website in its current frontend milestone."
+      intro="A plain-language description of the information used when browsing, contacting us and placing an order."
       sections={[
         {
           title: "Your book bag and saved titles",
@@ -16,15 +17,15 @@ export default function Page() {
         },
         {
           title: "Enquiries you choose to send",
-          body: "The Contact and Request a Book forms prepare a message in your browser. The website does not submit that message to a backend. If you choose Continue in WhatsApp, your prepared message is included in a WhatsApp link; review it there before sending. WhatsApp handles information under its own policies.",
+          body: "Enquiry forms record the details you submit so the team can respond. If you continue in WhatsApp, the prepared message is included in a WhatsApp link for you to review and send. WhatsApp handles information under its own policies.",
         },
         {
           title: "Accounts and payments",
-          body: "Account registration, sign-in and online ordering are not active in this milestone. Their form fields are disabled. This website does not currently collect account passwords, payment-card details or delivery addresses.",
+          body: "Clerk provides account registration and sign-in. Orders store your name, contact details, delivery address and selected books in Supabase so the team can fulfil them. Reviews store your displayed name, rating and comment for moderation. Online card payments are not enabled; this website does not collect card details.",
         },
         {
           title: "Browsing and hosting",
-          body: "Images and fonts are served by this website. No advertising or analytics tracker is configured in the application. The hosting service may process technical request information, such as IP addresses and request logs, to deliver and protect the website.",
+          body: "Images are served by the website and Supabase storage, and fonts are served by the website. Hosting and authentication services may process technical request information to deliver and protect these services.",
         },
         {
           title: "External services",
@@ -32,9 +33,13 @@ export default function Page() {
         },
         {
           title: "Future services and questions",
-          body: "This information will need to be updated before accounts, orders, payments or other data-processing services are activated. Contact our team with questions about the current website.",
+          body: "Contact the team with questions about your account, orders, enquiries or published reviews, or to request help correcting your details.",
         },
       ]}
     />
   );
+}
+
+export default function PublishedPage() {
+  return <CmsPage path="/privacy"><Page /></CmsPage>;
 }

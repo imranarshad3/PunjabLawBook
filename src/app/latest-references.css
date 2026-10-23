@@ -117,7 +117,7 @@
       #f7eddb 67%,
       #f7eddb 100%
     ),
-    url("/images/exam-library-edge.webp") left center/auto 100% no-repeat;
+    var(--site-images-exam-library-edge-webp, url("/images/exam-library-edge.webp")) var(--site-images-exam-library-edge-webp-position, left center)/var(--site-images-exam-library-edge-webp-size, auto 100%) no-repeat;
   overflow: hidden;
 }
 .exam-final .exam-grid {
@@ -244,7 +244,7 @@
   border-radius: 0;
   background:
     linear-gradient(#f7eddb 35%, #f7eddbc9),
-    url("/images/exam-courthouse.webp") bottom right/100% auto no-repeat;
+    var(--site-images-exam-courthouse-webp, url("/images/exam-courthouse.webp")) var(--site-images-exam-courthouse-webp-position, bottom right)/var(--site-images-exam-courthouse-webp-size, 100% auto) no-repeat;
   padding: 55px 0 75px 25px;
   position: relative;
 }
@@ -561,7 +561,7 @@
     padding: 35px 22px 55px;
     background:
       linear-gradient(#f7eddb 40%, #f7eddbdd),
-      url("/images/exam-courthouse.webp") bottom right/100% auto no-repeat;
+      var(--site-images-exam-courthouse-webp, url("/images/exam-courthouse.webp")) var(--site-images-exam-courthouse-webp-position, bottom right)/var(--site-images-exam-courthouse-webp-size, 100% auto) no-repeat;
   }
   .exam-final .exam-features .medallion {
     width: 58px;

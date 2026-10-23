@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { CatalogueProvider } from "@/components/catalogue-context";
+import { SiteImagesProvider } from "@/components/site-image";
+import { getSiteImages } from "@/lib/site-images";
 import { getCatalogue } from "@/lib/catalogue";
 import { siteUrl } from "@/lib/site";
 import { Inter, Playfair_Display } from "next/font/google";
@@ -55,7 +57,7 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const catalogue = await getCatalogue();
+  const [catalogue, images] = await Promise.all([getCatalogue(), getSiteImages()]);
   return (
     <ClerkProvider
       appearance={{
@@ -66,9 +68,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         },
       }}
     >
-      <html lang="en" className={`${serif.variable} ${sans.variable}`}>
+      <html lang="en" data-scroll-behavior="smooth" className={`${serif.variable} ${sans.variable}`}>
         <body>
-          <CatalogueProvider value={catalogue}>{children}</CatalogueProvider>
+          <SiteImagesProvider images={images}><CatalogueProvider value={catalogue}>{children}</CatalogueProvider></SiteImagesProvider>
         </body>
       </html>
     </ClerkProvider>

@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+import { createClerkSupabaseClient, supabase } from "./supabase";
 
 export type OrderCustomer = {
   full_name: string;
@@ -16,17 +16,24 @@ export type OrderCustomer = {
 export async function placeOrder(
   customer: OrderCustomer,
   items: { legacy_id: number; quantity: number }[],
-  clerkUserId?: string | null,
+  getToken?: () => Promise<string | null>,
 ) {
   if (!supabase) return { error: "Ordering is unavailable right now." };
-  const { data, error } = await supabase.rpc("place_order", {
+  const client = getToken ? createClerkSupabaseClient(getToken) : supabase;
+  if (!client) return { error: "Ordering is unavailable right now." };
+  try {
+  const { data, error } = await client.rpc("place_order", {
     p_customer: customer,
     p_items: items,
-    p_clerk_user_id: clerkUserId ?? null,
+    p_clerk_user_id: null,
   });
   if (error) return { error: error.message };
   const row = Array.isArray(data) ? data[0] : data;
-  return { orderNumber: row?.order_number as string, total: Number(row?.total) };
+  if (!row?.order_number || !Number.isFinite(Number(row.total))) return { error: "Order confirmation was unavailable. Please contact the store before trying again." };
+  return { orderNumber: row.order_number as string, total: Number(row.total) };
+  } catch {
+    return { error: "The order response could not be received. Contact the store to confirm whether it was placed before trying again." };
+  }
 }
 
 /**

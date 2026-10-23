@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Punjab Law Book House
 
-## Getting Started
+Next.js storefront and Clerk-protected administration for the book catalogue, galleries, moderated reviews, categories, orders, content and store settings. Orders use cash on delivery; an online payment gateway is not integrated.
 
-First, run the development server:
+## Run locally
 
-```bash
+Use Node 24 (`.nvmrc`); Next requires at least Node 20.9.
+
+```sh
+nvm use
+npm ci
+cp .env.example .env
+# Fill in the credentials in .env before starting.
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Validate and run a production build
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```sh
+npm run lint
+npm run typecheck
+npm run build
+npm start
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`npm start` serves the compiled production application on port 3000.
+`npm audit --omit=dev` checks the production dependencies separately from lint tooling.
 
-## Learn More
+## Production configuration
 
-To learn more about Next.js, take a look at the following resources:
+Set the environment variables in `.env.example` on the deployment host before building. Use the public HTTPS domain for `NEXT_PUBLIC_SITE_URL`, Clerk production credentials, and the production Clerk hostname for `NEXT_PUBLIC_CLERK_DOMAIN` so the Content Security Policy allows it. Keep `CLERK_SECRET_KEY` and `SUPABASE_DB_URL` server-side.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The Supabase project must accept Clerk session tokens as a third-party auth provider. Staff need a matching `admin_members.clerk_user_id` record; customer order access is scoped to the verified Clerk identity. The `media` storage bucket uses public reads and admin-only uploads.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Apply only migrations not already present in the target database. The gallery/review and atomic gallery replacement migrations have been applied to PunjabBooks. `db:apply` is a bootstrap helper, not an incremental production migration ledger; do not replay it blindly against an existing store.
 
-## Deploy on Vercel
+## Content publishing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Website Content manages shared image placements, homepage hero banners, Featured Books/Bestsellers headings and visibility, and the About, Contact, Request a Book, Delivery, Returns, Help, Privacy and Terms pages. Published plain-text page content replaces the default page; leaving it empty or keeping it as a draft retains the default template. Refresh an already-open storefront tab after publishing. Admin saves invalidate the shared catalogue/content cache.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Database verification
+
+`scripts/check-store-integrity.sql` checks gallery atomicity, review moderation isolation, public review visibility, category deletion protection and checkout stock/totals. Run it as the database owner in the Supabase SQL editor. It wraps the checks in a transaction and rolls back fixture rows. Generated sequence values can still advance.
+
+Before launch, verify the configured domain, Clerk production sign-in, an actual delivery contact and the host’s production environment. No deployment is performed by the build command.

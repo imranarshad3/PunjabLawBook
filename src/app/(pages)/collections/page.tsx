@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import Image from "@/components/site-image";
 import Link from "next/link";
 import { PageIntro } from "@/components/page-intro";
 import { Icon } from "@/components/ui";
@@ -64,7 +64,7 @@ export default async function CollectionsPage() {
             >
               <div className="collection-directory-photo">
                 <Image
-                  src={`/images/${copy[category].image}.webp`}
+                  src={`/images/${(copy[category] ?? { image: "category-1" }).image}.webp`}
                   alt={`${category} collection`}
                   fill
                   sizes="(max-width:480px) 90vw, (max-width:800px) 45vw, 30vw"
@@ -76,7 +76,10 @@ export default async function CollectionsPage() {
                   SELECTED TITLES
                 </p>
                 <h2>{category}</h2>
-                <p>{copy[category].description}</p>
+                <p>
+                  {copy[category]?.description ??
+                    `Explore books and references in ${category.toLowerCase()}.`}
+                </p>
                 <span>
                   Explore collection <Icon name="arrow" />
                 </span>

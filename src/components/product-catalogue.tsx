@@ -10,10 +10,16 @@ import { useCatalogue } from "./catalogue-context";
 export function ProductCatalogue({
   initialQuery,
   initialCategory,
+  initialPrice = 5000,
+  initialSort = "featured",
+  initialStock = false,
   collection,
 }: {
   initialQuery: string;
   initialCategory: string;
+  initialPrice?: number;
+  initialSort?: string;
+  initialStock?: boolean;
   collection?: string;
 }) {
   const { products, categories, collections } = useCatalogue();
@@ -25,10 +31,41 @@ export function ProductCatalogue({
   const [category, setCategory] = useState(
     categories.includes(initialCategory) ? initialCategory : "All books",
   );
-  const [price, setPrice] = useState(5000);
-  const [sort, setSort] = useState("featured");
-  const [stock, setStock] = useState(false);
+  const [price, setPrice] = useState(initialPrice);
+  const [sort, setSort] = useState(initialSort);
+  const [stock, setStock] = useState(initialStock);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const updateUrl = (changes: Record<string, string | null>) => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    for (const [key, value] of Object.entries(changes)) {
+      if (value === null) params.delete(key);
+      else params.set(key, value);
+    }
+    const query = params.toString();
+    const nextUrl = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`;
+    window.history.replaceState(null, "", nextUrl);
+  };
+  const changeQuery = (value: string) => {
+    setQuery(value);
+    updateUrl({ q: value.trim() ? value : null });
+  };
+  const changeCategory = (value: string) => {
+    setCategory(value);
+    updateUrl({ category: value === "All books" ? null : value });
+  };
+  const changePrice = (value: number) => {
+    setPrice(value);
+    updateUrl({ maxPrice: value >= 5000 ? null : String(value) });
+  };
+  const changeStock = (value: boolean) => {
+    setStock(value);
+    updateUrl({ stock: value ? "1" : null });
+  };
+  const changeSort = (value: string) => {
+    setSort(value);
+    updateUrl({ sort: value === "featured" ? null : value });
+  };
   const filtered = selectedProducts.filter(
     (book) =>
       (category === "All books" || book.category === category) &&
@@ -43,10 +80,11 @@ export function ProductCatalogue({
   if (sort === "title")
     filtered.sort((a, b) => titleFor(a).localeCompare(titleFor(b)));
   const reset = () => {
-    setQuery("");
-    setCategory("All books");
-    setPrice(5000);
-    setStock(false);
+    changeQuery("");
+    changeCategory("All books");
+    changePrice(5000);
+    changeStock(false);
+    changeSort("featured");
   };
   return (
     <main id="main" className="products-page">
@@ -92,7 +130,7 @@ export function ProductCatalogue({
             <Icon name="truck" /> Delivery across Pakistan
           </span>
           <span>
-            <Icon name="chat" /> Personal book assistance
+            <Icon name="whatsapp" /> Personal book assistance
           </span>
         </div>
       </div>
@@ -140,7 +178,7 @@ export function ProductCatalogue({
                     type="radio"
                     name="category"
                     checked={category === item}
-                    onChange={() => setCategory(item)}
+                    onChange={() => changeCategory(item)}
                   />
                   <span>{item}</span>
                   <small>
@@ -165,7 +203,7 @@ export function ProductCatalogue({
                 max="5000"
                 step="50"
                 value={price}
-                onChange={(event) => setPrice(Number(event.target.value))}
+                onChange={(event) => changePrice(Number(event.target.value))}
               />
               <div className="range-labels">
                 <span>Rs. 250</span>
@@ -177,7 +215,7 @@ export function ProductCatalogue({
                     key={budget}
                     type="button"
                     aria-pressed={price === budget}
-                    onClick={() => setPrice(budget)}
+                    onClick={() => changePrice(budget)}
                   >
                     {budget === 5000
                       ? "Any price"
@@ -192,13 +230,13 @@ export function ProductCatalogue({
                 <input
                   type="checkbox"
                   checked={stock}
-                  onChange={(event) => setStock(event.target.checked)}
+                  onChange={(event) => changeStock(event.target.checked)}
                 />
                 In-stock books only
               </label>
             </fieldset>
             <div className="book-concierge">
-              <Icon name="chat" />
+              <Icon name="whatsapp" />
               <h3>
                 A particular book
                 <br />
@@ -207,7 +245,7 @@ export function ProductCatalogue({
               <p>
                 Let us help you find the right reference for your bookshelf.
               </p>
-              <a href="https://wa.me/923080060188">
+              <a href="https://wa.me/923334222005">
                 Ask our team <Icon name="arrow" />
               </a>
             </div>
@@ -219,10 +257,10 @@ export function ProductCatalogue({
                 aria-label="Search this collection"
                 placeholder="Search by title, author or subject…"
                 value={query}
-                onChange={(event) => setQuery(event.target.value)}
+                onChange={(event) => changeQuery(event.target.value)}
               />
               {query && (
-                <button onClick={() => setQuery("")} aria-label="Clear search">
+                <button onClick={() => changeQuery("")} aria-label="Clear search">
                   ×
                 </button>
               )}
@@ -232,12 +270,12 @@ export function ProductCatalogue({
                 Showing <strong>{filtered.length}</strong> of{" "}
                 {selectedProducts.length} books
               </p>
-              <SortDropdown value={sort} onChange={setSort} />
+              <SortDropdown value={sort} onChange={changeSort} />
             </div>
             {category !== "All books" && (
               <button
                 className="active-filter"
-                onClick={() => setCategory("All books")}
+                onClick={() => changeCategory("All books")}
               >
                 {category} <span aria-label="Remove category filter">×</span>
               </button>
@@ -246,20 +284,20 @@ export function ProductCatalogue({
               {price < 5000 && (
                 <button
                   className="active-filter"
-                  onClick={() => setPrice(5000)}
+                  onClick={() => changePrice(5000)}
                 >
                   Up to Rs. {price.toLocaleString("en-PK")} <span>×</span>
                 </button>
               )}
               {query && (
-                <button className="active-filter" onClick={() => setQuery("")}>
+                <button className="active-filter" onClick={() => changeQuery("")}>
                   Search: {query} <span>×</span>
                 </button>
               )}
               {stock && (
                 <button
                   className="active-filter"
-                  onClick={() => setStock(false)}
+                  onClick={() => changeStock(false)}
                 >
                   In stock <span>×</span>
                 </button>
@@ -288,8 +326,7 @@ export function ProductCatalogue({
               </div>
             )}
             <p className="shop-catalogue-note">
-              A selection from our catalogue. Online ordering will open in the
-              next milestone.
+              Order from the live catalogue with cash on delivery. Delivery details are confirmed by the team.
             </p>
           </div>
         </div>
@@ -303,7 +340,7 @@ export function ProductCatalogue({
             library.
           </p>
         </div>
-        <a className="button button-gold" href="https://wa.me/923080060188">
+        <a className="button button-gold" href="https://wa.me/923334222005">
           Let’s talk books <Icon name="arrow" />
         </a>
       </section>

@@ -118,7 +118,7 @@ export function EnquiryForm({ request = false }: { request?: boolean }) {
           </p>
           <a
             className="button button-gold"
-            href={`https://wa.me/923080060188?text=${encodeURIComponent(message)}`}
+            href={`https://wa.me/923334222005?text=${encodeURIComponent(message)}`}
             target="_blank"
             rel="noreferrer"
           >

@@ -1,18 +1,19 @@
+import { CmsPage } from "@/components/cms-page";
 import type { Metadata } from "next";
 import { InformationPage } from "@/components/information-page";
 export const metadata: Metadata = {
   title: "Delivery Information | Punjab Law Book House",
 };
-export default function Page() {
+function Page() {
   return (
     <InformationPage
       title="From our shelf."
       accent="To your next chapter."
-      intro="We serve readers across Pakistan. Here is what to know while online ordering is being prepared."
+      intro="We serve readers across Pakistan. Here is what to know when ordering your next books."
       sections={[
         {
           title: "Delivery across Pakistan",
-          body: "Contact the team with your location and the titles you need to discuss delivery options. This frontend does not currently accept delivery bookings or online orders.",
+          body: "Add books to your bag and enter your name, phone number, city and address at checkout. The team will confirm your order and delivery arrangements by phone before dispatch.",
         },
         {
           title: "Charges and timing",
@@ -20,7 +21,7 @@ export default function Page() {
         },
         {
           title: "Your delivery details",
-          body: "The checkout page includes a preview of the delivery form. Its fields remain inactive until secure ordering is connected; delivery addresses are not collected by this website yet.",
+          body: "Check your phone number, address and city carefully at checkout. Sign in before placing your order to see its details and progress in your account.",
         },
         {
           title: "A question before your next order?",
@@ -29,4 +30,8 @@ export default function Page() {
       ]}
     />
   );
+}
+
+export default function PublishedPage() {
+  return <CmsPage path="/delivery"><Page /></CmsPage>;
 }

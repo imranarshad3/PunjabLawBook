@@ -101,7 +101,7 @@
   padding: 56px 0 58px;
   background:
     linear-gradient(90deg, #faf7f1 35%, #faf7f100 75%) top/100% 285px no-repeat,
-    url("/images/bestsellers-new.webp") top right/auto 270px no-repeat,
+    var(--site-images-bestsellers-new-webp, url("/images/bestsellers-new.webp")) var(--site-images-bestsellers-new-webp-position, top right)/var(--site-images-bestsellers-new-webp-size, auto 270px) no-repeat,
     #faf7f1;
 }
 .bestsellers-heading {
@@ -447,7 +447,7 @@
   .bestsellers-redesign {
     background:
       linear-gradient(90deg, #faf7f1f7, #faf7f1ce) top/100% 285px no-repeat,
-      url("/images/bestsellers-new.webp") right top/auto 270px no-repeat,
+      var(--site-images-bestsellers-new-webp, url("/images/bestsellers-new.webp")) var(--site-images-bestsellers-new-webp-position, right top)/var(--site-images-bestsellers-new-webp-size, auto 270px) no-repeat,
       #faf7f1;
   }
   .bestsellers-heading h2 {

@@ -139,7 +139,7 @@ export function RecordsPanel({
   const schema = schemas[view];
   if (!schema) return null;
   return (
-    <section className="plbh-admin-panel">
+    <section className={`plbh-admin-panel${view === "Team & Access" ? " plbh-admin-team-panel" : ""}`}>
       <div className="plbh-admin-panel-heading">
         <div>
           <h2>

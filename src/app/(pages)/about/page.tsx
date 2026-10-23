@@ -1,5 +1,6 @@
+import { CmsPage } from "@/components/cms-page";
 import type { Metadata } from "next";
-import Image from "next/image";
+import Image from "@/components/site-image";
 import Link from "next/link";
 import { PageIntro } from "@/components/page-intro";
 import { Icon, type IconName } from "@/components/ui";
@@ -23,7 +24,7 @@ const values: { icon: IconName; title: string; copy: string }[] = [
     copy: "Resources for students, advocates, educators, chambers and institutional libraries.",
   },
 ];
-export default function AboutPage() {
+function AboutPage() {
   return (
     <main id="main" className="inner-page">
       <PageIntro
@@ -123,4 +124,8 @@ export default function AboutPage() {
       </section>
     </main>
   );
+}
+
+export default function PublishedPage() {
+  return <CmsPage path="/about"><AboutPage /></CmsPage>;
 }

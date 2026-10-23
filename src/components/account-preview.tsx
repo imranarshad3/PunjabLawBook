@@ -32,7 +32,10 @@ export function AccountPreview({
   // It carries the (already verified) email address, so neither flow asks for
   // one: a new recipient only chooses a password, and a recipient who already
   // has an account is signed straight in.
-  const ticket = useSearchParams().get("__clerk_ticket");
+  const searchParams = useSearchParams();
+  const ticket = searchParams.get("__clerk_ticket");
+  const requestedReturn = searchParams.get("redirect_url") || "/account";
+  const returnTo = requestedReturn.startsWith("/") && !requestedReturn.startsWith("//") ? requestedReturn : "/account";
   const { isLoaded: userLoaded, isSignedIn, user } = useUser();
   const { signOut } = useClerk();
   const { signIn } = useSignIn();
@@ -62,27 +65,27 @@ export function AccountPreview({
         const verified = await signUp.verifications.verifyEmailCode({ code });
         if (verified.error) return setError(readError(verified.error as MaybeClerkError));
         await signUp.finalize();
-        router.push("/account");
+        router.push(returnTo);
       } else if (awaitingCode && reset) {
         const verified = await signIn.resetPasswordEmailCode.verifyCode({ code });
         if (verified.error) return setError(readError(verified.error as MaybeClerkError));
         const changed = await signIn.resetPasswordEmailCode.submitPassword({ password });
         if (changed.error) return setError(readError(changed.error as MaybeClerkError));
         await signIn.finalize();
-        router.push("/account");
+        router.push(returnTo);
       }
       // ---------------------------------------------------- first steps
       else if (signin && ticket) {
         const accepted = await signIn.ticket({ ticket });
         if (accepted.error) return setError(readError(accepted.error as MaybeClerkError));
         await signIn.finalize();
-        router.push("/account");
+        router.push(returnTo);
       } else if (signin) {
         if (!email.trim()) return setError("Enter the email address you signed up with.");
         const attempt = await signIn.password({ identifier: email, password });
         if (attempt.error) return setError(readError(attempt.error as MaybeClerkError));
         await signIn.finalize();
-        router.push("/account");
+        router.push(returnTo);
       } else if (reset) {
         if (!email.trim()) return setError("Enter the email address you signed up with.");
         const created = await signIn.create({ identifier: email });
@@ -101,7 +104,7 @@ export function AccountPreview({
           const accepted = await signUp.create({ strategy: "ticket", ticket, password, ...names });
           if (accepted.error) return setError(readError(accepted.error as MaybeClerkError));
           await signUp.finalize();
-          router.push("/account");
+          router.push(returnTo);
           return;
         }
         const created = await signUp.create({ emailAddress: email, password, ...names });

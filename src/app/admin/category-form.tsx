@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Glyph } from "./icons";
@@ -14,16 +13,15 @@ import { useAdminData } from "./use-admin-data";
 const slugify = (value: string) =>
   value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80);
 
-/** Illustrations shipped with the Categories design, selectable as the icon. */
-const artwork = [
-  ["educational", "Educational"],
-  ["fiction", "Fiction"],
-  ["islamic", "Islamic"],
-  ["children", "Children"],
-  ["self-help", "Self Help"],
-  ["academic", "Academic"],
-  ["science", "Science"],
-  ["history", "History"],
+const categoryIcons = [
+  ["book", "Books"],
+  ["scale", "Scales of justice"],
+  ["gavel", "Gavel"],
+  ["landmark", "Courts"],
+  ["shield", "Legal protection"],
+  ["briefcase", "Practice"],
+  ["graduation", "Study"],
+  ["scroll", "Legal text"],
 ] as const;
 
 export function CategoryForm({ categoryId }: { categoryId?: string }) {
@@ -34,23 +32,39 @@ export function CategoryForm({ categoryId }: { categoryId?: string }) {
     ? (data.categoryRows.find((row) => row.id === categoryId) as Record<string, unknown> | undefined)
     : undefined;
 
-  const [name, setName] = useState("");
-  const [slug, setSlug] = useState("");
-  const [description, setDescription] = useState("");
-  const [sortOrder, setSortOrder] = useState("");
-  const [icon, setIcon] = useState("");
+  if (editing && data.loading) {
+    return <AdminShell view="Categories" title="Loading category…" subtitle="Fetching category details."><p className="plbh-admin-empty">Loading category details…</p></AdminShell>;
+  }
+  if (editing && !data.loading && !existing) {
+    return <AdminShell view="Categories" title="Category not found" subtitle="This category may have been removed or you may not have access."><div className="plbh-admin-form-actions"><button className="plbh-admin-button" onClick={() => router.push("/admin/categories")}>Back to categories</button></div></AdminShell>;
+  }
+
+  return <CategoryEditor
+    key={categoryId ?? "new"}
+    categoryId={categoryId}
+    initialCategory={existing}
+    saveRecord={data.save}
+    orderBadge={data.orders.filter((order) => order.status === "pending").length}
+    enquiryBadge={data.enquiries.filter((enquiry) => enquiry.status === "new").length}
+  />;
+}
+
+function CategoryEditor({ categoryId, initialCategory, saveRecord, orderBadge, enquiryBadge }: {
+  categoryId?: string;
+  initialCategory?: Record<string, unknown>;
+  saveRecord: (table: string, values: Record<string, unknown>, id?: string) => Promise<string>;
+  orderBadge: number;
+  enquiryBadge: number;
+}) {
+  const router = useRouter();
+  const editing = Boolean(categoryId);
+  const [name, setName] = useState(() => String(initialCategory?.name ?? ""));
+  const [slug, setSlug] = useState(() => String(initialCategory?.slug ?? ""));
+  const [description, setDescription] = useState(() => String(initialCategory?.description ?? ""));
+  const [sortOrder, setSortOrder] = useState(() => initialCategory?.sort_order === undefined ? "" : String(initialCategory.sort_order));
+  const [icon, setIcon] = useState(() => String(initialCategory?.icon ?? ""));
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const [loaded, setLoaded] = useState(false);
-
-  if (editing && existing && !loaded) {
-    setLoaded(true);
-    setName(String(existing.name ?? ""));
-    setSlug(String(existing.slug ?? ""));
-    setDescription(String(existing.description ?? ""));
-    setSortOrder(existing.sort_order === undefined ? "" : String(existing.sort_order));
-    setIcon(String(existing.icon ?? ""));
-  }
 
   async function save() {
     setError("");
@@ -59,7 +73,7 @@ export function CategoryForm({ categoryId }: { categoryId?: string }) {
       return;
     }
     setSaving(true);
-    const failure = await data.save(
+    const failure = await saveRecord(
       "categories",
       {
         name: name.trim(),
@@ -92,8 +106,8 @@ export function CategoryForm({ categoryId }: { categoryId?: string }) {
         { label: editing ? "Edit" : "Add New Category" },
       ]}
       banner="/images/admin/banner-categories.webp"
-      orderBadge={data.orders.filter((order) => order.status === "pending").length}
-      enquiryBadge={data.enquiries.filter((enquiry) => enquiry.status === "new").length}
+      orderBadge={orderBadge}
+      enquiryBadge={enquiryBadge}
     >
       <div className="plbh-admin-form-layout plbh-admin-form-layout-narrow">
         <section className="plbh-admin-panel plbh-admin-form-panel">
@@ -165,21 +179,13 @@ export function CategoryForm({ categoryId }: { categoryId?: string }) {
           </div>
 
           <fieldset className="plbh-admin-icon-picker">
-            <legend className="plbh-admin-field-label">Card illustration</legend>
-            <p className="plbh-admin-field-hint">
-              These eight came with the approved Categories design. Pick the closest, or leave it unset
-              for the plain gold mark.
-            </p>
+            <legend className="plbh-admin-field-label">Category icon</legend>
+            <p className="plbh-admin-field-hint">Choose the symbol shown on this category tile.</p>
             <div>
-              <label className={icon === "" ? "is-active" : ""}>
-                <input type="radio" name="icon" value="" checked={icon === ""} onChange={() => setIcon("")} className="plbh-admin-visually-hidden" />
-                <span className="plbh-admin-icon-none"><Glyph name="book" size={28} /></span>
-                <small>None</small>
-              </label>
-              {artwork.map(([key, label]) => (
+              {categoryIcons.map(([key, label]) => (
                 <label key={key} className={icon === key ? "is-active" : ""}>
                   <input type="radio" name="icon" value={key} checked={icon === key} onChange={() => setIcon(key)} className="plbh-admin-visually-hidden" />
-                  <Image src={`/images/admin/category-${key}.webp`} alt="" width={96} height={96} />
+                  <span className="plbh-admin-icon-none"><Glyph name={key} size={28} /></span>
                   <small>{label}</small>
                 </label>
               ))}

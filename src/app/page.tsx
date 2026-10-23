@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image from "@/components/site-image";
 import Link from "next/link";
 import { BookCarousel } from "@/components/book-carousel";
 import { SiteHeader, SiteFooter } from "@/components/site-shell";
@@ -6,6 +6,7 @@ import { BookCard, ShowcaseCard } from "@/components/book-card";
 import { Button, Icon, SectionHeading, type IconName } from "@/components/ui";
 import { Newsletter } from "@/components/store-interactions";
 import { getCatalogue } from "@/lib/catalogue";
+import { getHomepageBanner } from "@/lib/content-pages";
 
 // Premium concept shots built from PLBH_20_Premium_Law_Book_Images by
 // scripts/make-premium-shots.py.
@@ -133,8 +134,9 @@ const features: { icon: IconName; title: string; description: string }[] = [
 ];
 
 export default async function Home() {
-  const catalogue = await getCatalogue();
-  const exam = catalogue.featured.find((book) => book.id === 5966)!;
+  const [catalogue, banner] = await Promise.all([getCatalogue(), getHomepageBanner()]);
+  const bannerLink = typeof banner?.link_url === "string" && (/^\/(?!\/)/.test(banner.link_url) || banner.link_url.startsWith("https://")) ? banner.link_url : "/products";
+  const exam = catalogue.products.find((book) => book.id === 5966);
   return (
     <>
       <Link className="skip-link" href="#main">
@@ -149,7 +151,7 @@ export default async function Home() {
         >
           <Image
             className="hero-art"
-            src="/images/hero-library.webp"
+            src={banner?.image_url || "/images/hero-library.webp"}
             alt=""
             fill
             sizes="100vw"
@@ -159,21 +161,20 @@ export default async function Home() {
           <div className="container hero-content">
             <p className="eyebrow">Knowledge builds a fairer Pakistan</p>
             <h1 id="hero-title">
-              Pakistan’s
+              {banner?.title || <>Pakistan’s
               <br />
               Home for
               <br />
-              <span>Authentic Law Books</span>
+              <span>Authentic Law Books</span></>}
             </h1>
             <p className="hero-description">
-              Law books, exam guides, bare acts and professional resources.
-              Discover the knowledge to support your next chapter.
+              {banner?.subtitle || "Law books, exam guides, bare acts and professional resources. Discover the knowledge to support your next chapter."}
             </p>
             <div className="hero-buttons">
-              <Button href="/products" variant="gold">
+              <Button href={bannerLink} variant="gold">
                 Shop All Books
               </Button>
-              <Button href="#exams" variant="outline">
+              <Button href={exam ? "#exams" : "/collections/exam-guides"} variant="outline">
                 Explore Exam Guides
               </Button>
             </div>
@@ -289,6 +290,7 @@ export default async function Home() {
         </section>
         <section
           id="featured"
+          hidden={catalogue.sections.featured?.active === false}
           className="featured-section"
           data-section="06-featured"
         >
@@ -308,7 +310,7 @@ export default async function Home() {
           </div>
           <div className="container collection-content">
             <div className="collection-heading">
-              <h2>Featured Books</h2>
+              <div><h2>{catalogue.sections.featured?.title || "Featured Books"}</h2>{catalogue.sections.featured?.subtitle && <p>{catalogue.sections.featured.subtitle}</p>}</div>
               <Link className="text-link" href="/products">
                 View All Books <Icon name="arrow" />
               </Link>
@@ -331,6 +333,7 @@ export default async function Home() {
         </section>
         <section
           id="bestsellers"
+          hidden={catalogue.sections.bestsellers?.active === false}
           className="bestsellers-section bestsellers-redesign popular-final"
           data-section="07-bestsellers"
         >
@@ -339,13 +342,10 @@ export default async function Home() {
               <div className="bestsellers-heading">
                 <p className="eyebrow">Bestsellers</p>
                 <h2>
-                  Most Popular
-                  <br />
-                  Law Books
+                  {catalogue.sections.bestsellers?.title || "Most Popular Law Books"}
                 </h2>
                 <p>
-                  Explore popular legal titles for study, professional practice
-                  and judicial examination preparation.
+                  {catalogue.sections.bestsellers?.subtitle || "Explore popular legal titles for study, professional practice and judicial examination preparation."}
                 </p>
               </div>
               <div className="popular-editorial-banner">
@@ -401,7 +401,7 @@ export default async function Home() {
             </p>
           </div>
         </section>
-        <section
+        {exam && <section
           id="exams"
           className="exam-section exam-final"
           data-section="08-exams"
@@ -425,7 +425,7 @@ export default async function Home() {
                   Explore the Book
                 </Button>
                 <Button
-                  href={`https://wa.me/923080060188?text=${encodeURIComponent(`Hello, could you share sample pages of the Civil Judge-cum-Judicial Magistrate Guide 2026? Catalogue no. ${exam.id}`)}`}
+                  href={`https://wa.me/923334222005?text=${encodeURIComponent(`Hello, could you share sample pages of the Civil Judge-cum-Judicial Magistrate Guide 2026? Catalogue no. ${exam.id}`)}`}
                   variant="outline"
                 >
                   Request Sample Pages
@@ -487,7 +487,7 @@ export default async function Home() {
               ))}
             </div>
           </div>
-        </section>
+        </section>}
         <section
           id="about"
           className="why-section why-redesign"
@@ -549,7 +549,7 @@ export default async function Home() {
                     icon: "chat" as const,
                     title: "Personal Support",
                     text: "Speak with the bookshop for help finding your next legal resource.",
-                    href: "https://wa.me/923080060188",
+                    href: "https://wa.me/923334222005",
                   },
                 ].map((item) => (
                   <Link

@@ -1,3 +1,4 @@
+import { CmsPage } from "@/components/cms-page";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageIntro } from "@/components/page-intro";
@@ -6,7 +7,7 @@ import { EnquiryForm } from "@/components/enquiry-form";
 export const metadata: Metadata = {
   title: "Contact & Visit Us | Punjab Law Book House",
 };
-export default function ContactPage() {
+function ContactPage() {
   return (
     <main id="main" className="inner-page">
       <PageIntro
@@ -28,11 +29,11 @@ export default function ContactPage() {
             its name, author or a link so we can help.
           </p>
           <div className="contact-method">
-            <Icon name="chat" />
+            <Icon name="whatsapp" />
             <div>
               <h3>Message us</h3>
               <p>Book enquiries and order assistance</p>
-              <a href="https://wa.me/923080060188">
+              <a href="https://wa.me/923334222005">
                 Chat on WhatsApp <Icon name="arrow" />
               </a>
             </div>
@@ -41,17 +42,17 @@ export default function ContactPage() {
             <Icon name="phone" />
             <div>
               <h3>Give us a call</h3>
-              <a href="tel:+923080060188">+92 308 0060188</a>
-              <a href="tel:+924237242304">+92 42 37242304</a>
+              <a href="tel:+923334222005">+92 333 4222005</a>
             </div>
           </div>
           <div className="contact-method">
             <Icon name="mail" />
             <div>
               <h3>Write to us</h3>
-              <a href="/contact">Contact our team</a>
+              <a href="mailto:civilcriminallawbook@gmail.com">civilcriminallawbook@gmail.com</a>
             </div>
           </div>
+          <div className="contact-method"><Icon name="chat" /><div><h3>Messenger</h3><p>KLR Law Publishers</p></div></div>
         </div>
         <EnquiryForm />
       </section>
@@ -98,4 +99,8 @@ export default function ContactPage() {
       </div>
     </main>
   );
+}
+
+export default function PublishedPage() {
+  return <CmsPage path="/contact"><ContactPage /></CmsPage>;
 }

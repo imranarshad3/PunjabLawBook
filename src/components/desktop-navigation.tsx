@@ -110,7 +110,7 @@ export function DesktopNavigation() {
           </div>
         )}
       </div>
-      <Link href="/products?category=Exam+Guides">Exam Guides</Link>
+      <Link href="/collections/exam-guides">Exam Guides</Link>
       <Link href="/#bestsellers">Bestsellers</Link>
       <Link href="/about">Our Story</Link>
     </nav>

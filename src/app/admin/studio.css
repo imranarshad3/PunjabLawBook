@@ -11,34 +11,34 @@
    ========================================================================= */
 
 .plbh-admin-app {
-  --s-forest: #0f2f23;
-  --s-forest-lift: #2a4b3e;
-  --s-green: #0f3a2a;
-  --s-green-dark: #0a2a1e;
-  --s-green-tint: #e7f1ea;
+  --s-forest: #10382a;
+  --s-forest-lift: #214c39;
+  --s-green: #164633;
+  --s-green-dark: #0f3426;
+  --s-green-tint: #e8f1e8;
 
-  --s-gold: #c9a227;
-  --s-gold-rail: #dfbb77;
-  --s-gold-soft: #f6eed9;
-  --s-gold-text: #8a6a1a;
+  --s-gold: #c19a58;
+  --s-gold-rail: #d9b674;
+  --s-gold-soft: #f5efdf;
+  --s-gold-text: #765d2e;
 
-  --s-ink: #1a2420;
-  --s-ink-2: #3f4a45;
-  --s-muted: #6d7873;
-  --s-faint: #98a19c;
+  --s-ink: #1b2922;
+  --s-ink-2: #405147;
+  --s-muted: #53645a;
+  --s-faint: #6c7a71;
 
-  --s-canvas: #f9f7f2;
-  --s-surface: #fdfcfa;
-  --s-band: #f3ebde;
-  --s-rail: #f3f2ee;
-  --s-line: #ece9e2;
-  --s-line-soft: #f2f1eb;
+  --s-canvas: #f4f5f1;
+  --s-surface: #fffefa;
+  --s-band: #f5f0e4;
+  --s-rail: #f1f3ee;
+  --s-line: #dfe5dd;
+  --s-line-soft: #e9ede7;
 
-  --s-ok: #1f7a44;      --s-ok-bg: #d8f1dc;
-  --s-info: #2563a8;    --s-info-bg: #dfeffe;
-  --s-warn: #9a6b16;    --s-warn-bg: #feefcf;
-  --s-bad: #c0392f;     --s-bad-bg: #fedddc;
-  --s-off: #6d7873;     --s-off-bg: #f0efeb;
+  --s-ok: #1d643e;      --s-ok-bg: #e7f2e8;
+  --s-info: #345c49;    --s-info-bg: #e7f0e9;
+  --s-warn: #805719;    --s-warn-bg: #f7efd9;
+  --s-bad: #943e34;     --s-bad-bg: #f8e9e6;
+  --s-off: #53625a;     --s-off-bg: #edf0eb;
 
   /* Row-action tiles (sampled from the reference pages). */
   --s-btn-face: #fcfbf8;
@@ -46,7 +46,7 @@
   --s-icon-ink: #121a22;
   --s-danger-icon: #e5241f;
   --s-danger-face: #feeeee;
-  --s-violet: #6b4ea8;  --s-violet-bg: #ece7fa;
+  --s-violet: #506a59;  --s-violet-bg: #e8efe8;
 
   --s-r-card: 0.875rem;
   --s-r-ctl: 0.625rem;
@@ -407,9 +407,19 @@
   gap: 0.5rem;
   font-size: 0.8125rem;
   color: var(--s-muted);
-  margin-bottom: 0.375rem;
+  margin-bottom: 0.75rem;
+  min-height: 1.5rem;
+  flex-wrap: wrap;
+  line-height: 1.5;
 }
-.plbh-admin-app .plbh-admin-crumbs a { color: var(--s-muted); display: inline-flex; }
+.plbh-admin-app .plbh-admin-crumbs > .plbh-admin-crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.plbh-admin-app .plbh-admin-crumbs svg { display: block; flex-shrink: 0; }
+.plbh-admin-app .plbh-admin-crumbs a { color: var(--s-muted); display: inline-flex; align-items: center; }
 .plbh-admin-app .plbh-admin-crumbs a:hover { color: var(--s-green); }
 .plbh-admin-app .plbh-admin-crumbs span { color: var(--s-ink-2); font-weight: 500; }
 
@@ -1068,6 +1078,10 @@
 }
 .plbh-admin-app .plbh-admin-gallery-add:hover { border-color: var(--s-green); color: var(--s-green); }
 .plbh-admin-app .plbh-admin-gallery-add small { font-size: 0.6875rem; }
+.plbh-admin-app .plbh-admin-gallery-editor { grid-column: 1 / -1; border: 1px solid var(--s-line); border-radius: var(--s-r-md); padding: 1.125rem; background: #fffefa; }
+.plbh-admin-app .plbh-admin-gallery-editor > div:first-child strong { color: var(--s-ink); font-size: 0.9375rem; }
+.plbh-admin-app .plbh-admin-gallery-editor > div:first-child p { margin: 0.35rem 0 0; color: var(--s-muted); font-size: 0.8125rem; line-height: 1.5; }
+.plbh-admin-app .plbh-admin-gallery-editor .plbh-admin-gallery { margin-top: 1rem; }
 .plbh-admin-app .plbh-admin-gallery-item { position: relative; width: 5.5rem; height: 5.5rem; }
 .plbh-admin-app .plbh-admin-gallery-item img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--s-r-ctl); }
 .plbh-admin-app .plbh-admin-gallery-item button {
@@ -1287,4 +1301,392 @@
 @media (max-width: 40rem) {
   .plbh-invite-list li { grid-template-columns: 1fr auto; row-gap: 0.375rem; }
   .plbh-invite-date { grid-column: 1 / -1; }
+}
+
+/* Velto-inspired workspace: clear headings, quiet surfaces and compact chrome. */
+.plbh-admin-app { --s-canvas: #f5f6f3; --s-surface: #fff; --s-line: #e4e8e1; }
+.plbh-admin-app .plbh-admin-page-heading { background: transparent; border-bottom: 1px solid var(--s-line); border-radius: 0; box-shadow: none; min-height: 0; padding: 24px 0 28px; margin-bottom: 24px; }
+.plbh-admin-app .plbh-admin-page-heading::before, .plbh-admin-app .plbh-admin-page-heading::after { display: none; }
+.plbh-admin-app .plbh-admin-page-heading h1 { font-size: clamp(28px, 3vw, 40px); letter-spacing: -.035em; }
+.plbh-admin-app .plbh-admin-rule { display: none; }
+.plbh-admin-app .plbh-admin-topbar { background: #ffffffed; border-bottom: 1px solid var(--s-line); box-shadow: none; }
+.plbh-admin-app .plbh-admin-panel { border: 1px solid var(--s-line); box-shadow: 0 3px 14px #173c3004; }
+.plbh-admin-app .plbh-admin-sidebar nav a { border-radius: 8px; margin: 3px 12px; }
+.plbh-admin-app .plbh-admin-sidebar nav a.active { background: #ffffff12; }
+.plbh-admin-app .plbh-admin-quote { display: none; }
+.plbh-admin-app :is(button,a,input,select):focus-visible { outline: 2px solid #b28a47; outline-offset: 3px; }
+
+.plbh-admin-quicklinks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 0 22px 22px; }
+.plbh-admin-quicklinks a { display: flex; align-items: center; gap: 12px; border: 1px solid var(--s-line); border-radius: 12px; padding: 18px 14px; color: var(--s-green); text-decoration: none; background: #fbfcf9; }
+.plbh-admin-quicklinks a:hover { border-color: #9baea0; background: #f1f5ef; }
+.plbh-admin-quicklinks span { flex: 1; min-width: 0; }
+.plbh-admin-quicklinks strong { display: block; font-size: 13px; }
+.plbh-admin-quicklinks small { display: block; color: var(--s-muted); font-size: 11px; margin-top: 5px; }
+@media(max-width: 1100px) { .plbh-admin-quicklinks { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media(max-width: 480px) { .plbh-admin-quicklinks { grid-template-columns: 1fr; } }
+
+/* Team access: calm, high-contrast invitations and membership history. */
+.plbh-admin-app .plbh-invite {
+  margin-bottom: 1.25rem;
+  padding: clamp(1.25rem, 1.4vw, 1.75rem);
+  border: 1px solid #dedfd5;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #fffefa 0%, #faf8f1 62%, #f2f5ef 100%);
+  box-shadow: 0 0.375rem 1.25rem rgb(24 51 37 / 0.055);
+}
+.plbh-admin-app .plbh-invite-head { align-items: center; gap: 1.25rem; }
+.plbh-admin-app .plbh-invite-heading { display: flex; align-items: flex-start; gap: 0.875rem; min-width: 0; }
+.plbh-admin-app .plbh-invite-icon { display: grid; place-items: center; flex: 0 0 2.875rem; width: 2.875rem; height: 2.875rem; border: 1px solid #e2d9c2; border-radius: 0.875rem; background: #f7f1e3; color: #725a2c; }
+.plbh-admin-app .plbh-invite-eyebrow { display: block; margin-bottom: 0.2rem; color: #806638; font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.13em; }
+.plbh-admin-app .plbh-invite-head h2 { color: #19392b; font: 500 1.45rem/1.25 var(--font-serif), Georgia, serif; letter-spacing: -0.02em; }
+.plbh-admin-app .plbh-invite-head p { margin-top: 0.4rem; max-width: 64ch; color: #59695f; font-size: 0.875rem; line-height: 1.6; }
+.plbh-admin-app .plbh-invite-count { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.45rem 0.8rem; border: 1px solid #dce6d9; border-radius: 999px; background: #edf5eb; color: #285e3f; font-size: 0.8125rem; font-weight: 600; letter-spacing: 0; }
+.plbh-admin-app .plbh-invite-form { grid-template-columns: minmax(12rem, 1.2fr) minmax(10rem, 0.9fr) minmax(15rem, 1.3fr) auto; align-items: start; gap: 0.875rem; margin-top: 1.375rem; }
+.plbh-admin-app .plbh-invite-form label { position: relative; gap: 0.45rem; color: #354b3e; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; }
+.plbh-admin-app .plbh-invite-form label small { position: absolute; top: 0; right: 0; color: #748076; font-size: 0.75rem; font-weight: 400; }
+.plbh-admin-app .plbh-invite-form label .plbh-invite-role-note { position: static; display: block; margin-top: 0.15rem; color: #53645a; }
+.plbh-admin-app .plbh-invite-form input,
+.plbh-admin-app .plbh-invite-form select { width: 100%; min-width: 0; min-height: 3rem; padding: 0.7rem 0.875rem; border: 1px solid #d8dbd1; border-radius: 0.75rem; background-color: #fff; color: #1c392c; font-size: 0.875rem; font-weight: 500; letter-spacing: 0; text-transform: none; box-shadow: 0 1px 2px rgb(23 43 32 / 0.04); }
+.plbh-admin-app .plbh-invite-form input::placeholder { color: #858f87; opacity: 1; }
+.plbh-admin-app .plbh-invite-form input:focus,
+.plbh-admin-app .plbh-invite-form select:focus { border-color: #4d765e; box-shadow: 0 0 0 0.22rem rgb(37 93 61 / 0.13); outline: none; }
+.plbh-admin-app .plbh-invite-form .plbh-invite-role-note { min-height: 2.25rem; color: #647168; font-size: 0.75rem; font-weight: 400; line-height: 1.45; letter-spacing: 0; text-transform: none; }
+.plbh-admin-app .plbh-invite-form > button { min-height: 3rem; align-self: start; margin-top: 1.36rem; padding: 0.7rem 1.125rem; border: 1px solid #164531; border-radius: 0.75rem; background: linear-gradient(135deg, #20573e, #123e2d); box-shadow: 0 0.25rem 0.625rem rgb(19 64 45 / 0.16); color: #fffdf7; font-size: 0.875rem; font-weight: 600; white-space: nowrap; transition: transform 0.18s var(--s-ease), box-shadow 0.18s var(--s-ease), filter 0.18s var(--s-ease); }
+.plbh-admin-app .plbh-invite-form > button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 0.375rem 0.875rem rgb(19 64 45 / 0.22); filter: brightness(1.04); }
+.plbh-admin-app .plbh-invite-form > button:disabled { opacity: 0.65; }
+.plbh-admin-app .plbh-invite-list { margin-top: 1.25rem; border-top: 1px solid #e5e5dc; }
+.plbh-admin-app .plbh-invite-list li { grid-template-columns: minmax(11rem, 1.8fr) 7rem 7rem minmax(10rem, 1.2fr) auto; gap: 0.875rem; min-height: 4.1rem; padding: 0.75rem 0.125rem; border-bottom-color: #e9e9e0; color: #263e32; font-size: 0.875rem; }
+.plbh-admin-app .plbh-invite-list li[data-status="revoked"] { opacity: 1; background: linear-gradient(90deg, #faf8f5, transparent 88%); }
+.plbh-admin-app .plbh-invite-who strong { color: #20392d; font-size: 0.875rem; font-weight: 650; }
+.plbh-admin-app .plbh-invite-who small { color: #69766d; font-size: 0.8125rem; }
+.plbh-admin-app .plbh-invite-role,
+.plbh-admin-app .plbh-invite-status { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.3rem 0.625rem; border: 1px solid #e6e3d9; background: #f4f2eb; color: #536258; font-size: 0.75rem; font-weight: 600; }
+.plbh-admin-app .plbh-invite-role svg { color: #687a6b; }
+.plbh-admin-app .plbh-invite-status i { width: 0.45rem; height: 0.45rem; border-radius: 50%; background: currentColor; }
+.plbh-admin-app .plbh-invite-list li[data-status="pending"] .plbh-invite-status { border-color: #ead9ad; background: #fbf3df; color: #7d5b1d; }
+.plbh-admin-app .plbh-invite-list li[data-status="accepted"] .plbh-invite-status { border-color: #cee3d1; background: #eaf5e9; color: #236140; }
+.plbh-admin-app .plbh-invite-list li[data-status="revoked"] .plbh-invite-status { border-color: #e7d5d2; background: #f7eeec; color: #85483f; }
+.plbh-admin-app .plbh-invite-date { color: #5f6f65; font-size: 0.8125rem; }
+.plbh-admin-app .plbh-invite-list button { min-height: 2.375rem; padding: 0.45rem 0.8rem; border: 1px solid #e2d4c9; border-radius: 0.625rem; background: #fffdfa; color: #9b382f; font-size: 0.8125rem; font-weight: 600; transition: background-color 0.18s ease, border-color 0.18s ease; }
+.plbh-admin-app .plbh-invite-list button:hover { border-color: #d5aaa1; background: #fbefed; }
+.plbh-admin-app .plbh-invite-note { border: 1px solid #e6dfcb; border-radius: 0.625rem; background: #f7f2e4; color: #5b5a4a; line-height: 1.55; }
+.plbh-admin-app .plbh-invite-message { border: 1px solid transparent; border-radius: 0.625rem; line-height: 1.55; }
+.plbh-admin-app .plbh-invite-message.is-sent { border-color: #cee3d1; background: #eaf5e9; color: #235d3e; }
+.plbh-admin-app .plbh-invite-message.is-error { border-color: #e9cac6; background: #fbefed; color: #8f332c; }
+.plbh-admin-app .plbh-admin-team-panel { margin-bottom: 1rem; }
+.plbh-admin-app .plbh-admin-team-panel th { background: #f2f3ed; color: #526158; }
+.plbh-admin-app .plbh-admin-team-panel tbody tr { transition: background-color 0.16s ease; }
+.plbh-admin-app .plbh-admin-team-panel tbody tr:hover { background: #f7f8f3; }
+.plbh-admin-app .plbh-admin-team-panel .plbh-admin-order-id { overflow-wrap: anywhere; color: #58675e; }
+@media(max-width: 1050px) {
+  .plbh-admin-app .plbh-invite-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .plbh-admin-app .plbh-invite-form > button { margin-top: 0; align-self: end; min-height: 3rem; }
+}
+@media(max-width: 640px) {
+  .plbh-admin-app .plbh-invite { padding: 1rem; }
+  .plbh-admin-app .plbh-invite-form { grid-template-columns: minmax(0, 1fr); }
+  .plbh-admin-app .plbh-invite-form > button { width: 100%; }
+  .plbh-admin-app .plbh-invite-list li { grid-template-columns: minmax(0, 1fr) auto; gap: 0.5rem; }
+  .plbh-admin-app .plbh-invite-who { grid-column: 1 / 2; }
+  .plbh-admin-app .plbh-invite-role { grid-column: 2; justify-self: end; }
+  .plbh-admin-app .plbh-invite-status { grid-column: 2; justify-self: end; }
+  .plbh-admin-app .plbh-invite-date { grid-column: 1; grid-row: 3; }
+  .plbh-admin-app .plbh-invite-list button { grid-column: 2; grid-row: 3; }
+}
+
+/* Dashboard and analytics: a clearer, more editorial reporting layer. */
+.plbh-admin-app .plbh-admin-metrics { gap: 1rem; margin-bottom: 1.375rem; }
+.plbh-admin-app .plbh-admin-metric {
+  min-height: 11.5rem;
+  padding: 1.25rem 1.375rem;
+  border: 1px solid #e7e4da;
+  border-top: 2px solid #c9ad72;
+  border-radius: 0.875rem;
+  background: linear-gradient(145deg, #fffefa, #fbfaf5);
+  box-shadow: 0 0.25rem 1rem rgb(29 48 37 / 0.035);
+}
+.plbh-admin-app .plbh-admin-metric:hover { transform: translateY(-2px); box-shadow: var(--s-sh-lift); }
+.plbh-admin-app .plbh-admin-metric-icon { width: 2.625rem; height: 2.625rem; border: 1px solid #e6e9df; border-radius: 0.75rem; }
+.plbh-admin-app .plbh-admin-metric > strong { margin: 0.875rem 0 0.125rem; font-size: clamp(1.8rem, 2vw, 2.45rem); line-height: 1.2; letter-spacing: -0.035em; overflow-wrap: anywhere; }
+.plbh-admin-app .plbh-admin-metric-label { color: #34473d; font-weight: 600; }
+.plbh-admin-app .plbh-admin-metric p { margin-top: 0.35rem; font-size: 0.75rem; color: #778078; }
+.plbh-admin-app .plbh-admin-chart-grid { gap: 1rem; margin-bottom: 1rem; }
+.plbh-admin-app .plbh-admin-panel { border-radius: 0.875rem; box-shadow: var(--s-sh-card); }
+.plbh-admin-app .plbh-admin-panel-heading { padding: 1.25rem 1.375rem 1rem; }
+.plbh-admin-app .plbh-admin-chart-unit { display: inline-flex; align-items: center; gap: 0.4rem; border-radius: 999px; padding: 0.35rem 0.7rem; background: #f5f2e9; color: #71613e; }
+.plbh-admin-app .plbh-admin-quicklinks { gap: 0.75rem; padding: 0 1.375rem 1.375rem; }
+.plbh-admin-app .plbh-admin-quicklinks a { min-height: 5rem; gap: 0.75rem; border-radius: 0.75rem; padding: 0.875rem; background: #fffefa; box-shadow: 0 1px 2px rgb(26 36 32 / 0.03); transition: border-color 0.2s var(--s-ease), background 0.2s var(--s-ease), transform 0.2s var(--s-ease); }
+.plbh-admin-app .plbh-admin-quicklinks a:hover { transform: translateY(-2px); border-color: #cbb87d; background: #faf8f0; }
+.plbh-admin-app .plbh-admin-quicklinks .plbh-admin-priority-icon { display: grid; place-items: center; flex: 0 0 2.5rem; width: 2.5rem; height: 2.5rem; border: 1px solid #e8e5d8; border-radius: 0.75rem; background: #f6f2e7; color: #826b3a; }
+.plbh-admin-app .plbh-admin-quicklinks a > span:nth-child(2) { flex: 1; min-width: 0; }
+.plbh-admin-app .plbh-admin-quicklinks strong { font-size: 0.875rem; color: #20372c; }
+.plbh-admin-app .plbh-admin-quicklinks small { margin-top: 0.25rem; font-size: 0.75rem; line-height: 1.45; }
+.plbh-admin-analytics-intro {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(10rem, auto);
+  align-items: center;
+  gap: 1rem;
+  margin: 0 0 1.25rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid #dfddcf;
+  border-radius: 0.875rem;
+  background: linear-gradient(112deg, #f2efe4 0%, #fbfaf5 54%, #e7eee5 100%);
+  box-shadow: 0 0.25rem 1rem rgb(29 48 37 / 0.035);
+}
+.plbh-admin-analytics-mark { display: grid; place-items: center; width: 3rem; height: 3rem; border: 1px solid #d9cfb5; border-radius: 0.875rem; background: #fffdf7; color: #806839; }
+.plbh-admin-analytics-eyebrow { color: #846735; font-size: 0.625rem; font-weight: 700; letter-spacing: 0.14em; }
+.plbh-admin-app .plbh-admin-analytics-intro h2 { margin: 0.125rem 0 0.125rem; color: #20372c; font: 500 1.35rem/1.3 var(--font-serif), Georgia, serif; letter-spacing: -0.02em; }
+.plbh-admin-analytics-intro p { margin: 0; color: #6d7873; font-size: 0.8125rem; }
+.plbh-admin-analytics-summary { display: grid; gap: 0.125rem; padding-left: 1rem; border-left: 1px solid #dedacb; color: #717b72; font-size: 0.75rem; }
+.plbh-admin-analytics-summary strong { color: #20372c; font-size: 0.875rem; text-transform: capitalize; }
+.plbh-admin-analytics-summary small { color: #899187; font-size: 0.6875rem; }
+.plbh-admin-app .plbh-admin-revenue-bars { min-height: 16rem; padding-top: 1.25rem; background: repeating-linear-gradient(to top, transparent 0, transparent calc(25% - 1px), #efeee8 calc(25% - 1px), #efeee8 25%); }
+.plbh-admin-app .plbh-admin-revenue-bars .plbh-admin-bar-column > i { min-height: 0.35rem; border-radius: 0.5rem 0.5rem 0.2rem 0.2rem; background: linear-gradient(180deg, #4b795f, #174431); box-shadow: 0 0.25rem 0.75rem rgb(22 67 47 / 0.16); }
+.plbh-admin-app .plbh-admin-revenue-bars .plbh-admin-bar-column:nth-child(even) > i { background: linear-gradient(180deg, #d5bd82, #ac874b); }
+.plbh-admin-app .plbh-admin-revenue-bars .plbh-admin-bar-value { min-width: max-content; padding: 0 0.25rem; font-size: 0.6875rem; }
+.plbh-admin-order-health { margin-top: 1rem; }
+.plbh-admin-status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: 0.75rem; padding: 0 1.375rem 1.375rem; }
+.plbh-admin-status-item { display: grid; grid-template-columns: 0.625rem minmax(4rem, auto) minmax(3rem, 1fr) auto; align-items: center; gap: 0.625rem; min-height: 3.25rem; padding: 0.65rem 0.75rem; border: 1px solid #eeece5; border-radius: 0.625rem; background: #fffefa; }
+.plbh-admin-status-dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: #8c978f; box-shadow: 0 0 0 0.2rem #8c978f1a; }
+.plbh-admin-status-dot.status-pending { background: #c4932e; box-shadow: 0 0 0 0.2rem #c4932e20; }
+.plbh-admin-status-dot.status-confirmed, .plbh-admin-status-dot.status-delivered { background: #2f8758; box-shadow: 0 0 0 0.2rem #2f875820; }
+.plbh-admin-status-dot.status-cancelled, .plbh-admin-status-dot.status-refunded { background: #bd5d50; box-shadow: 0 0 0 0.2rem #bd5d5020; }
+.plbh-admin-status-label { color: #526158; font-size: 0.8125rem; text-transform: capitalize; }
+.plbh-admin-status-track { height: 0.375rem; overflow: hidden; border-radius: 999px; background: #efeee8; }
+.plbh-admin-status-track i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #b69b5b, #1b513a); }
+.plbh-admin-status-item > strong { color: #263e32; font-size: 0.8125rem; }
+.plbh-admin-app .plbh-admin-range { display: flex; }
+.plbh-admin-app { font-size: 0.9375rem; }
+.plbh-admin-app .plbh-admin-sidebar nav a { font-size: 0.9375rem; }
+.plbh-admin-app .plbh-admin-page-heading p,
+.plbh-admin-app .plbh-admin-context-row .plbh-admin-current-tab,
+.plbh-admin-app .plbh-admin-context-row .plbh-admin-period,
+.plbh-admin-app .plbh-admin-panel-heading p,
+.plbh-admin-app .plbh-admin-table-footer,
+.plbh-admin-app .plbh-admin-status-label { font-size: 0.875rem; line-height: 1.55; }
+.plbh-admin-app .plbh-admin-tabs > span:not(.plbh-admin-current-tab),
+.plbh-admin-app .plbh-admin-chart-unit,
+.plbh-admin-app .plbh-admin-bar-column > small,
+.plbh-admin-app .plbh-admin-analytics-summary,
+.plbh-admin-app .plbh-admin-analytics-summary small { font-size: 0.8125rem; }
+.plbh-admin-app .plbh-admin-metric-label { font-size: 0.9375rem; }
+.plbh-admin-app .plbh-admin-metric p,
+.plbh-admin-app .plbh-admin-quicklinks small { font-size: 0.8125rem; }
+.plbh-admin-app .plbh-admin-status-item > strong { font-size: 0.875rem; }
+.plbh-admin-app input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.plbh-admin-app select,
+.plbh-admin-app textarea {
+  min-height: 3rem;
+  padding: 0.6875rem 0.875rem;
+  border: 1px solid #dedfd6;
+  border-radius: 0.75rem;
+  background-color: #fffefa;
+  color: #20372c;
+  font: inherit;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  box-shadow: inset 0 1px 2px rgb(26 36 32 / 0.025), 0 1px 2px rgb(26 36 32 / 0.035);
+  transition: border-color 0.18s var(--s-ease), box-shadow 0.18s var(--s-ease), background-color 0.18s var(--s-ease);
+}
+.plbh-admin-app input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):hover,
+.plbh-admin-app select:hover,
+.plbh-admin-app textarea:hover { border-color: #c8cbbb; background-color: #fff; }
+.plbh-admin-app input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+.plbh-admin-app select:focus,
+.plbh-admin-app textarea:focus {
+  border-color: #507661;
+  background-color: #fff;
+  box-shadow: 0 0 0 0.22rem rgb(29 83 57 / 0.12), 0 2px 5px rgb(26 36 32 / 0.045);
+  outline: none;
+}
+.plbh-admin-app input::placeholder,
+.plbh-admin-app textarea::placeholder { color: #89938b; opacity: 1; }
+.plbh-admin-app .plbh-admin-field label,
+.plbh-admin-app .plbh-admin-form-grid label { color: #34483c; font-size: 0.875rem; font-weight: 600; line-height: 1.45; }
+.plbh-admin-app .plbh-admin-field-hint,
+.plbh-admin-app .plbh-admin-form-grid label > small { color: #727e75; font-size: 0.8125rem; line-height: 1.5; }
+.plbh-admin-app select {
+  appearance: none;
+  padding-right: 2.75rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%236d7873' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.8rem center;
+  cursor: pointer;
+}
+.plbh-admin-app .plbh-admin-range select { min-height: 0; padding: 0; box-shadow: none; background-image: none; font-size: 0.875rem; }
+.plbh-admin-app input[type="checkbox"], .plbh-admin-app input[type="radio"] { accent-color: #1c5038; }
+.plbh-admin-app input:disabled, .plbh-admin-app select:disabled, .plbh-admin-app textarea:disabled { cursor: not-allowed; opacity: 0.65; background: #f3f3ee; }
+.plbh-admin-app .plbh-admin-search input { min-height: 2.875rem; padding: 0.25rem 0; border: 0; border-radius: 0; box-shadow: none; font-size: 0.9375rem; }
+.plbh-admin-app .plbh-admin-search input:hover,
+.plbh-admin-app .plbh-admin-search input:focus { border: 0; box-shadow: none; background: none; }
+.plbh-admin-app .plbh-admin-topsearch input { min-height: 2rem; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.plbh-admin-app .plbh-admin-topsearch input:hover,
+.plbh-admin-app .plbh-admin-topsearch input:focus { border: 0; background: transparent; box-shadow: none; }
+.plbh-admin-app .plbh-admin-table-toolbar > select { min-height: 3rem; }
+.plbh-admin-app .plbh-admin-bar-column > small { max-width: 7rem; min-height: 2.5rem; overflow: visible; text-overflow: clip; white-space: normal; text-align: center; line-height: 1.25; overflow-wrap: anywhere; }
+@media(max-width: 760px) {
+  .plbh-admin-analytics-intro { grid-template-columns: auto minmax(0, 1fr); padding: 1rem; }
+  .plbh-admin-analytics-summary { grid-column: 1 / -1; grid-template-columns: auto auto 1fr; align-items: center; column-gap: 0.5rem; padding: 0.75rem 0 0; border-top: 1px solid #dedacb; border-left: 0; }
+  .plbh-admin-analytics-summary small { text-align: right; }
+  .plbh-admin-app .plbh-admin-metric { min-height: 10.5rem; padding: 1rem; }
+  .plbh-admin-app .plbh-admin-metric > strong { font-size: clamp(1.45rem, 7vw, 2rem); }
+  .plbh-admin-app .plbh-admin-quicklinks { padding: 0 1rem 1rem; }
+  .plbh-admin-status-grid { padding: 0 1rem 1rem; }
+}
+
+.plbh-admin-app .plbh-admin-sidebar { background: #123a2d; }
+.plbh-admin-app .plbh-admin-bar-value { background: transparent; color: var(--s-green); border-radius: 0; font-size: 12px; font-weight: 600; }
+
+/* Collection rows have four cells; content-page rows use an extra index cell. */
+.plbh-admin-app .plbh-admin-collections-list article {
+  grid-template-columns: minmax(150px, .8fr) minmax(200px, 1.6fr) max-content max-content;
+  gap: 16px 24px;
+  padding: 20px;
+  min-width: 0;
+}
+.plbh-admin-app .plbh-admin-collections-list :is(h3, p) { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.plbh-admin-app .plbh-admin-collections-list .plbh-admin-badge { justify-self: start; width: auto; white-space: nowrap; }
+.plbh-admin-app .plbh-admin-collections-list .plbh-admin-text-button { justify-self: end; white-space: nowrap; }
+@media (max-width: 1100px) {
+  .plbh-admin-app .plbh-admin-collections-list article { grid-template-columns: minmax(0, 1fr) auto; gap: 12px 20px; }
+  .plbh-admin-app .plbh-admin-collections-list h3 { grid-column: 1; grid-row: 1; }
+  .plbh-admin-app .plbh-admin-collections-list p { grid-column: 1; grid-row: 2; }
+  .plbh-admin-app .plbh-admin-collections-list .plbh-admin-badge { grid-column: 2; grid-row: 1; justify-self: end; }
+  .plbh-admin-app .plbh-admin-collections-list .plbh-admin-text-button { grid-column: 2; grid-row: 2; }
+}
+@media (max-width: 480px) {
+  .plbh-admin-app .plbh-admin-collections-list article { grid-template-columns: minmax(0, 1fr); padding: 16px; }
+  .plbh-admin-app .plbh-admin-collections-list :is(h3, p, .plbh-admin-badge, .plbh-admin-text-button) { grid-column: 1; grid-row: auto; justify-self: start; }
+}
+
+/* Book catalogue: readable title column and two focused row actions. */
+.plbh-admin-app .plbh-admin-book-table { table-layout: fixed; min-width: 840px; }
+.plbh-admin-app .plbh-admin-book-table th:first-child { width: 44px; }
+.plbh-admin-app .plbh-admin-book-table th:nth-child(3) { width: 150px; }
+.plbh-admin-app .plbh-admin-book-table th:nth-child(4) { width: 115px; }
+.plbh-admin-app .plbh-admin-book-table th:nth-child(5) { width: 125px; }
+.plbh-admin-app .plbh-admin-book-table th:last-child { width: 112px; }
+.plbh-admin-app .plbh-admin-book-table :is(th, td) { padding: 18px 14px; }
+.plbh-admin-app .plbh-admin-book-table .plbh-admin-table-book { display: flex; gap: 14px; min-width: 0; align-items: center; }
+.plbh-admin-app .plbh-admin-book-table .plbh-admin-table-book img { width: 44px; height: 60px; object-fit: contain; flex-shrink: 0; background: #f4f3ed; border: 1px solid #e8e8df; padding: 3px; border-radius: 5px; }
+.plbh-admin-app .plbh-admin-book-table .plbh-admin-table-book > div { min-width: 0; }
+.plbh-admin-app .plbh-admin-book-table strong { display: block; white-space: normal; overflow-wrap: anywhere; line-height: 1.5; }
+.plbh-admin-app .plbh-admin-book-table strong a { color: inherit; text-decoration: none; }
+.plbh-admin-app .plbh-admin-book-table strong a:hover { color: var(--s-green); text-decoration: underline; text-underline-offset: 3px; }
+.plbh-admin-app .plbh-admin-book-table small { margin-top: 5px; font-size: 11px; letter-spacing: .04em; }
+.plbh-admin-app .plbh-admin-book-table .plbh-admin-row-actions { justify-content: flex-end; gap: 8px; }
+.plbh-admin-app .plbh-admin-book-table th:last-child { text-align: right; }
+.plbh-admin-app .plbh-admin-book-table .plbh-admin-amount { white-space: nowrap; }
+.plbh-admin-app .plbh-admin-catalogue-filters { display: flex; flex-wrap: wrap; }
+.plbh-admin-app .plbh-admin-catalogue-filters .plbh-admin-search { flex: 1 1 260px; min-width: 0; }
+.plbh-admin-app .plbh-admin-catalogue-filters select { flex: 0 1 180px; min-width: 140px; }
+@media (max-width: 600px) {
+  .plbh-admin-app .plbh-admin-catalogue-filters select { flex: 1 1 140px; }
+}
+
+
+/* CMS page list: keep the page name, summary and preview in distinct columns. */
+.plbh-admin-app .plbh-admin-storefront-pages article {
+  grid-template-columns: 44px minmax(0, 1fr) max-content;
+  align-items: center;
+  gap: 20px;
+  min-height: 92px;
+  padding: 18px 20px;
+}
+.plbh-admin-app .plbh-admin-storefront-pages .plbh-admin-page-mark {
+  display: grid; place-items: center; width: 42px; height: 42px;
+  border-radius: 12px; color: var(--s-green); background: var(--s-green-tint);
+}
+.plbh-admin-app .plbh-admin-storefront-pages .plbh-admin-page-copy { min-width: 0; }
+.plbh-admin-app .plbh-admin-storefront-pages h3 { margin: 0; overflow-wrap: anywhere; }
+.plbh-admin-app .plbh-admin-storefront-pages p { margin: 5px 0 0; max-width: 76ch; overflow-wrap: anywhere; }
+.plbh-admin-app .plbh-admin-storefront-pages .plbh-admin-text-button { white-space: nowrap; }
+@media(max-width: 620px) {
+  .plbh-admin-app .plbh-admin-storefront-pages article { grid-template-columns: 38px minmax(0, 1fr); gap: 12px; }
+  .plbh-admin-app .plbh-admin-storefront-pages .plbh-admin-page-mark { width: 36px; height: 36px; }
+  .plbh-admin-app .plbh-admin-storefront-pages .plbh-admin-text-button { grid-column: 2; justify-self: start; }
+}
+
+/* Settings: stable two-column cards with readable label/value rows. */
+.plbh-admin-app .plbh-admin-settings {
+  width: 100%; max-width: none; min-width: 0;
+  padding: clamp(1.125rem, 2vw, 1.75rem);
+}
+.plbh-admin-app .plbh-admin-settings > .plbh-admin-panel-heading {
+  padding: 0 0 1.25rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--s-line-soft);
+}
+.plbh-admin-app .plbh-admin-settings .plbh-admin-settings-grid {
+  display: grid; width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch; gap: 1rem; margin: 0;
+}
+.plbh-admin-app .plbh-admin-settings .plbh-admin-settings-section {
+  min-width: 0; padding: 1.125rem; border-radius: 0.875rem;
+}
+.plbh-admin-app .plbh-admin-settings .plbh-admin-settings-section h3 {
+  margin-bottom: 0.5rem; padding-bottom: 0.75rem; border-bottom-color: var(--s-line-soft);
+  color: var(--s-ink); font-size: 1rem;
+}
+.plbh-admin-app .plbh-admin-settings .plbh-admin-settings-list { margin: 0; }
+.plbh-admin-app .plbh-admin-settings .plbh-admin-settings-list > div {
+  display: grid; grid-template-columns: minmax(7.25rem, 0.78fr) minmax(0, 1.22fr);
+  align-items: start; gap: 0.75rem; min-width: 0; padding-block: 0.75rem;
+  border-bottom: 1px solid var(--s-line-soft); font-size: 0.8125rem; line-height: 1.5;
+}
+.plbh-admin-app .plbh-admin-settings .plbh-admin-settings-list > div:last-child { border-bottom: 0; }
+.plbh-admin-app .plbh-admin-settings .plbh-admin-settings-list dt { min-width: 0; color: var(--s-ink-2); }
+.plbh-admin-app .plbh-admin-settings .plbh-admin-settings-list dd { min-width: 0; margin: 0; color: var(--s-ink); overflow-wrap: anywhere; }
+.plbh-admin-app .plbh-admin-settings .plbh-admin-status-badge { max-width: 100%; white-space: normal; line-height: 1.45; }
+.plbh-admin-app .plbh-admin-settings .plbh-admin-settings-note {
+  align-items: flex-start; margin-top: 1rem; padding: 1rem 1.125rem;
+  border-radius: 0.875rem; font-size: 0.875rem; line-height: 1.6;
+}
+.plbh-admin-app .plbh-admin-settings .plbh-admin-settings-note strong { color: var(--s-ink); font-size: 0.9375rem; }
+.plbh-admin-app .plbh-admin-settings .plbh-admin-settings-note p { color: var(--s-ink-2); font-size: 0.8125rem; }
+.plbh-admin-app .plbh-admin-settings .plbh-admin-note-icon {
+  flex: 0 0 2.25rem; width: 2.25rem; height: 2.25rem; background: var(--s-green-tint); color: var(--s-green);
+}
+.plbh-admin-app .plbh-admin-settings .plbh-admin-note-icon.is-warning { background: var(--s-warn-bg); color: var(--s-warn); }
+.plbh-admin-app .plbh-admin-settings .plbh-admin-note-icon.is-demo { background: var(--s-gold-soft); color: var(--s-gold-text); }
+.plbh-admin-app .plbh-admin-settings .plbh-admin-panel-heading .plbh-admin-button:disabled { cursor: wait; opacity: 0.7; }
+.plbh-admin-app {
+  --s-canvas: #f4f5f1;
+  --s-surface: #fffefa;
+  --s-line: #dfe5dd;
+  --s-muted: #53645a;
+  --s-faint: #68786e;
+}
+.plbh-admin-app .plbh-admin-topbar { background: rgb(255 254 250 / 96%); border-bottom-color: var(--s-line); }
+.plbh-admin-app .plbh-admin-panel,
+.plbh-admin-app .plbh-admin-settings-section { background-color: var(--s-surface); border-color: var(--s-line); }
+.plbh-admin-app .plbh-admin-panel-heading h2,
+.plbh-admin-app .plbh-admin-settings-section h3,
+.plbh-admin-app .plbh-admin-page-heading h1 { color: var(--s-ink); }
+.plbh-admin-app .plbh-admin-panel-heading p,
+.plbh-admin-app .plbh-admin-page-heading p,
+.plbh-admin-app .plbh-admin-table-footer,
+.plbh-admin-app .plbh-admin-table-footer > span { color: var(--s-muted); }
+.plbh-admin-app .plbh-admin-sidebar nav a.active { background: #ffffff18; color: #fffefa; }
+.plbh-admin-app .plbh-admin-sidebar nav a.active::before { background: var(--s-gold-rail); }
+.plbh-admin-app .plbh-admin-table th { background: #edf1eb; color: #354a3e; border-bottom-color: #dce3da; }
+.plbh-admin-app .plbh-admin-table td { color: var(--s-ink-2); border-bottom-color: var(--s-line-soft); }
+.plbh-admin-app .plbh-admin-table tbody tr:hover { background: #f6f8f3; }
+.plbh-admin-app .plbh-admin-button-primary,
+.plbh-admin-app .plbh-admin-button.plbh-admin-button-primary { background: var(--s-green); border-color: var(--s-green); color: #fffefa; }
+.plbh-admin-app .plbh-admin-button-primary:hover:not(:disabled),
+.plbh-admin-app .plbh-admin-button.plbh-admin-button-primary:hover:not(:disabled) { background: var(--s-green-dark); border-color: var(--s-green-dark); }
+.plbh-admin-app :is(button, a, input, select, textarea):focus-visible { outline-color: var(--s-gold); }
+.plbh-admin-app :is(input, textarea)::placeholder { color: #68786e; opacity: 1; }
+.plbh-admin-app .plbh-admin-badge.pending,
+.plbh-admin-app .plbh-admin-status-pending { background: var(--s-warn-bg); color: var(--s-warn); }
+.plbh-admin-app .plbh-admin-badge.processing { background: var(--s-info-bg); color: var(--s-info); }
+.plbh-admin-app .plbh-admin-badge.refunded,
+.plbh-admin-app .plbh-admin-badge.inactive { background: var(--s-off-bg); color: var(--s-off); }
+.plbh-admin-app .plbh-admin-badge.active,
+.plbh-admin-app .plbh-admin-badge.accepted { background: var(--s-ok-bg); color: var(--s-ok); }
+@media (max-width: 820px) {
+  .plbh-admin-app .plbh-admin-settings .plbh-admin-settings-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 480px) {
+  .plbh-admin-app .plbh-admin-settings .plbh-admin-panel-heading { align-items: flex-start; flex-direction: column; }
+  .plbh-admin-app .plbh-admin-settings .plbh-admin-settings-list > div { grid-template-columns: minmax(6.25rem, 0.72fr) minmax(0, 1.28fr); gap: 0.5rem; }
 }

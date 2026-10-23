@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getCatalogue } from "@/lib/catalogue";
+import { getCatalogue, getProductExtras } from "@/lib/catalogue";
 import { BookCard, titleFor, creditFor } from "@/components/book-card";
 import { ProductGallery, ProductPurchase } from "@/components/product-purchase";
 import { Icon } from "@/components/ui";
+import { ProductReviews } from "@/components/product-reviews";
 
 type Props = { params: Promise<{ id: string }> };
 export async function generateStaticParams() {
@@ -21,11 +23,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       : "Book not found",
   };
 }
-export default async function ProductPage({ params }: Props) {
+async function ProductDetails({ params }: Props) {
   const { id } = await params;
   const { products } = await getCatalogue();
   const book = products.find((book) => String(book.id) === id);
   if (!book) notFound();
+  const extras = await getProductExtras(book.id);
+  const detailedBook = { ...book, ...extras };
   const related = [
     ...products.filter(
       (item) => item.id !== book.id && item.category === book.category,
@@ -51,7 +55,7 @@ export default async function ProductPage({ params }: Props) {
           <span aria-current="page">Book details</span>
         </nav>
         <section className="product-overview">
-          <ProductGallery book={book} />
+          <ProductGallery book={detailedBook} />
           <div className="product-summary">
             <Link
               className="shop-kicker"
@@ -85,7 +89,7 @@ export default async function ProductPage({ params }: Props) {
                 </span>
               </div>
               <div>
-                <Icon name="chat" />
+                <Icon name="whatsapp" />
                 <span>
                   Here to help<small>Personal book assistance</small>
                 </span>
@@ -112,7 +116,7 @@ export default async function ProductPage({ params }: Props) {
             </p>
             <a
               className="text-link"
-              href={`https://wa.me/923080060188?text=${encodeURIComponent(`Please confirm the edition and book details for ${book.name}. Catalogue no. ${book.id}`)}`}
+              href={`https://wa.me/923334222005?text=${encodeURIComponent(`Please confirm the edition and book details for ${book.name}. Catalogue no. ${book.id}`)}`}
             >
               Speak to a book specialist <Icon name="arrow" />
             </a>
@@ -140,21 +144,21 @@ export default async function ProductPage({ params }: Props) {
             <details>
               <summary>Delivery & ordering</summary>
               <p>
-                We deliver across Pakistan. Online ordering is not active yet.
-                Delivery charges and available payment methods will be confirmed
-                when checkout opens.
+                Place your order through checkout with cash on delivery. The team
+                will confirm availability, delivery charges and dispatch details
+                by phone before sending your books.
               </p>
             </details>
             <details>
               <summary>Edition & availability</summary>
               <p>
-                Catalogue prices and stock were last checked on 13 October 2026.
-                Please confirm the current edition and availability with our
-                team.
+                Prices and availability come from the live catalogue. Contact our
+                team if you need to confirm the edition, language or binding.
               </p>
             </details>
           </div>
         </section>
+        <ProductReviews bookId={extras.uuid} bookName={titleFor(book)} initialReviews={extras.reviews} />
         <section className="related-books">
           <div className="shop-heading">
             <div>
@@ -178,4 +182,8 @@ export default async function ProductPage({ params }: Props) {
       </div>
     </main>
   );
+}
+
+export default function ProductPage({ params }: Props) {
+  return <Suspense fallback={<main id="main" className="products-page"><div className="container" role="status">Loading book details…</div></main>}><ProductDetails params={params} /></Suspense>;
 }

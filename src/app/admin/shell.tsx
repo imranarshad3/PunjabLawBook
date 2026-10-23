@@ -2,11 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { Glyph } from "./icons";
 import { navigation, viewPath, type View } from "./navigation";
+
+const subscribeHydration = () => () => {};
+const clientSnapshot = () => true;
+const serverSnapshot = () => false;
 
 /** Chrome shared by every admin screen: sidebar, top bar and the header band.
  *  Lifted out of the workspace so the record forms render inside the same frame
@@ -24,6 +28,7 @@ export const rangeOptions = [
 export const bannerArt: Partial<Record<View, string>> = {
   Dashboard: "/images/admin/banner-orders.webp",
   Books: "/images/admin/banner-add-book.webp",
+  "Book Reviews": "/images/admin/banner-add-book.webp",
   Categories: "/images/admin/banner-categories.webp",
   Orders: "/images/admin/banner-orders.webp",
   Customers: "/images/admin/banner-customers.webp",
@@ -39,6 +44,7 @@ export const bannerArt: Partial<Record<View, string>> = {
 
 export const subtitles: Partial<Record<View, string>> = {
   Books: "Manage your book collection.",
+  "Book Reviews": "Moderate reader ratings and comments before they appear on the storefront.",
   Categories: "Manage and organise your book categories.",
   Orders: "Manage customer orders and track their status.",
   Customers: "Manage your registered customers.",
@@ -76,12 +82,21 @@ export function AdminShell({
 }) {
   const router = useRouter();
   const { user } = useUser();
-  const displayName = user?.fullName || user?.username || "Administrator";
+  // The static shell has no Clerk user. Match that first hydration render even
+  // when Clerk has already loaded in the browser before this segment streams.
+  const hydrated = useSyncExternalStore(subscribeHydration, clientSnapshot, serverSnapshot);
+  const displayName = (hydrated && (user?.fullName || user?.username)) || "Administrator";
 
   const [mobile, setMobile] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [topSearch, setTopSearch] = useState("");
-  const [range, setRange] = useState("30d");
+  const params = useSearchParams();
+  const range = params.get("range") || "all";
+  const setRange = (value: string) => {
+    const next = new URLSearchParams(params.toString());
+    next.set("range", value);
+    router.replace(`${viewPath(view)}?${next.toString()}`, { scroll: false });
+  };
 
   const sidebar = useRef<HTMLElement>(null);
   const mobileToggle = useRef<HTMLButtonElement>(null);
@@ -204,8 +219,8 @@ export function AdminShell({
             aria-expanded={mobile}
             aria-controls="admin-navigation"
             onClick={() => {
-              setMobile(!mobile);
-              setCollapsed(!collapsed);
+              if (window.innerWidth <= 760) setMobile(!mobile);
+              else setCollapsed(!collapsed);
             }}
           >
             <Glyph name="menu" size={20} />
@@ -221,14 +236,14 @@ export function AdminShell({
             <Glyph name="search" size={17} />
             <input
               type="search"
-              aria-label="Search books, orders and customers"
-              placeholder="Search books, orders, customers..."
+              aria-label="Search books"
+              placeholder="Search your catalogue…"
               value={topSearch}
               onChange={(event) => setTopSearch(event.target.value)}
             />
           </form>
           <div className="plbh-admin-top-actions">
-            <label className="plbh-admin-range">
+            {(view === "Dashboard" || view === "Analytics") && <label className="plbh-admin-range">
               <Glyph name="calendar" size={17} />
               <span className="plbh-admin-visually-hidden">Date range</span>
               <select value={range} onChange={(event) => setRange(event.target.value)}>
@@ -239,7 +254,7 @@ export function AdminShell({
                 ))}
               </select>
               <Glyph name="down" size={15} />
-            </label>
+            </label>}
             <button
               className="plbh-admin-bell"
               aria-label={enquiryBadge > 0 ? `${enquiryBadge} new enquiries` : "No new enquiries"}
@@ -249,7 +264,7 @@ export function AdminShell({
               {enquiryBadge > 0 && <em>{enquiryBadge}</em>}
             </button>
             <div className="plbh-admin-account">
-              <UserButton />
+              {hydrated && <UserButton />}
               <span>
                 {displayName}
                 <small>Administrator</small>

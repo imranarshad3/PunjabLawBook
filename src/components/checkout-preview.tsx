@@ -2,15 +2,16 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useSession } from "@clerk/nextjs";
 import { useCart, setCartQuantity } from "./cart-state";
 import { placeOrder } from "@/lib/storefront";
-import { products } from "@/data/products";
+import { useCatalogue } from "./catalogue-context";
 import { titleFor } from "./book-card";
 import { Icon } from "./ui";
 export function CheckoutPreview() {
   const cart = useCart();
-  const { user } = useUser();
+  const { session, isLoaded: sessionLoaded } = useSession();
+  const { products } = useCatalogue();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [placed, setPlaced] = useState<{ orderNumber: string; total: number } | null>(null);
@@ -24,7 +25,7 @@ export function CheckoutPreview() {
   );
   async function submitOrder(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (busy || lines.length === 0) return;
+    if (busy || !sessionLoaded || lines.length === 0) return;
     setBusy(true);
     setError("");
     const form = new FormData(event.currentTarget);
@@ -33,12 +34,12 @@ export function CheckoutPreview() {
         full_name: String(form.get("full_name") || "").trim(),
         email: String(form.get("email") || "").trim(),
         phone: String(form.get("phone") || "").trim(),
-        address: String(form.get("address") || "").trim(),
+        address: [String(form.get("address") || "").trim(), String(form.get("postal_code") || "").trim()].filter(Boolean).join(", "),
         city: String(form.get("city") || "").trim(),
         notes: String(form.get("notes") || "").trim(),
       },
       lines.map((line) => ({ legacy_id: line.book.id, quantity: line.quantity })),
-      user?.id,
+      session ? () => session.getToken() : undefined,
     );
     setBusy(false);
     if (result.error) {
@@ -179,8 +180,8 @@ export function CheckoutPreview() {
               <div>
                 <h3>Cash on delivery</h3>
                 <p>
-                  Pay when your books arrive. Online payment methods will be
-                  added to this list once a gateway is connected.
+                  Pay when your books arrive. The team will confirm delivery
+                  arrangements by phone before dispatch.
                 </p>
               </div>
             </div>
@@ -214,7 +215,7 @@ export function CheckoutPreview() {
               <span>Estimated subtotal</span>
               <strong>Rs. {total.toLocaleString("en-PK")}</strong>
             </div>
-            <button className="button button-green" type="submit" form="checkout-form" disabled={busy}>
+            <button className="button button-green" type="submit" form="checkout-form" disabled={busy || !sessionLoaded}>
               {busy ? "Placing your order…" : "Place your order"} <Icon name="arrow" />
             </button>
             {error && <small role="alert">{error}</small>}

@@ -8,7 +8,7 @@ export function HeaderCart() {
     <Link
       className="icon-button header-cart-link"
       href="/cart"
-      aria-label={`Open book bag${count ? `, ${count} books` : ""}`}
+      aria-label={`Open book bag${count ? `, ${count} ${count === 1 ? "book" : "books"}` : ""}`}
     >
       <Icon name="cart" />
       {count > 0 && (

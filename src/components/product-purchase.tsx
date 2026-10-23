@@ -5,47 +5,49 @@ import { addToCart } from "./cart-state";
 import Image from "next/image";
 import { Icon } from "./ui";
 import { WishlistButton } from "./store-interactions";
-import type { Product } from "@/data/products";
+import type { Product } from "@/lib/catalogue";
 
 export function ProductGallery({ book }: { book: Product }) {
-  const [cover, setCover] = useState(false);
+  const images = [
+    { src: book.image, label: "Front cover", alt: `${book.name} — front cover` },
+    ...(book.gallery || []).map((image, index) => ({ src: image.url, label: `Book view ${index + 1}`, alt: image.alt || `${book.name} — view ${index + 1}` })),
+  ];
+  const [selectedImage, setSelectedImage] = useState(0);
+  const active = images[selectedImage] || images[0];
   return (
     <div className="product-gallery">
-      <div className={`product-main-photo ${cover ? "show-cover" : ""}`}>
+      <div className="product-main-photo show-cover">
         <Image
-          src={cover ? book.image : `/images/premium-${book.id}.webp`}
-          alt={
-            cover
-              ? `${book.name} — front cover`
-              : `${book.name} — styled book photograph`
-          }
+          src={active.src}
+          alt={active.alt}
           fill
           sizes="(max-width: 800px) 90vw, 50vw"
           priority
+          unoptimized={active.src.startsWith("https://")}
         />
         <span className="gallery-label">THE LEGAL BOOKSHELF</span>
         <WishlistButton id={book.id} name={book.name} />
       </div>
       <div className="product-thumbnails">
-        {[false, true].map((isCover) => (
+        {images.map((image, index) => (
           <button
-            key={String(isCover)}
-            aria-label={isCover ? "Show front cover" : "Show styled photograph"}
-            aria-pressed={cover === isCover}
-            onClick={() => setCover(isCover)}
+            key={`${image.src}-${index}`}
+            aria-label={`Show ${image.label.toLowerCase()}`}
+            aria-pressed={selectedImage === index}
+            onClick={() => setSelectedImage(index)}
           >
             <Image
-              src={isCover ? book.image : `/images/premium-${book.id}.webp`}
+              src={image.src}
               width={70}
               height={70}
-              alt=""
+              alt={image.alt}
+              unoptimized={image.src.startsWith("https://")}
             />
           </button>
         ))}
         <p>
-          Explore the book.
-          <br />
-          <span>Select a view above.</span>
+          {images.length} book views.
+          <br /><span>Select a view above.</span>
         </p>
       </div>
     </div>
@@ -103,10 +105,10 @@ export function ProductPurchase({ book }: { book: Product }) {
         </div>
       )}
       <p className="checkout-note">
-        Save your selection. Online ordering opens in a future milestone.
+        Add this title to your bag, then continue to checkout for cash on delivery.
       </p>
       <Link className="detail-whatsapp" href="/contact">
-        <Icon name="chat" /> Ask our team about this book <Icon name="arrow" />
+        <Icon name="whatsapp" /> Ask our team about this book <Icon name="arrow" />
       </Link>
     </div>
   );

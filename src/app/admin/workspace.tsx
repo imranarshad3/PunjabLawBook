@@ -15,6 +15,8 @@ import { ProductDetails } from "./product-details";
 import { useAdminData } from "./use-admin-data";
 import { RecordsPanel } from "./records";
 import { EntityForm, type EntityKey } from "./entity-form";
+import { SiteImagesEditor } from "./site-images-editor";
+import { SITE_IMAGE_PREFIX } from "@/lib/site-image-slots";
 import { TeamInvites } from "./team-invites";
 import type { AdminBook, RecordRow } from "./use-admin-data";
 
@@ -34,14 +36,16 @@ const recordTable: Record<string, string> = {
 const money = (amount: number) =>
   new Intl.NumberFormat("en-PK", { maximumFractionDigits: 2 }).format(amount);
 /** Joins table names for prose: "a, b and c". */
-/* Category illustrations from the approved Categories design. Mapped by exact
-   name only: this store's subjects are law categories, so most fall back to the
-   neutral mark rather than borrowing an unrelated illustration. */
-const categoryArt: Record<string, string> = Object.fromEntries(
-  ["educational", "fiction", "islamic", "children", "self help", "academic", "science", "history"].map(
-    (name) => [name, `/images/admin/category-${name.replace(" ", "-")}.webp`],
-  ),
-);
+const categoryIconNames = new Set(["book", "scale", "gavel", "landmark", "shield", "briefcase", "graduation", "scroll"]);
+const categoryIconFor = (name: string, savedIcon?: string | null) => {
+  if (savedIcon && categoryIconNames.has(savedIcon)) return savedIcon;
+  const normalized = name.toLowerCase();
+  if (normalized.includes("criminal") || normalized.includes("family")) return "scale";
+  if (normalized.includes("evidence")) return "gavel";
+  if (normalized.includes("tax")) return "file";
+  if (normalized.includes("student") || normalized.includes("exam")) return "graduation";
+  return "book";
+};
 const listed = (names: string[]) =>
   names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`;
 const contentPages = [
@@ -90,7 +94,7 @@ function CatalogueChart({ categories, total }: { categories: { name: string; cou
           <div key={c.name} className="plbh-admin-bar-column" title={`${c.name}: ${c.count}`}>
             <span className="plbh-admin-bar-value">{c.count}</span>
             <i style={{ height: `${Math.max(6, (c.count / peak) * 100)}%`, animationDelay: `${index * 50}ms` }} />
-            <small>{c.name.split(" ")[0].slice(0, 7)}</small>
+            <small>{c.name}</small>
           </div>
         ))}
       </div>
@@ -165,7 +169,6 @@ export function AdminWorkspace({ view }: { view: View }) {
   const [selectedBooks, setSelectedBooks] = useState<Set<number>>(new Set());
   const [notice, setNotice] = useState("");
   const [editing, setEditing] = useState<{ entity: EntityKey; row?: RecordRow | null } | null>(null);
-  const [orderDetail, setOrderDetail] = useState<RecordRow | null>(null);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [categorySearch, setCategorySearch] = useState("");
   const shortcutsDialog = useRef<HTMLDialogElement>(null);
@@ -256,9 +259,17 @@ export function AdminWorkspace({ view }: { view: View }) {
   const setAvailability = (value: string) => { updateFilters({ availability: value === "All availability" ? null : value, page: null }); clearSelection(); };
   const setSort = (value: string) => { updateFilters({ sort: value === "Title A–Z" ? null : value, page: null }); clearSelection(); };
   const overview = view === "Dashboard";
-  const liveOrders = data.orders.filter(
-    (order) => !["cancelled", "refunded"].includes(String(order.status)),
-  );
+  const range = params.get("range") || "all";
+  const rangeOrders = data.orders.filter((order) => {
+    if (range === "all") return true;
+    const start = new Date();
+    if (range === "year") start.setMonth(0, 1);
+    else start.setDate(start.getDate() - ({ "7d": 7, "30d": 30, "90d": 90 }[range] ?? 30));
+    start.setHours(0, 0, 0, 0);
+    return new Date(String(order.placed_at)) >= start;
+  });
+  const liveOrders = rangeOrders.filter((order) => !["cancelled", "refunded"].includes(String(order.status)));
+  const liveOrderIds = new Set(liveOrders.map((order) => order.id));
   const revenue = liveOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
   const lowStock = products.filter((book) => book.stockStatus === "low_stock" || book.stockStatus === "out_of_stock").length;
   const monthly = (() => {
@@ -274,6 +285,7 @@ export function AdminWorkspace({ view }: { view: View }) {
   const topTitles = (() => {
     const buckets = new Map<string, number>();
     for (const item of data.orderItems) {
+      if (!liveOrderIds.has(String(item.order_id))) continue;
       const title = String(item.title);
       buckets.set(title, (buckets.get(title) || 0) + Number(item.quantity || 0));
     }
@@ -284,7 +296,7 @@ export function AdminWorkspace({ view }: { view: View }) {
   })();
   const statusSplit = (() => {
     const buckets = new Map<string, number>();
-    for (const order of data.orders) {
+    for (const order of rangeOrders) {
       const key = String(order.status);
       buckets.set(key, (buckets.get(key) || 0) + 1);
     }
@@ -298,13 +310,21 @@ export function AdminWorkspace({ view }: { view: View }) {
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-+|-+$/g, "")
-        .slice(0, 60)}-${Date.now().toString(36)}`;
+        .slice(0, 60)}`;
     }
     const failure = await data.save(table, values, id);
     if (!failure) setNotice(id ? "Changes saved." : "Record created.");
     return failure;
   }
   async function destroy(table: string, id: string, label: string) {
+    if (table === "categories") {
+      const usage = await data.categoryBookCount(id);
+      if (usage.error) { setNotice(`Could not check category books: ${usage.error}`); return; }
+      if (usage.count > 0) {
+        setNotice(`Cannot delete ${label}: ${usage.count} ${usage.count === 1 ? "book is" : "books are"} assigned to it. Reassign those books first.`);
+        return;
+      }
+    }
     const failure = await data.remove(table, id);
     setNotice(failure || `${label} deleted.`);
   }
@@ -398,7 +418,7 @@ export function AdminWorkspace({ view }: { view: View }) {
                 <span>
                   {data.failures.length
                     ? `Supabase refused the read for ${listed(data.failures)}. Those pages are empty because the request was denied, not because the tables are. Check the row level security policies for your admin role.`
-                    : "Your Supabase books table returned no rows, so these pages show the catalogue shipped with the site. Changes you make here will not appear in the shop."}
+                    : "The database is not configured. This catalogue is read-only until the store connection is restored."}
                 </span>
               </div>
               <button
@@ -414,7 +434,7 @@ export function AdminWorkspace({ view }: { view: View }) {
               <span className="plbh-admin-current-tab">
                 {overview ? "Store overview" : view}
               </span>
-              <span>Public catalogue snapshot</span>
+              <span>{data.live ? "Live store workspace" : "Catalogue preview"}</span>
             </div>
             <span className="plbh-admin-period">
               <Glyph name="calendar" size={15} /> Verified{" "}
@@ -422,34 +442,62 @@ export function AdminWorkspace({ view }: { view: View }) {
             </span>
           </div>
           {(overview || view === "Analytics") && (
-            <>
-              <div className="plbh-admin-metrics">
-                {[
+            <div className="plbh-admin-metrics">
+                {(overview
+                  ? [
                   {
                     label: "Catalogue titles",
                     icon: "book",
                     value: String(products.length),
-                    detail: `${categoryCounts.length} subjects · ${lowStock} need restocking`,
+                    detail: `${categoryCounts.length} subjects in your store`,
                   },
                   {
                     label: "Orders",
                     icon: "bag",
-                    value: String(data.orders.length),
-                    detail: `${data.orders.filter((order) => order.status === "pending").length} awaiting confirmation`,
+                    value: String(rangeOrders.length),
+                    detail: `${pendingOrders} need confirmation`,
                   },
                   {
-                    label: "Customers",
-                    icon: "users",
-                    value: String(data.customers.length),
-                    detail: `${data.enquiries.filter((enquiry) => enquiry.status === "new").length} new enquiries`,
+                    label: "Stock watch",
+                    icon: "box",
+                    value: String(lowStock),
+                    detail: "Titles low or out of stock",
                   },
                   {
-                    label: "Revenue",
-                    icon: "chart",
-                    value: `Rs. ${money(revenue)}`,
-                    detail: "Excludes cancelled and refunded orders",
+                    label: "Reader enquiries",
+                    icon: "mail",
+                    value: String(newEnquiries),
+                    detail: "Messages ready for follow-up",
                   },
-                ].map((metric, index) => (
+                ]
+                  : [
+                      {
+                        label: "Net order value",
+                        icon: "wallet",
+                        value: `Rs. ${money(revenue)}`,
+                        detail: "Excludes cancelled and refunded orders",
+                      },
+                      {
+                        label: "Orders in range",
+                        icon: "bag",
+                        value: String(rangeOrders.length),
+                        detail: `${liveOrders.length} active orders counted`,
+                      },
+                      {
+                        label: "Average order",
+                        icon: "chart",
+                        value: `Rs. ${money(liveOrders.length ? revenue / liveOrders.length : 0)}`,
+                        detail: "Average value per active order",
+                      },
+                      {
+                        label: "Units ordered",
+                        icon: "book",
+                        value: String(data.orderItems
+                          .filter((item) => liveOrderIds.has(String(item.order_id)))
+                          .reduce((sum, item) => sum + Number(item.quantity || 0), 0)),
+                        detail: "Across the selected order range",
+                      },
+                    ]).map((metric, index) => (
                   <section className="plbh-admin-metric" key={metric.label}>
                     <span className={`plbh-admin-metric-icon tone-${index}`}>
                       <Glyph name={metric.icon} size={18} />
@@ -459,62 +507,26 @@ export function AdminWorkspace({ view }: { view: View }) {
                     <p>{metric.detail}</p>
                   </section>
                 ))}
-              </div>
+            </div>
+          )}
+          {overview && (
+            <>
               <div className="plbh-admin-chart-grid">
                 <CatalogueChart categories={categoryCounts} total={products.length} />
                 <Composition onCategory={browseCategory} categories={categoryCounts} total={products.length} />
               </div>
               <section className="plbh-admin-panel plbh-admin-readiness">
-                  <div className="plbh-admin-panel-heading">
-                    <div>
-                      <h2>A clear view of what’s next</h2>
-                      <p>Your management workspace, step by step.</p>
-                    </div>
-                  </div>
-                  <div className="plbh-admin-readiness-items">
-                    {[
-                      [
-                        "✓",
-                        "Catalogue connected",
-                        "Reading the existing storefront source.",
-                      ],
-                      [
-                        "1",
-                        "Connect Supabase & Clerk",
-                        "Shared data and verified admin identity.",
-                      ],
-                      [
-                        "2",
-                        "Enable protected publishing",
-                        "Catalogue, website content and media.",
-                      ],
-                      [
-                        "3",
-                        "Bring your operations together",
-                        "Enquiries, customer history and reports.",
-                      ],
-                    ].map(([step, title, text]) => (
-                      <div key={step}>
-                        <span
-                          className={
-                            step === "✓" ? "plbh-admin-ready-mark" : "plbh-admin-wait-mark"
-                          }
-                        >
-                          {step}
-                        </span>
-                        <span>
-                          <strong>{title}</strong>
-                          <small>{text}</small>
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    className="plbh-admin-text-button"
-                    onClick={() => navigate("Team & Access")}
-                  >
-                    View access requirements <Glyph name="arrow" size={16} />
-                  </button>
+                <div className="plbh-admin-panel-heading"><div><h2>Today&apos;s priorities</h2><p>A focused view of the work that can move your store forward.</p></div><span className="plbh-admin-chart-unit">WORKSPACE PULSE</span></div>
+                <div className="plbh-admin-quicklinks">
+                  {([
+                    ["Orders", "cart", "Review orders", `${pendingOrders} awaiting confirmation`],
+                    ["Inventory", "box", "Review stock", `${lowStock} titles need attention`],
+                    ["Book Enquiries", "mail", "Reply to readers", `${newEnquiries} new enquiries`],
+                    ["Books", "book", "Curate catalogue", `${products.length} titles available`],
+                  ] as const).map(([target, icon, label, note]) => (
+                    <Link key={target} href={viewPath(target)}><span className="plbh-admin-priority-icon"><Glyph name={icon} size={18} /></span><span><strong>{label}</strong><small>{note}</small></span><Glyph name="arrow" size={16} /></Link>
+                  ))}
+                </div>
               </section>
             </>
           )}
@@ -652,8 +664,7 @@ export function AdminWorkspace({ view }: { view: View }) {
                     <span className="plbh-admin-count">{filtered.length}</span>
                   </h2>
                   <p>
-                    Source catalogue · read only until protected publishing is
-                    connected.
+                    {data.live ? "Manage titles, pricing and availability in your live catalogue." : "Catalogue preview · connect the store to edit books."}
                   </p>
                 </div>
                 <button
@@ -662,17 +673,6 @@ export function AdminWorkspace({ view }: { view: View }) {
                 >
                   <Glyph name="plus" size={15} /> Add book
                 </button>
-                {visible.length > 0 && (
-                  <label className="plbh-admin-select-all">
-                    <input
-                      type="checkbox"
-                      checked={visible.length > 0 && visible.every(b => selectedBooks.has(b.id))}
-                      onChange={toggleAllSelection}
-                      aria-label="Select all books on this page"
-                    />
-                    <span>Select all</span>
-                  </label>
-                )}
               </div>
               <div className="plbh-admin-filter-tabs" role="group" aria-label="Availability filter">
                 {[
@@ -776,7 +776,16 @@ export function AdminWorkspace({ view }: { view: View }) {
                   <thead>
                     <tr>
                       <th scope="col" className="plbh-admin-check-cell">
-                        <span className="plbh-admin-visually-hidden">Select</span>
+                        <label className="plbh-admin-select-all plbh-admin-select-all-header">
+                          <input
+                            type="checkbox"
+                            checked={visible.length > 0 && visible.every(book => selectedBooks.has(book.id))}
+                            onChange={toggleAllSelection}
+                            disabled={visible.length === 0}
+                            aria-label="Select all books on this page"
+                            title="Select all books on this page"
+                          />
+                        </label>
                       </th>
                       <th scope="col">Book</th>
                       <th scope="col">Category</th>
@@ -798,9 +807,9 @@ export function AdminWorkspace({ view }: { view: View }) {
                         </td>
                         <td>
                           <div className="plbh-admin-table-book">
-                            <Image src={book.image} alt="" width={36} height={50} />
+                            <Image src={book.image} alt="" width={44} height={60} />
                             <div>
-                              <strong>{book.name}</strong>
+                              <strong>{book.uuid ? <Link href={`/admin/books/${book.uuid}/edit`}>{book.name}</Link> : book.name}</strong>
                               <small>PLBH-{book.id}</small>
                             </div>
                           </div>
@@ -815,23 +824,6 @@ export function AdminWorkspace({ view }: { view: View }) {
                         </td>
                         <td>
                           <div className="plbh-admin-row-actions">
-                            <Link
-                              className="plbh-admin-icon-button"
-                              href={book.url}
-                              target="_blank"
-                              aria-label={`Preview ${book.name} on the storefront`}
-                              title="Preview on storefront"
-                            >
-                              <Glyph name="external" size={15} />
-                            </Link>
-                            <button
-                              className="plbh-admin-icon-button"
-                              onClick={() => setSelectedBook(book)}
-                              aria-label={`Inspect ${book.name}`}
-                              title="View details"
-                            >
-                              <Glyph name="eye" size={16} />
-                            </button>
                             {book.uuid && (
                               <>
                                 <button
@@ -931,16 +923,12 @@ export function AdminWorkspace({ view }: { view: View }) {
                     .filter((c) => c.name.toLowerCase().includes(categorySearch.trim().toLowerCase()))
                     .map((c) => {
                       const record = data.categoryRows.find((row) => row.name === c.name);
-                      const art = categoryArt[c.name.toLowerCase()];
+                      const icon = categoryIconFor(c.name, record?.icon);
                       return (
                         <div className="plbh-admin-category-tile" key={c.name}>
                           <button onClick={() => browseCategory(c.name)}>
                             <span className="plbh-admin-category-icon">
-                              {art ? (
-                                <Image src={art} alt="" width={256} height={256} />
-                              ) : (
-                                <Glyph name="book" size={46} />
-                              )}
+                              <Glyph name={icon} size={27} />
                             </span>
                             <strong>{c.name}</strong>
                             <span>{c.count} {c.count === 1 ? "book" : "books"}</span>
@@ -978,7 +966,7 @@ export function AdminWorkspace({ view }: { view: View }) {
                     </p>
                   </div>
                 </div>
-                <div className="plbh-admin-content-grid">
+                <div className="plbh-admin-content-grid plbh-admin-collections-list">
                   {Object.entries(collections).map(([slug, c]) => (
                     <article key={slug}>
                       <h3>{c.title}</h3>
@@ -1064,11 +1052,12 @@ export function AdminWorkspace({ view }: { view: View }) {
                 </div>
               ) : (
                 <div className="plbh-admin-media-grid">{data.media.map((asset) => <article key={asset.id}>
-                  <span className="plbh-admin-media-preview"><Image src={String(asset.url)} alt={String(asset.alt_text || "")} width={140} height={190} unoptimized /></span>
-                  <div><h3>{String(asset.alt_text || (asset.books as { title?: string } | null)?.title || "Untitled asset")}</h3><p>{String(asset.kind)}</p>
-                    <a className="plbh-admin-text-button" href={String(asset.url)} target="_blank" rel="noreferrer">Open original <Glyph name="external" size={14} /></a>
-                    <button className="plbh-admin-text-button" onClick={() => destroy("media_assets", String(asset.id), "Asset")}>Remove <Glyph name="arrow" size={14} /></button>
-                  </div>
+                  <span className="plbh-admin-media-preview">
+                    <Image src={String(asset.url)} alt={String(asset.alt_text || "")} width={140} height={190} unoptimized />
+                    <a className="plbh-admin-media-action" href={String(asset.url)} target="_blank" rel="noreferrer" aria-label="Open original image" title="Open image"><Glyph name="external" size={16} /></a>
+                    <button className="plbh-admin-media-action is-danger" type="button" onClick={() => destroy("media_assets", String(asset.id), "Asset")} aria-label="Remove image" title="Remove image"><Glyph name="trash" size={16} /></button>
+                  </span>
+                  <div><h3>{String(asset.alt_text || (asset.books as { title?: string } | null)?.title || "Untitled asset")}</h3><p>{String(asset.kind)}</p></div>
                 </article>)}
                 {!data.media.length && <div className="plbh-admin-empty"><Glyph name="book" size={36} /><h2>No assets yet</h2><p>Upload a cover or banner to start your library.</p></div>}</div>
               )}
@@ -1079,52 +1068,121 @@ export function AdminWorkspace({ view }: { view: View }) {
               </div>
             </section>
           )}
-          {view === "Website Content" && (
+          {view === "Book Reviews" && (
             <section className="plbh-admin-panel">
               <div className="plbh-admin-panel-heading">
-                <div>
-                  <h2>Storefront pages</h2>
-                  <p>
-                    Existing content is maintained in source files. CMS editing
-                    and publishing await the database connection.
-                  </p>
-                </div>
+                <div><h2>Reader reviews <span className="plbh-admin-count">{data.reviews.length}</span></h2><p>Review each reader note before it appears on a book page.</p></div>
+                <span className="plbh-admin-badge pending">{data.reviews.filter((review) => review.status === "pending").length} awaiting review</span>
               </div>
-              <div className="plbh-admin-content-grid">
-                {contentPages.map(([title, path, description]) => (
-                  <article key={path}>
-                    <span className="plbh-admin-eyebrow">STOREFRONT PAGE</span>
-                    <h3>{title}</h3>
-                    <p>{description}</p>
-                    <Link
-                      className="plbh-admin-text-button"
-                      href={path}
-                      target="_blank"
-                    >
-                      Preview page <Glyph name="external" size={14} />
-                    </Link>
-                  </article>
-                ))}
+              <div className="plbh-admin-table-scroll">
+                <table className="plbh-admin-review-table"><thead><tr><th>Review</th><th>Book</th><th>Rating</th><th>Submitted</th><th>Status</th><th>Actions</th></tr></thead>
+                  <tbody>{data.reviews.map((review) => {
+                    const nestedBook = review.books as { title?: string } | null;
+                    return <tr key={review.id}>
+                      <td><strong>{String(review.title)}</strong><small>{String(review.customer_name)}</small><p>{String(review.body)}</p></td>
+                      <td>{String(nestedBook?.title || "Book")}</td>
+                      <td className="plbh-admin-review-stars" aria-label={`${String(review.rating)} out of 5 stars`}>{"★".repeat(Number(review.rating))}{"☆".repeat(5 - Number(review.rating))}</td>
+                      <td>{review.created_at ? new Date(String(review.created_at)).toLocaleDateString("en-PK") : "—"}</td>
+                      <td><span className={`plbh-admin-badge ${review.status === "published" ? "delivered" : review.status === "rejected" ? "cancelled" : "pending"}`}>{String(review.status)}</span></td>
+                      <td><div className="plbh-admin-review-actions">
+                        {review.status !== "published" && <button className="plbh-admin-button plbh-admin-button-primary" onClick={() => void persist("book_reviews", { status: "published" }, review.id)}>Approve</button>}
+                        {review.status !== "rejected" && <button className="plbh-admin-button" onClick={() => void persist("book_reviews", { status: "rejected" }, review.id)}>Reject</button>}
+                        <button className="plbh-admin-icon-button" data-tone="danger" aria-label={`Delete review by ${String(review.customer_name)}`} onClick={() => destroy("book_reviews", review.id, "Review")}><Glyph name="trash" size={15} /></button>
+                      </div></td>
+                    </tr>;
+                  })}
+                  {!data.reviews.length && <tr><td colSpan={6}><div className="plbh-admin-empty"><Glyph name="star" size={34} /><h2>No reviews yet</h2><p>New reader reviews will appear here for moderation.</p></div></td></tr>}
+                  </tbody>
+                </table>
               </div>
             </section>
           )}
+          {view === "Website Content" && (
+            <>
+              {!data.loading && <SiteImagesEditor rows={data.banners} upload={data.uploadImage} save={data.save} />}
+              <section className="plbh-admin-panel plbh-admin-content-overview">
+                <div className="plbh-admin-panel-heading">
+                  <div>
+                    <h2>Storefront pages</h2>
+                    <p>Edit page titles, summaries and published content, then preview the live route.</p>
+                  </div>
+                  <span className="plbh-admin-badge delivered">{data.pages.filter((page) => page.published !== false).length} published</span>
+                </div>
+                <div className="plbh-admin-content-grid plbh-admin-storefront-pages">
+                  {contentPages.map(([title, path, description]) => {
+                    const page = data.pages.find((entry) => entry.path === path);
+                    const pageRow = page || {
+                      id: "", slug: path.replace(/^\//, "").replaceAll("/", "-") || "home",
+                      path, title, description, body: "", published: true,
+                    };
+                    return (
+                      <article key={path}>
+                        <span className="plbh-admin-page-mark"><Glyph name="file" size={19} /></span>
+                        <div className="plbh-admin-page-copy">
+                          <h3>{String(page?.title || title)}</h3>
+                          <p>{String(page?.description || description)}</p>
+                          <span className={`plbh-admin-content-status ${page?.published === false ? "is-draft" : "is-live"}`}>
+                            <i /> {page?.published === false ? "Draft" : "Published"}
+                          </span>
+                        </div>
+                        <div className="plbh-admin-content-actions">
+                          {path !== "/" && <button className="plbh-admin-text-button" onClick={() => setEditing({ entity: "page", row: pageRow as RecordRow })}>
+                            <Glyph name="pencil" size={14} /> Edit content
+                          </button>}
+                          <Link className="plbh-admin-text-button" href={path} target="_blank">
+                            Preview <Glyph name="external" size={14} />
+                          </Link>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
+              <section className="plbh-admin-panel plbh-admin-space-top">
+                <div className="plbh-admin-panel-heading">
+                  <div><h2>Homepage featured sections <span className="plbh-admin-count">{data.featuredSections.length}</span></h2><p>Control the heading, supporting copy and visibility of Featured Books and Bestsellers.</p></div>
+                  <button className="plbh-admin-button plbh-admin-button-primary" onClick={() => setEditing({ entity: "feature-section" })}><Glyph name="plus" size={16} /> Add section</button>
+                </div>
+                <div className="plbh-admin-featured-sections">
+                  {data.featuredSections.map((section) => (
+                    <article key={section.id}>
+                      <span className="plbh-admin-page-mark"><Glyph name="book" size={19} /></span>
+                      <div><h3>{String(section.title)}</h3><p>{String(section.subtitle || "No supporting text")}</p><small>Key: {String(section.key)} · Order {String(section.sort_order ?? 0)}</small></div>
+                      <span className={`plbh-admin-content-status ${section.active === false ? "is-draft" : "is-live"}`}><i /> {section.active === false ? "Hidden" : "Visible"}</span>
+                      <div className="plbh-admin-content-actions">
+                        <button className="plbh-admin-icon-button" aria-label={`Edit ${String(section.title)}`} onClick={() => setEditing({ entity: "feature-section", row: section })}><Glyph name="pencil" size={15} /></button>
+                        <button className="plbh-admin-icon-button" data-tone="danger" aria-label={`Delete ${String(section.title)}`} onClick={() => destroy("featured_sections", section.id, String(section.title))}><Glyph name="trash" size={15} /></button>
+                      </div>
+                    </article>
+                  ))}
+                  {!data.featuredSections.length && <div className="plbh-admin-empty"><Glyph name="book" size={34} /><h2>No featured sections configured</h2><p>Add a homepage section to curate its heading and visibility.</p></div>}
+                </div>
+              </section>
+            </>
+          )}
           {view === "Analytics" && (
+            <>
+            <section className="plbh-admin-analytics-intro">
+              <span className="plbh-admin-analytics-mark"><Glyph name="chart" size={20} /></span>
+              <div><span className="plbh-admin-analytics-eyebrow">PERFORMANCE REPORT</span><h2>Know what readers are choosing.</h2><p>Explore order value, sales momentum and the titles moving through your store.</p></div>
+              <div className="plbh-admin-analytics-summary"><span>Selected period</span><strong>{range === "all" ? "All time" : range === "year" ? "This year" : `Last ${range.replace("d", " days")}`}</strong><small>{rangeOrders.length} orders included</small></div>
+            </section>
             <div className="plbh-admin-chart-grid plbh-admin-space-top">
               <section className="plbh-admin-panel">
                 <div className="plbh-admin-panel-heading">
                   <div>
-                    <h2>Revenue by month</h2>
-                    <p>Confirmed orders only</p>
+                    <h2>Revenue over time</h2>
+                    <p>Order value by month for the selected period</p>
                   </div>
-                  <span className="plbh-admin-chart-unit">Rs. {money(revenue)}</span>
+                  <span className="plbh-admin-chart-unit"><Glyph name="wallet" size={14} /> Rs. {money(revenue)}</span>
                 </div>
                 {monthly.length ? (
-                  <div className="plbh-admin-bars">
+                  <div className="plbh-admin-bars plbh-admin-revenue-bars">
                     {monthly.map((month) => {
                       const peak = Math.max(...monthly.map((entry) => entry.count));
                       return (
                         <div className="plbh-admin-bar-column" key={month.name} title={`${month.name}: Rs. ${money(month.count)}`}>
-                          <span className="plbh-admin-bar-value">{Math.round(month.count / 1000)}k</span>
+                          <span className="plbh-admin-bar-value">{month.count >= 1000 ? `${(month.count / 1000).toFixed(month.count >= 10000 ? 0 : 1)}k` : money(month.count)}</span>
                           <i style={{ height: `${Math.max(6, (month.count / peak) * 100)}%` }} />
                           <small>{month.name}</small>
                         </div>
@@ -1138,10 +1196,10 @@ export function AdminWorkspace({ view }: { view: View }) {
               <section className="plbh-admin-panel">
                 <div className="plbh-admin-panel-heading">
                   <div>
-                    <h2>Best sellers</h2>
-                    <p>Units sold across all orders</p>
+                    <h2>Reader favourites</h2>
+                    <p>Best-selling titles in the selected period</p>
                   </div>
-                  <span className="plbh-admin-chart-unit">{data.orderItems.length} LINES</span>
+                  <span className="plbh-admin-chart-unit"><Glyph name="book" size={14} /> TOP TITLES</span>
                 </div>
                 <div className="plbh-admin-composition">
                   {topTitles.length ? (
@@ -1159,10 +1217,15 @@ export function AdminWorkspace({ view }: { view: View }) {
                   )}
                 </div>
                 <div className="plbh-admin-table-footer">
-                  Source: order_items<span>{statusSplit.map((entry) => `${entry.count} ${entry.name}`).join(" · ") || "No orders"}</span>
+                  Source: order items<span>{data.orderItems.length} order lines</span>
                 </div>
               </section>
             </div>
+            <section className="plbh-admin-panel plbh-admin-order-health">
+              <div className="plbh-admin-panel-heading"><div><h2>Order status</h2><p>Where orders currently stand in the selected period.</p></div><span className="plbh-admin-chart-unit">{rangeOrders.length} TOTAL</span></div>
+              {statusSplit.length ? <div className="plbh-admin-status-grid">{statusSplit.map((entry) => <div className="plbh-admin-status-item" key={entry.name}><span className={`plbh-admin-status-dot status-${entry.name.toLowerCase().replace(/[^a-z]+/g, "-")}`} /><span className="plbh-admin-status-label">{entry.name.replaceAll("_", " ")}</span><span className="plbh-admin-status-track"><i style={{ width: `${(entry.count / Math.max(1, rangeOrders.length)) * 100}%` }} /></span><strong>{entry.count}</strong></div>)}</div> : <div className="plbh-admin-empty"><Glyph name="bag" size={34} /><h2>No order activity</h2><p>Order statuses will appear here when customers place orders.</p></div>}
+            </section>
+            </>
           )}
           {view === "Team & Access" && <TeamInvites role={myRole} />}
           {recordViews.includes(view) && (
@@ -1176,14 +1239,14 @@ export function AdminWorkspace({ view }: { view: View }) {
                     : view === "Promotions"
                       ? data.promotions
                       : view === "Website Content"
-                        ? data.banners
+                        ? data.banners.filter((row) => !String(row.title).startsWith(SITE_IMAGE_PREFIX))
                         : view === "Team & Access"
                           ? data.team
                           : data.enquiries
               }
               loading={data.loading}
-              title={view}
-              description={subtitles[view] || ""}
+              title={view === "Team & Access" ? "Active studio members" : view}
+              description={view === "Team & Access" ? "People with direct access to manage this workspace." : subtitles[view] || ""}
               onAdd={
                 recordEntity[view] && view !== "Customers"
                   ? () => setEditing({ entity: recordEntity[view] })
@@ -1198,7 +1261,7 @@ export function AdminWorkspace({ view }: { view: View }) {
               }
               onEdit={
                 view === "Orders"
-                  ? (row) => setOrderDetail(row)
+                  ? (row) => router.push(`/admin/orders/${row.id}`)
                   : recordEntity[view]
                     ? (row) => setEditing({ entity: recordEntity[view], row })
                     : undefined
@@ -1228,9 +1291,17 @@ export function AdminWorkspace({ view }: { view: View }) {
                 </div>
                 <button
                   className="plbh-admin-button plbh-admin-button-primary"
+                  disabled={data.loading || (!data.live && data.failures.length === 0)}
+                  aria-busy={data.loading}
+                  title={!data.loading && !data.live && data.failures.length === 0 ? "Connect Supabase to edit and save store settings." : undefined}
                   onClick={() => setEditing({ entity: "settings", row: data.settings })}
                 >
-                  <Glyph name="settings" size={15} /> Edit store settings
+                  <Glyph name="settings" size={15} />
+                  {data.loading
+                    ? "Loading settings…"
+                    : data.live || data.failures.length > 0
+                      ? "Edit store settings"
+                      : "Database unavailable"}
                 </button>
               </div>
               <div className="plbh-admin-settings-grid">
@@ -1241,8 +1312,11 @@ export function AdminWorkspace({ view }: { view: View }) {
                       ["Store name", String(data.settings?.store_name || "Punjab Law Book House")],
                       ["Store email", String(data.settings?.store_email || "Not set")],
                       ["Phone", String(data.settings?.phone || "Not set")],
+                      ["WhatsApp", String(data.settings?.whatsapp || "Not set")],
                       ["Address", [data.settings?.address, data.settings?.city].filter(Boolean).join(", ") || "Not set"],
                       ["Currency", String(data.settings?.currency || "PKR")],
+                      ["Flat shipping", `${String(data.settings?.currency || "PKR")} ${money(Number(data.settings?.shipping_flat_fee || 0))}`],
+                      ["Free shipping from", data.settings?.free_shipping_over == null ? "Not set" : `${String(data.settings?.currency || "PKR")} ${money(Number(data.settings.free_shipping_over))}`],
                       ["Catalogue source", data.live ? `Supabase · ${products.length} titles` : `Repository JSON · ${products.length} titles`],
                     ].map(([label, value]) => (
                       <div key={label}>
@@ -1260,15 +1334,15 @@ export function AdminWorkspace({ view }: { view: View }) {
                       <dd>
                         {data.failures.length ? (
                           <span className="plbh-admin-status-badge plbh-admin-badge cancelled">
-                            Connected · {data.failures.length} {data.failures.length === 1 ? "table" : "tables"} refused
+                            Attention needed · {data.failures.join(", ")}
                           </span>
                         ) : data.live ? (
                           <span className="plbh-admin-status-badge plbh-admin-status-live">
-                            Connected · reading {products.length} titles under row level security
+                            Connected · {products.length} titles readable
                           </span>
                         ) : (
                           <span className="plbh-admin-status-badge plbh-admin-status-pending">
-                            Connected · no rows returned yet
+                            Not configured · using the bundled catalogue
                           </span>
                         )}
                       </dd>
@@ -1276,10 +1350,6 @@ export function AdminWorkspace({ view }: { view: View }) {
                     <div>
                       <dt>Clerk authentication</dt>
                       <dd><span className="plbh-admin-status-badge plbh-admin-status-live">Connected · admin routes require a staff account</span></dd>
-                    </div>
-                    <div>
-                      <dt>Ordering</dt>
-                      <dd><span className="plbh-admin-status-badge plbh-admin-status-live">Live · orders written through place_order</span></dd>
                     </div>
                     <div>
                       <dt>Payment gateway</dt>
@@ -1307,7 +1377,7 @@ export function AdminWorkspace({ view }: { view: View }) {
                   <h3>Operations</h3>
                   <dl className="plbh-admin-settings-list">
                     {[
-                      ["Ordering", "Live · orders and stock written by the place_order function"],
+                      ["Order processing", "Orders and stock are written by the place_order function"],
                       ["Payments", "Cash on delivery · no gateway connected"],
                       ["Enquiries", "Recorded to the enquiries table; WhatsApp remains the reply channel"],
                       ["Inventory tracking", "Live · movements recorded, stock updated by trigger"],
@@ -1322,13 +1392,23 @@ export function AdminWorkspace({ view }: { view: View }) {
                 </div>
               </div>
               <div className="plbh-admin-settings-note">
-                <span className="plbh-admin-note-icon">{data.live ? "✓" : "⚙"}</span>
+                <span className={`plbh-admin-note-icon ${data.failures.length ? "is-warning" : data.live ? "is-connected" : "is-demo"}`}>
+                  <Glyph name={data.failures.length ? "alert" : data.live ? "check" : "settings"} size={17} />
+                </span>
                 <div>
-                  <strong>{data.live ? "Database and authentication are linked" : "Waiting for the first rows"}</strong>
+                  <strong>
+                    {data.failures.length
+                      ? "Some database connections need attention"
+                      : data.live
+                        ? "Database and authentication are connected"
+                        : "Showing the bundled catalogue"}
+                  </strong>
                   <p>
-                    {data.live
-                      ? "Clerk signs you in, Supabase sees that session, and row level security decides what you can read and write. Team roles, publishing, uploads, private records and shared settings are all active. The one thing still unconnected is a payment gateway — orders are taken as cash on delivery."
-                      : "Clerk is signing you in and the tables are reachable, but no rows have come back yet, so these pages are showing the catalogue shipped with the site."}
+                    {data.failures.length
+                      ? `The following data could not be loaded: ${data.failures.join(", ")}. Check your database policies and connection, then reload this page.`
+                      : data.live
+                        ? "Clerk authenticates staff and Supabase applies row level security to admin data. Orders use cash on delivery; no online payment gateway is connected."
+                        : "Supabase is not connected in this environment, so catalogue details come from the files shipped with the site. Configure the database to edit and persist store settings."}
                   </p>
                 </div>
               </div>
@@ -1358,50 +1438,6 @@ export function AdminWorkspace({ view }: { view: View }) {
         </div>
       )}
       {selectedBook && <ProductDetails book={selectedBook} onClose={() => setSelectedBook(null)} />}
-      {orderDetail && (
-        <dialog
-          className="plbh-admin-detail-dialog"
-          ref={(node) => node?.showModal()}
-          onClose={() => setOrderDetail(null)}
-          onClick={(event) => {
-            if (event.target === event.currentTarget) setOrderDetail(null);
-          }}
-        >
-          <div className="plbh-admin-entity-form">
-            <div className="plbh-admin-panel-heading">
-              <div>
-                <h2>Order {String(orderDetail.order_number)}</h2>
-                <p>
-                  {String(orderDetail.customer_name)} · {String(orderDetail.status)} ·{" "}
-                  {new Date(String(orderDetail.placed_at)).toLocaleString("en-PK")}
-                </p>
-              </div>
-              <button className="plbh-admin-icon-button" aria-label="Close order" onClick={() => setOrderDetail(null)}>×</button>
-            </div>
-            <div className="plbh-admin-table-scroll">
-              <table>
-                <thead><tr><th>Title</th><th>Unit price</th><th>Qty</th><th>Line total</th></tr></thead>
-                <tbody>
-                  {data.orderItems.filter((item) => item.order_id === orderDetail.id).map((item) => (
-                    <tr key={String(item.id)}>
-                      <td><strong>{String(item.title)}</strong></td>
-                      <td className="plbh-admin-amount">Rs. {money(Number(item.unit_price))}</td>
-                      <td>{String(item.quantity)}</td>
-                      <td className="plbh-admin-amount">Rs. {money(Number(item.line_total))}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <dl className="plbh-admin-settings-list" style={{ padding: "0 1.5rem" }}>
-              <div><dt>Deliver to</dt><dd>{[orderDetail.shipping_address, orderDetail.shipping_city].filter(Boolean).join(", ") || "Not provided"}</dd></div>
-              <div><dt>Contact</dt><dd>{[orderDetail.customer_phone, orderDetail.customer_email].filter(Boolean).join(" · ") || "Not provided"}</dd></div>
-              <div><dt>Payment</dt><dd>{String(orderDetail.payment_status)} · {String(orderDetail.payment_method || "cash on delivery")}</dd></div>
-              <div><dt>Total</dt><dd>Rs. {money(Number(orderDetail.total))}</dd></div>
-            </dl>
-          </div>
-        </dialog>
-      )}
       {editing && (
         <EntityForm
           entity={editing.entity}

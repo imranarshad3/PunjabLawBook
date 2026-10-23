@@ -44,3 +44,20 @@ token to `createClient` via its `accessToken` option.
   (`untracked` / `out_of_stock` / `low_stock` / `in_stock`).
 - Inserting into `inventory_movements` automatically adjusts `books.stock`.
 - `orders.order_number` auto-generates as `PB03200`, `PB03201`, …
+
+## Checkout integrity
+
+`20261023025723_checkout_integrity.sql` binds customer ownership to the verified
+Clerk JWT, rejects caller-supplied identities that do not match that token, and
+keeps guest email addresses separate from registered customer accounts. Book
+rows are locked in catalogue-ID order, quantities and delivery details are
+validated, and insufficient stock rolls back the whole order.
+
+The checkout client forwards the Clerk token and reads the live catalogue.
+Account history explicitly filters to the current customer's orders, including
+when the signed-in reader also has administrator access.
+
+Verified against the configured database with a rolled-back transaction:
+forged identity rejection, insufficient-stock rejection, authenticated order
+ownership, database-calculated totals and exact inventory deduction. No test
+orders were retained.

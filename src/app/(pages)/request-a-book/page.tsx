@@ -1,11 +1,12 @@
+import { CmsPage } from "@/components/cms-page";
 import type { Metadata } from "next";
-import Image from "next/image";
+import Image from "@/components/site-image";
 import { PageIntro } from "@/components/page-intro";
 import { EnquiryForm } from "@/components/enquiry-form";
 export const metadata: Metadata = {
   title: "Request a Book | Punjab Law Book House",
 };
-export default function RequestBookPage() {
+function RequestBookPage() {
   return (
     <main id="main" className="inner-page">
       <PageIntro
@@ -66,4 +67,8 @@ export default function RequestBookPage() {
       </section>
     </main>
   );
+}
+
+export default function PublishedPage() {
+  return <CmsPage path="/request-a-book"><RequestBookPage /></CmsPage>;
 }

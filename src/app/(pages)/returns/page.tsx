@@ -1,18 +1,19 @@
+import { CmsPage } from "@/components/cms-page";
 import type { Metadata } from "next";
 import { InformationPage } from "@/components/information-page";
 export const metadata: Metadata = {
   title: "Returns & Order Support | Punjab Law Book House",
 };
-export default function Page() {
+function Page() {
   return (
     <InformationPage
       title="A little assistance."
       accent="When you need it."
-      intro="A clear place for order questions, with the full online returns process to follow when ordering opens."
+      intro="A clear place for questions about your books, delivery and order support."
       sections={[
         {
-          title: "Online orders are not active yet",
-          body: "This website currently supports browsing and local book selections. It has not accepted any online orders, and its checkout preview cannot submit a purchase.",
+          title: "Questions about an order",
+          body: "Sign in to your account to view orders placed while signed in. Contact the team with your order reference if you need an update or correction.",
         },
         {
           title: "Before placing an order",
@@ -20,7 +21,7 @@ export default function Page() {
         },
         {
           title: "Returns information",
-          body: "Return eligibility, time limits, shipping responsibilities and refund methods will be published before online ordering is activated. No return or refund promise is made by the current preview.",
+          body: "Contact the team with your order reference and a description of the issue to discuss return eligibility, shipping responsibilities and next steps before sending any books back.",
         },
         {
           title: "Speak with the team",
@@ -29,4 +30,8 @@ export default function Page() {
       ]}
     />
   );
+}
+
+export default function PublishedPage() {
+  return <CmsPage path="/returns"><Page /></CmsPage>;
 }

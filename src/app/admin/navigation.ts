@@ -1,6 +1,7 @@
 export const navigation = [
   ["Dashboard", "home", ""],
   ["Books", "book", "books"],
+  ["Book Reviews", "star", "reviews"],
   ["Categories", "grid", "categories"],
   ["Orders", "cart", "orders"],
   ["Customers", "users", "customers"],

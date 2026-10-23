@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  outputFileTracingRoot: process.cwd(),
   async headers() {
     const development = process.env.NODE_ENV !== "production";
     // Next's cached HTML contains inline hydration scripts. Nonce-based CSP
@@ -61,6 +62,7 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {
+    root: process.cwd(),
     rules: {
       "*.css": {
         loaders: ["@tailwindcss/turbopack"],

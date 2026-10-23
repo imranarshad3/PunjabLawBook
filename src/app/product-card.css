@@ -682,3 +682,33 @@
     padding: 8px 6px;
   }
 }
+
+/* Keep catalogue covers clear, without the dark studio-photo treatment. */
+.featured-grid .editorial-product-photo { background: #f6f2e9; }
+.featured-grid .editorial-product-photo img { object-fit: contain; padding: 30px 24px 20px; }
+.featured-grid .editorial-product-photo:after { display: none; }
+
+/* The catalogue uses clean cover art, so give it a bright, quiet display plinth
+   and show the complete cover instead of cropping it into a dark studio panel. */
+.shop-product-grid .editorial-product-photo {
+  background:
+    radial-gradient(ellipse at 50% 38%, #fffefa 0, #f8f6ef 52%, transparent 78%),
+    linear-gradient(145deg, #f5f3eb, #ecefe7);
+  border-bottom-color: #e6e5d9;
+}
+.shop-product-grid .editorial-product-photo > a {
+  inset: 12px 14px;
+}
+.shop-product-grid .editorial-product-photo img {
+  object-fit: contain;
+  object-position: center;
+  padding: 12px 14px 18px;
+  filter: none;
+  transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.shop-product-grid .book-card:hover .editorial-product-photo img {
+  transform: translateY(-3px) scale(1.025);
+}
+.shop-product-grid .editorial-product-photo:after {
+  display: none;
+}

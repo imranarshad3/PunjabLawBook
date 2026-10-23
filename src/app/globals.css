@@ -628,7 +628,7 @@ button:focus-visible {
   position: relative;
   background:
     linear-gradient(90deg, #faf6eb 35%, #faf6eb00 70%),
-    url("/images/knowledge.webp") right center/auto 100% no-repeat,
+    var(--site-images-knowledge-webp, url("/images/knowledge.webp")) var(--site-images-knowledge-webp-position, right center)/var(--site-images-knowledge-webp-size, auto 100%) no-repeat,
     #f9f3e6;
   padding: 45px 0;
   min-height: 285px;
@@ -798,7 +798,7 @@ button:focus-visible {
   padding: 42px 0;
   background:
     linear-gradient(90deg, #031f19 27%, #031f19b0 52%, #031f1900 85%),
-    url("/images/bestseller-library.webp") right center/auto 100% no-repeat,
+    var(--site-images-bestseller-library-webp, url("/images/bestseller-library.webp")) var(--site-images-bestseller-library-webp-position, right center)/var(--site-images-bestseller-library-webp-size, auto 100%) no-repeat,
     #031f19;
   color: #fff9e7;
   min-height: 295px;
@@ -931,7 +931,7 @@ button:focus-visible {
   gap: 34px;
 }
 .why-art {
-  background: url("/images/library-detail.webp") center/cover;
+  background: var(--site-images-library-detail-webp, url("/images/library-detail.webp")) var(--site-images-library-detail-webp-position, center)/var(--site-images-library-detail-webp-size, cover);
   border-radius: 10px;
 }
 .why-layout .section-heading h2 {
@@ -982,8 +982,8 @@ button:focus-visible {
 .testimonials-section {
   background:
     linear-gradient(90deg, #002e24e8, #002e24f7 35%, #002e24e8),
-    url("/images/reader-left.webp") left center/auto 100% no-repeat,
-    url("/images/reader-right.webp") right center/auto 100% no-repeat,
+    var(--site-images-reader-left-webp, url("/images/reader-left.webp")) var(--site-images-reader-left-webp-position, left center)/var(--site-images-reader-left-webp-size, auto 100%) no-repeat,
+    var(--site-images-reader-right-webp, url("/images/reader-right.webp")) var(--site-images-reader-right-webp-position, right center)/var(--site-images-reader-right-webp-size, auto 100%) no-repeat,
     #002e24;
   color: #fff;
 }
@@ -1046,8 +1046,8 @@ button:focus-visible {
   border-top: 1px solid #ad8b4a;
   background:
     linear-gradient(90deg, #00281ca0, #00291feb 29%, #00291ff5 65%, #00291fb3),
-    url("/images/newsletter-library.webp") left center/auto 100% no-repeat,
-    url("/images/newsletter-right.webp") right center/auto 100% no-repeat,
+    var(--site-images-newsletter-library-webp, url("/images/newsletter-library.webp")) var(--site-images-newsletter-library-webp-position, left center)/var(--site-images-newsletter-library-webp-size, auto 100%) no-repeat,
+    var(--site-images-newsletter-right-webp, url("/images/newsletter-right.webp")) var(--site-images-newsletter-right-webp-position, right center)/var(--site-images-newsletter-right-webp-size, auto 100%) no-repeat,
     #00291f;
 }
 .newsletter-form {
@@ -1105,7 +1105,7 @@ button:focus-visible {
 .site-footer {
   background:
     linear-gradient(110deg, #00281ffb, #00281ff5 80%, #00281fbb),
-    url("/images/footer-library.webp") right center/auto 100% no-repeat,
+    var(--site-images-footer-library-webp, url("/images/footer-library.webp")) var(--site-images-footer-library-webp-position, right center)/var(--site-images-footer-library-webp-size, auto 100%) no-repeat,
     #00281f;
   color: #e2e7db;
   border-top: 1px solid #af8b44;
@@ -1508,7 +1508,7 @@ button:focus-visible {
   .knowledge-banner {
     background:
       linear-gradient(90deg, #faf6ebfa 20%, #faf6ebcc 65%, #faf6eb60),
-      url("/images/knowledge.webp") right center/auto 100% no-repeat;
+      var(--site-images-knowledge-webp, url("/images/knowledge.webp")) var(--site-images-knowledge-webp-position, right center)/var(--site-images-knowledge-webp-size, auto 100%) no-repeat;
   }
   .featured-grid,
   .bestsellers-grid {
@@ -1521,7 +1521,7 @@ button:focus-visible {
   .bestseller-banner {
     background:
       linear-gradient(90deg, #031f19ee 20%, #031f19a0),
-      url("/images/bestseller-library.webp") right center/auto 100% no-repeat;
+      var(--site-images-bestseller-library-webp, url("/images/bestseller-library.webp")) var(--site-images-bestseller-library-webp-position, right center)/var(--site-images-bestseller-library-webp-size, auto 100%) no-repeat;
   }
   .exam-grid {
     gap: 20px;
@@ -1781,7 +1781,7 @@ button:focus-visible {
     padding-block: 36px;
     background:
       linear-gradient(90deg, #faf6ebfa, #faf6ebcf),
-      url("/images/knowledge.webp") right center/auto 100% no-repeat;
+      var(--site-images-knowledge-webp, url("/images/knowledge.webp")) var(--site-images-knowledge-webp-position, right center)/var(--site-images-knowledge-webp-size, auto 100%) no-repeat;
   }
   .knowledge-banner h2 {
     font-size: 2.6875rem;

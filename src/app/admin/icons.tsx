@@ -1,119 +1,30 @@
-import type { ReactNode } from "react";
+import {
+  LayoutGrid, BookOpen, ShoppingBag, Users, ChartColumn, House, ShoppingCart,
+  Package, Tag, FileText, Eye, Pencil, Trash2, Copy, Upload, CloudUpload,
+  EllipsisVertical, ChevronRight, ChevronLeft, RefreshCw, Save, Mail, Phone,
+  MapPin, Store, CreditCard, Truck, Star, Image, Settings, Search, ArrowRight,
+  ExternalLink, Bell, Plus, Download, CalendarDays, Wallet, Menu, Check, CircleAlert,
+  Scale, Landmark, Shield, BriefcaseBusiness, GraduationCap, ScrollText, Gavel,
+  type LucideIcon,
+} from "lucide-react";
+
+const icons: Record<string, LucideIcon> = {
+  grid: LayoutGrid, book: BookOpen, bag: ShoppingBag, users: Users,
+  chart: ChartColumn, home: House, cart: ShoppingCart, box: Package, tag: Tag,
+  file: FileText, bars: ChartColumn, eye: Eye, pencil: Pencil, trash: Trash2,
+  copy: Copy, upload: Upload, cloud: CloudUpload, dots: EllipsisVertical,
+  right: ChevronRight, left: ChevronLeft, refresh: RefreshCw, save: Save,
+  mail: Mail, phone: Phone, pin: MapPin, store: Store, card: CreditCard,
+  truck: Truck, star: Star, image: Image, settings: Settings, search: Search,
+  arrow: ArrowRight, external: ExternalLink, bell: Bell, plus: Plus,
+  down: Download, calendar: CalendarDays, wallet: Wallet, menu: Menu,
+  check: Check, alert: CircleAlert,
+  scale: Scale, landmark: Landmark, shield: Shield,
+  briefcase: BriefcaseBusiness, graduation: GraduationCap,
+  scroll: ScrollText, gavel: Gavel,
+};
 
 export function Glyph({ name, size = 20 }: { name: string; size?: number }) {
-  const paths: Record<string, ReactNode> = {
-    grid: (
-      <>
-        <rect x="3" y="3" width="7" height="7" rx="1.5" />
-        <rect x="14" y="3" width="7" height="7" rx="1.5" />
-        <rect x="3" y="14" width="7" height="7" rx="1.5" />
-        <rect x="14" y="14" width="7" height="7" rx="1.5" />
-      </>
-    ),
-    book: (
-      <>
-        <path d="M12 5v16M12 5C8 2 4 3 2 4v15c4-1 7-1 10 2 3-3 6-3 10-2V4c-4-1-7-1-10 1Z" />
-        <path d="m5 8 4 1m6 0 4-1" />
-      </>
-    ),
-    bag: (
-      <>
-        <path d="M4 7h16l1 14H3L4 7Z" />
-        <path d="M8 8V6a4 4 0 0 1 8 0v2" />
-      </>
-    ),
-    users: (
-      <>
-        <circle cx="9" cy="7" r="3" />
-        <path d="M2 21v-3a7 7 0 0 1 14 0v3M16 4a3 3 0 0 1 0 6m3 4c2 1 3 3 3 6" />
-      </>
-    ),
-    chart: (
-      <>
-        <path d="M4 3v18h18M8 16v-5m5 5V6m5 10V9" />
-      </>
-    ),
-    home: (<><path d="M3.5 10.5 12 4l8.5 6.5V20a1 1 0 0 1-1 1h-4v-6h-7v6h-4a1 1 0 0 1-1-1z" /></>),
-    cart: (<><circle cx="9" cy="20" r="1.3" /><circle cx="18" cy="20" r="1.3" /><path d="M2.5 3.5h2.2l2.4 11.1a1.5 1.5 0 0 0 1.5 1.2h9.1a1.5 1.5 0 0 0 1.5-1.2L21 7.5H6" /></>),
-    box: (<><path d="M20.5 7.8v8.4a1.5 1.5 0 0 1-.8 1.3l-7 3.8a1.5 1.5 0 0 1-1.4 0l-7-3.8a1.5 1.5 0 0 1-.8-1.3V7.8a1.5 1.5 0 0 1 .8-1.3l7-3.8a1.5 1.5 0 0 1 1.4 0l7 3.8a1.5 1.5 0 0 1 .8 1.3z" /><path d="m3.6 7 8.4 4.6L20.4 7M12 21v-9.4" /></>),
-    tag: (<><path d="M20.5 12.8 13 20.3a1.7 1.7 0 0 1-2.4 0l-7-7a1.7 1.7 0 0 1-.5-1.2V4.9a1.6 1.6 0 0 1 1.6-1.6h7.2c.4 0 .9.2 1.2.5l7 7a1.7 1.7 0 0 1 0 2.4z" /><circle cx="7.8" cy="7.8" r="1.3" /></>),
-    file: (<><path d="M14 3.5H7a1.8 1.8 0 0 0-1.8 1.8v13.4A1.8 1.8 0 0 0 7 20.5h10a1.8 1.8 0 0 0 1.8-1.8V8.3z" /><path d="M14 3.5v4.8h4.8M8.8 13h6.4M8.8 16.5h4.6" /></>),
-    bars: (<><path d="M5 20V12M12 20V5M19 20v-5" /></>),
-    eye: (<><path d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12z" /><circle cx="12" cy="12" r="2.8" /></>),
-    pencil: (<><path d="M16.5 3.9a1.9 1.9 0 0 1 2.7 2.7L7.9 17.9l-3.6.9.9-3.6z" /></>),
-    trash: (<><path d="M4 6.5h16M9.5 6.5V4.8a1.3 1.3 0 0 1 1.3-1.3h2.4a1.3 1.3 0 0 1 1.3 1.3v1.7M6.2 6.5l.8 12.1a1.8 1.8 0 0 0 1.8 1.7h6.4a1.8 1.8 0 0 0 1.8-1.7l.8-12.1" /><path d="M10.2 10v6.4M13.8 10v6.4" /></>),
-    copy: (<><rect x="8.5" y="8.5" width="11.5" height="11.5" rx="2" /><path d="M15.5 5.3A1.8 1.8 0 0 0 13.8 4H6a2 2 0 0 0-2 2v7.8a1.8 1.8 0 0 0 1.3 1.7" /></>),
-    upload: (<><path d="M12 15.5V4.2M8.2 7.8 12 4l3.8 3.8" /><path d="M4.5 15v3.6a1.9 1.9 0 0 0 1.9 1.9h11.2a1.9 1.9 0 0 0 1.9-1.9V15" /></>),
-    cloud: (<><path d="M7 18.5a4.3 4.3 0 0 1-.5-8.6 5.6 5.6 0 0 1 10.8-1.3A3.9 3.9 0 0 1 17.8 18.5z" /><path d="M12 20V11.5M9.2 14.3 12 11.5l2.8 2.8" /></>),
-    dots: (<><circle cx="12" cy="5.5" r="1.3" /><circle cx="12" cy="12" r="1.3" /><circle cx="12" cy="18.5" r="1.3" /></>),
-    right: (<><path d="m9 5 7 7-7 7" /></>),
-    left: (<><path d="m15 5-7 7 7 7" /></>),
-    refresh: (<><path d="M20.5 12a8.5 8.5 0 1 1-2.6-6.1" /><path d="M20.5 4.2V9h-4.8" /></>),
-    save: (<><path d="M5.8 3.5h9.4L20.5 8.8v9.7a2 2 0 0 1-2 2H5.8a2 2 0 0 1-2-2V5.5a2 2 0 0 1 2-2z" /><path d="M8 3.5v5h7M8 20.5v-5.8h8v5.8" /></>),
-    mail: (<><rect x="2.8" y="5" width="18.4" height="14" rx="2" /><path d="m3.5 6.5 8.5 6 8.5-6" /></>),
-    phone: (<><path d="M21 16.9v2.6a1.8 1.8 0 0 1-2 1.8 17.6 17.6 0 0 1-7.7-2.7 17.3 17.3 0 0 1-5.3-5.3A17.6 17.6 0 0 1 3.3 5.5a1.8 1.8 0 0 1 1.8-2h2.6a1.8 1.8 0 0 1 1.8 1.5c.1.9.3 1.7.6 2.5a1.8 1.8 0 0 1-.4 1.9l-1.1 1.1a14 14 0 0 0 5.3 5.3l1.1-1.1a1.8 1.8 0 0 1 1.9-.4c.8.3 1.6.5 2.5.6a1.8 1.8 0 0 1 1.6 1.9z" /></>),
-    pin: (<><path d="M20 10.5c0 5.5-8 12-8 12s-8-6.5-8-12a8 8 0 0 1 16 0z" /><circle cx="12" cy="10.3" r="2.8" /></>),
-    store: (<><path d="M4 9.5V19a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 19V9.5" /><path d="M2.8 9.5 4.6 4.3A1.2 1.2 0 0 1 5.8 3.5h12.4a1.2 1.2 0 0 1 1.2.8l1.8 5.2a2.6 2.6 0 0 1-5.2 0 2.6 2.6 0 0 1-5.2 0 2.6 2.6 0 0 1-5.2 0 2.6 2.6 0 0 1-2.6 0z" /></>),
-    card: (<><rect x="2.8" y="5.3" width="18.4" height="13.4" rx="2" /><path d="M2.8 9.8h18.4" /></>),
-    truck: (<><path d="M3.5 6.5h9.2v9.8H3.5zM12.7 10h3.6l3.2 3.2v3.1h-6.8z" /><circle cx="7" cy="18.5" r="1.6" /><circle cx="16.8" cy="18.5" r="1.6" /></>),
-    star: (<><path d="m12 3.8 2.6 5.4 5.9.8-4.3 4.1 1 5.9-5.2-2.8-5.2 2.8 1-5.9L3.5 10l5.9-.8z" /></>),
-    image: (<><rect x="3" y="4.5" width="18" height="15" rx="2" /><circle cx="8.6" cy="9.8" r="1.6" /><path d="m3.6 16.8 4.9-4.3 4.2 3.6 3-2.6 4.3 3.7" /></>),
-    settings: (
-      <>
-        <circle cx="12" cy="12" r="3" />
-        <path d="m9 3 6 0 1 3 3 1 2 5-2 5-3 1-1 3H9l-1-3-3-1-2-5 2-5 3-1 1-3Z" />
-      </>
-    ),
-    search: (
-      <>
-        <circle cx="10" cy="10" r="6.5" />
-        <path d="m15 15 6 6" />
-      </>
-    ),
-    arrow: <path d="M5 12h14m-5-5 5 5-5 5" />,
-    external: (
-      <>
-        <path d="M14 3h7v7m0-7L10 14M10 4H4v16h16v-6" />
-      </>
-    ),
-    bell: (
-      <>
-        <path d="M5 17h14l-2-4V8a5 5 0 0 0-10 0v5l-2 4Zm5 3h4" />
-      </>
-    ),
-    plus: <path d="M12 5v14M5 12h14" />,
-    down: (
-      <>
-        <path d="M12 3v12m-4-4 4 4 4-4M4 16v5h16v-5" />
-      </>
-    ),
-    calendar: (
-      <>
-        <rect x="3" y="5" width="18" height="16" rx="2" />
-        <path d="M7 3v4m10-4v4M3 11h18" />
-      </>
-    ),
-    wallet: (
-      <>
-        <rect x="3" y="5" width="18" height="15" rx="2" />
-        <path d="M16 10h5v5h-5zM3 9h18" />
-      </>
-    ),
-    menu: <path d="M4 6h16M4 12h16M4 18h16" />,
-  };
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      {paths[name] || paths.book}
-    </svg>
-  );
+  const Icon = icons[name] || BookOpen;
+  return <Icon size={size} strokeWidth={1.7} aria-hidden="true" />;
 }

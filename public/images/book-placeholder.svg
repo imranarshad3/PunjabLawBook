@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 640">
+  <rect width="480" height="640" fill="#f0eee6"/>
+  <rect x="100" y="90" width="280" height="430" rx="12" fill="#fffdf7" stroke="#c7b88e" stroke-width="3"/>
+  <path d="M125 90v430M190 220h100M190 244h100M190 268h70" fill="none" stroke="#17402f" stroke-width="5" stroke-linecap="round"/>
+  <text x="240" y="370" text-anchor="middle" fill="#17402f" font-family="Georgia,serif" font-size="27">Punjab Law</text>
+  <text x="240" y="407" text-anchor="middle" fill="#17402f" font-family="Georgia,serif" font-size="27">Book House</text>
+  <text x="240" y="565" text-anchor="middle" fill="#5c6b62" font-family="Arial,sans-serif" font-size="19">Cover coming soon</text>
+</svg>

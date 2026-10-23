@@ -52,6 +52,8 @@ export function AccountDashboard() {
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [lines, setLines] = useState<OrderLine[]>([]);
+  const [loadError, setLoadError] = useState("");
+  const [retry, setRetry] = useState(0);
   const [open, setOpen] = useState<string | null>(null);
   // Nothing to load when Supabase is not configured.
   const [loading, setLoading] = useState(supabaseConfigured);
@@ -60,22 +62,37 @@ export function AccountDashboard() {
 
   useEffect(() => {
     const client = createClerkSupabaseClient(getToken);
-    if (!client) return;
+    if (!client || !user?.id) return;
     let cancelled = false;
     (async () => {
-      const [orderResult, lineResult] = await Promise.all([
-        client.from("orders").select("*").order("placed_at", { ascending: false }).limit(50),
-        client.from("order_items").select("id, order_id, title, quantity, line_total").limit(300),
-      ]);
+      setLoading(true);
+      setLoadError("");
+      try {
+        const customer = await client.from("customers").select("id").eq("clerk_user_id", user.id).maybeSingle();
+        if (customer.error) throw new Error(customer.error.message);
+        const orderResult = customer.data
+          ? await client.from("orders").select("*").eq("customer_id", customer.data.id).order("placed_at", { ascending: false }).limit(50)
+          : { data: [], error: null };
+        if (orderResult.error) throw new Error(orderResult.error.message);
+        const orderIds = (orderResult.data || []).map((order) => order.id);
+        const lineResult = orderIds.length
+          ? await client.from("order_items").select("id, order_id, title, quantity, line_total").in("order_id", orderIds)
+          : { data: [], error: null };
+        if (lineResult.error) throw new Error(lineResult.error.message);
+        if (cancelled) return;
+        setOrders((orderResult.data as Order[]) || []);
+        setLines((lineResult.data as OrderLine[]) || []);
+      } catch {
+        if (cancelled) return;
+        setLoadError("We couldn’t load your orders. Please try again.");
+      }
       if (cancelled) return;
-      setOrders((orderResult.data as Order[]) || []);
-      setLines((lineResult.data as OrderLine[]) || []);
       setLoading(false);
     })();
     return () => {
       cancelled = true;
     };
-  }, [getToken]);
+  }, [getToken, user?.id, retry]);
 
   const savedBooks = products.filter((book) => saved.includes(book.id));
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -188,7 +205,9 @@ export function AccountDashboard() {
             Order again <Icon name="arrow" />
           </Link>
         </header>
-        {loading ? (
+        {loadError ? (
+          <div className="account-empty-note" role="alert"><p>{loadError}</p><button className="button button-outline" onClick={() => setRetry((value) => value + 1)}>Try again</button></div>
+        ) : loading ? (
           <p className="account-empty-note">Loading your orders…</p>
         ) : orders.length === 0 ? (
           <div className="account-empty-note">
@@ -234,6 +253,9 @@ export function AccountDashboard() {
                           "an address we will confirm by phone"}{" "}
                         · payment {order.payment_status}
                       </p>
+                      <Link className="account-order-details-link" href={`/account/orders/${order.id}`}>
+                        View full order details <Icon name="arrow" />
+                      </Link>
                     </div>
                   )}
                 </li>

@@ -563,7 +563,7 @@
   color: #e6c88f;
   background:
     linear-gradient(#003b30e3, #003b30e3),
-    url("/images/exam-courthouse.webp") center/cover;
+    var(--site-images-exam-courthouse-webp, url("/images/exam-courthouse.webp")) var(--site-images-exam-courthouse-webp-position, center)/var(--site-images-exam-courthouse-webp-size, cover);
 }
 .store-location-art .icon {
   width: 65px;
@@ -708,7 +708,7 @@
   color: #f6eddb;
   background:
     linear-gradient(#00382de0, #002b23f5),
-    url("/images/reader-left.webp") center/cover;
+    var(--site-images-reader-left-webp, url("/images/reader-left.webp")) var(--site-images-reader-left-webp-position, center)/var(--site-images-reader-left-webp-size, cover);
   display: flex;
   flex-direction: column;
   justify-content: center;

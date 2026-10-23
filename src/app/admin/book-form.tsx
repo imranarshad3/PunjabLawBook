@@ -57,32 +57,43 @@ export function BookForm({ bookId }: { bookId?: string }) {
 
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<Draft>({});
-  const [tags, setTags] = useState<string[]>([]);
+  const [editedTags, setTags] = useState<string[] | null>(null);
   const [tagDraft, setTagDraft] = useState("");
   const [cover, setCover] = useState("");
-  const [gallery, setGallery] = useState<string[]>([]);
+  const [galleryAdds, setGalleryAdds] = useState<string[]>([]);
+  const [removedGallery, setRemovedGallery] = useState<string[]>([]);
+  const [activeBookId, setActiveBookId] = useState(bookId || "");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const [loaded, setLoaded] = useState(false);
-
-  // Seed the draft from the record once it arrives, then leave edits alone.
-  if (editing && existing && !loaded) {
-    setLoaded(true);
-    const row = existing as unknown as Record<string, unknown>;
-    setDraft({
-      title: existing.name ?? "",
-      author: String(row.author ?? ""),
-      category_id: existing.categoryId ?? "",
-      isbn: String(row.isbn ?? ""),
-      price: String(existing.price ?? ""),
-      stock: String(existing.stock ?? ""),
-      status: existing.status ?? "draft",
-    });
-    setCover(existing.image ?? "");
-  }
-
+  const [uploads, setUploads] = useState(0);
   const set = (name: string, value: string) => setDraft((d) => ({ ...d, [name]: value }));
-  const value = (name: string) => draft[name] ?? "";
+  const existingFields = existing?.details;
+  const tags = editedTags ?? (Array.isArray(existingFields?.tags) ? existingFields.tags as string[] : []);
+  const compareAt = Number(existingFields?.compare_at_price || 0);
+  const existingDefaults: Record<string, string> = {
+    title: existing?.name ?? "",
+    author: String(existingFields?.author ?? ""),
+    category_id: existing?.categoryId ?? "",
+    isbn: String(existingFields?.isbn ?? ""),
+    price: String(compareAt > (existing?.price ?? 0) ? compareAt : existing?.price ?? ""),
+    sale_price: compareAt > (existing?.price ?? 0) ? String(existing?.price) : "",
+    stock: String(existing?.stock ?? ""),
+    status: existing?.status ?? "draft",
+    publisher: String(existingFields?.publisher ?? ""),
+    slug: String(existingFields?.slug ?? ""),
+    description: String(existingFields?.description ?? ""),
+    short_description: String(existingFields?.short_description ?? ""),
+    meta_title: String(existingFields?.meta_title ?? ""),
+    meta_description: String(existingFields?.meta_description ?? ""),
+    language: String(existingFields?.language ?? "English"),
+    publication_date: String(existingFields?.publication_date ?? ""),
+    low_stock_threshold: String(existingFields?.low_stock_threshold ?? 5),
+  };
+  const value = (name: string) => draft[name] ?? existingDefaults[name] ?? "";
+  const gallery = [
+    ...data.bookImages.filter((image) => image.book_id === existing?.uuid && !removedGallery.includes(String(image.image_url))).map((image) => String(image.image_url)),
+    ...galleryAdds,
+  ];
 
   const addTag = () => {
     const next = tagDraft.trim();
@@ -91,14 +102,26 @@ export function BookForm({ bookId }: { bookId?: string }) {
   };
 
   const upload = async (file: File, onDone: (url: string) => void) => {
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setError("Choose a JPG, PNG or WebP image.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError(`${file.name} is larger than 5 MB.`);
+      return;
+    }
+    setUploads((count) => count + 1);
     try {
       onDone(await data.uploadImage(file));
     } catch (failure) {
       setError(failure instanceof Error ? failure.message : "Upload failed.");
+    } finally {
+      setUploads((count) => count - 1);
     }
   };
 
   async function save() {
+    if (saving || uploads) return;
     setError("");
     const title = value("title").trim();
     if (!title) {
@@ -111,6 +134,11 @@ export function BookForm({ bookId }: { bookId?: string }) {
     // live price and the original moves to compare_at_price to strike through.
     const list = Number(value("price") || 0);
     const sale = value("sale_price") === "" ? null : Number(value("sale_price"));
+    if (!Number.isFinite(list) || list < 0 || (sale !== null && (!Number.isFinite(sale) || sale < 0 || sale > list))) {
+      setSaving(false);
+      setError("Enter a valid price. The sale price cannot exceed the regular price.");
+      return;
+    }
     const payload: Record<string, unknown> = {
       title,
       slug: value("slug").trim() || slugify(title),
@@ -119,8 +147,8 @@ export function BookForm({ bookId }: { bookId?: string }) {
       language: value("language").trim() || "English",
       publisher: value("publisher").trim(),
       price: sale ?? list,
-      compare_at_price: sale ? list : 0,
-      stock: Number(value("stock") || 0),
+      compare_at_price: sale !== null ? list : null,
+      stock: value("stock") === "" ? null : Number(value("stock")),
       low_stock_threshold: Number(value("low_stock_threshold") || 5),
       status: value("status") || "draft",
       description: value("description"),
@@ -129,18 +157,23 @@ export function BookForm({ bookId }: { bookId?: string }) {
       meta_description: value("meta_description"),
       tags,
     };
-    if (value("category_id")) payload.category_id = value("category_id");
-    if (value("publication_date")) payload.publication_date = value("publication_date");
+    payload.category_id = value("category_id") || null;
+    payload.publication_date = value("publication_date") || null;
     if (cover) payload.cover_url = cover;
 
-    const failure = await data.save("books", payload, bookId);
-    if (failure) {
+    const saved = await data.saveWithId("books", payload, activeBookId || undefined);
+    if (saved.error) {
       setSaving(false);
-      setError(failure);
+      setError(saved.error);
       return;
     }
-    // Gallery images are rows of their own; only new books need them attached.
-    for (const url of gallery) await data.save("media_assets", { url, kind: "gallery" });
+    setActiveBookId(saved.id);
+    const galleryError = await data.saveBookImages(saved.id, gallery.map((url) => ({ url })));
+    if (galleryError) {
+      setSaving(false);
+      setError(`The book was saved, but its gallery could not be saved: ${galleryError}`);
+      return;
+    }
     router.push("/admin/books");
   }
 
@@ -248,8 +281,8 @@ export function BookForm({ bookId }: { bookId?: string }) {
                 <div className="plbh-admin-cover-panel">
                   <span className="plbh-admin-field-label">Book Cover Image <em aria-hidden="true">*</em></span>
                   <div className="plbh-admin-upload">
-                    {cover ? (
-                      <Image src={cover} alt="" width={150} height={200} unoptimized />
+                    {(cover || existing?.image) ? (
+                      <Image src={cover || existing?.image || ""} alt="" width={150} height={200} unoptimized />
                     ) : (
                       <Glyph name="cloud" size={38} />
                     )}
@@ -270,30 +303,6 @@ export function BookForm({ bookId }: { bookId?: string }) {
                     </label>
                   </div>
 
-                  <span className="plbh-admin-field-label">Additional Images (Optional)</span>
-                  <div className="plbh-admin-gallery">
-                    <label className="plbh-admin-gallery-add">
-                      <Glyph name="cloud" size={22} />
-                      <small>Add Images</small>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        className="plbh-admin-visually-hidden"
-                        onChange={(e) => {
-                          for (const file of Array.from(e.target.files ?? [])) {
-                            void upload(file, (url) => setGallery((g) => [...g, url]));
-                          }
-                        }}
-                      />
-                    </label>
-                    {gallery.map((url) => (
-                      <span key={url} className="plbh-admin-gallery-item">
-                        <Image src={url} alt="" width={96} height={96} unoptimized />
-                        <button type="button" aria-label="Remove image" onClick={() => setGallery(gallery.filter((g) => g !== url))}>×</button>
-                      </span>
-                    ))}
-                  </div>
                 </div>
               </div>
 
@@ -369,6 +378,27 @@ export function BookForm({ bookId }: { bookId?: string }) {
               <Field id="cover_url" label="Cover image URL" hint="Uploading on the first step fills this in for you.">
                 <input id="cover_url" type="url" placeholder="https://..." value={cover} onChange={(e) => setCover(e.target.value)} />
               </Field>
+              <div className="plbh-admin-gallery-editor">
+                <div><strong>Book gallery</strong><p>Add extra views such as the back cover, contents and inside pages. Upload several images at once.</p></div>
+                <div className="plbh-admin-gallery">
+                  <label className="plbh-admin-gallery-add">
+                    <Glyph name="cloud" size={22} /><small>Add images</small>
+                    <input type="file" accept="image/jpeg,image/png,image/webp" multiple className="plbh-admin-visually-hidden" onChange={(event) => {
+                      const files = Array.from(event.target.files ?? []);
+                      if (gallery.length + files.length > 20) { setError("Choose up to 20 gallery images."); return; }
+                      for (const file of files) void upload(file, (url) => setGalleryAdds((current) => [...current, url]));
+                      event.currentTarget.value = "";
+                    }} />
+                  </label>
+                  {gallery.map((url, index) => <span key={`${url}-${index}`} className="plbh-admin-gallery-item">
+                    <Image src={url} alt={`Book gallery image ${index + 1}`} width={96} height={96} unoptimized />
+                    <button type="button" aria-label={`Remove gallery image ${index + 1}`} onClick={() => {
+                      if (galleryAdds.includes(url)) setGalleryAdds((current) => current.filter((image) => image !== url));
+                      else setRemovedGallery((current) => [...current, url]);
+                    }}>×</button>
+                  </span>)}
+                </div>
+              </div>
             </div>
           )}
 
@@ -390,8 +420,8 @@ export function BookForm({ bookId }: { bookId?: string }) {
             <button type="button" className="plbh-admin-button" onClick={() => router.push("/admin/books")}>
               Cancel
             </button>
-            <button type="button" className="plbh-admin-button plbh-admin-button-primary" onClick={save} disabled={saving}>
-              <Glyph name="save" size={17} /> {saving ? "Saving..." : editing ? "Save Changes" : "Save Book"}
+            <button type="button" className="plbh-admin-button plbh-admin-button-primary" onClick={save} disabled={saving || uploads > 0 || data.loading}>
+              <Glyph name="save" size={17} /> {uploads ? "Uploading images…" : saving ? "Saving..." : editing ? "Save Changes" : "Save Book"}
             </button>
           </div>
         </section>

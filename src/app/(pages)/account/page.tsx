@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
+import "./account.css";
 import { Suspense } from "react";
 import Link from "next/link";
-import { PageIntro } from "@/components/page-intro";
 import { AccountPreview } from "@/components/account-preview";
 import { Icon } from "@/components/ui";
 export const metadata: Metadata = {
@@ -9,14 +9,13 @@ export const metadata: Metadata = {
 };
 export default function Page() {
   return (
-    <main id="main" className="inner-page">
-      <PageIntro
-        label="My Account"
-        eyebrow="YOUR PERSONAL LEGAL BOOKSHELF"
-        title="Welcome back"
-        accent="to your next chapter."
-        description="A dedicated space for your reading journey. Sign in to pick up where you left off."
-      />
+    <main id="main" className="inner-page account-page">
+      <div className="container account-page-heading">
+        <nav aria-label="Breadcrumb"><Link href="/">Home</Link><span>/</span><span aria-current="page">My account</span></nav>
+        <p className="shop-kicker">THE READER’S DESK</p>
+        <h1>Your personal bookshelf.</h1>
+        <p>Your collection, orders and account, thoughtfully organised.</p>
+      </div>
       <Suspense fallback={null}>
         <AccountPreview />
       </Suspense>
@@ -38,7 +37,7 @@ export default function Page() {
           </span>
         </Link>
         <Link href="/contact">
-          <Icon name="chat" />
+          <Icon name="whatsapp" />
           <h3>A little assistance</h3>
           <p>Speak to us about your next reference.</p>
           <span>

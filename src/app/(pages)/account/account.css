@@ -1,0 +1,48 @@
+/* Reader desk: a compact introduction and a single personal welcome. */
+.account-page { background: #f7f5ef; }
+.account-page-heading { padding-top: 30px; padding-bottom: 32px; }
+.account-page-heading nav { display: flex; gap: 12px; font-size: 12px; color: #6e7871; margin-bottom: 26px; }
+.account-page-heading .shop-kicker { color: #947440; font-size: 11px; letter-spacing: .16em; }
+.account-page-heading h1 { font-size: clamp(30px, 4vw, 48px); color: #173e30; margin: 10px 0; line-height: 1.15; }
+.account-page-heading > p:last-child { color: #69746c; margin-bottom: 0; }
+.account-page .account-dashboard { padding-top: 0; }
+.account-page .account-hero { border-radius: 20px; background: #123e30; background-image: radial-gradient(ellipse at top right, #39634b66, transparent 65%); box-shadow: 0 16px 40px #143c3012; padding: clamp(24px, 4vw, 48px); }
+.account-page .account-hero h2 { font-size: clamp(30px, 3.3vw, 44px); }
+.account-page .account-identity { background: #ffffff08; border: 1px solid #ffffff24; border-radius: 14px; box-shadow: none; }
+.account-page .account-stats { gap: 16px; }
+.account-page .account-stats article { border: 1px solid #e5e6dd; border-radius: 14px; box-shadow: 0 4px 16px #173e3004; }
+.account-page .account-panel-card { border: 1px solid #e5e6dd; border-radius: 16px; box-shadow: 0 4px 16px #173e3004; }
+.footer-contact a span, .contact-method a { overflow-wrap: anywhere; }
+.account-order-content { padding-bottom: 64px; display: grid; gap: 22px; }
+.account-order-summary { padding: 28px; }
+.account-order-summary > header { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; }
+.account-order-summary h2 { font: 600 1.55rem/1.2 Georgia,serif; margin: 5px 0; color: #153c30; }
+.account-order-summary header p:last-child { color: #64736b; margin: 0; }
+.account-order-detail-grid { display: grid; grid-template-columns: minmax(0,1.45fr) minmax(280px,0.8fr); gap: 22px; align-items: start; }
+.account-order-detail-grid > aside { display: grid; gap: 22px; }
+.account-order-detail-grid .account-panel-card { padding: 22px; }
+.account-order-detail-grid .account-panel-card > header { margin: 0 0 18px; padding: 0; border: 0; }
+.account-order-detail-grid .account-panel-card h2 { font: 600 1.2rem/1.3 Georgia,serif; color: #153c30; margin: 0; }
+.account-order-detail-grid .account-panel-card header p { color: #64736b; margin: 5px 0 0; font-size: 0.9rem; }
+.account-order-lines, .account-order-lines li { list-style: none; margin: 0; padding: 0; }
+.account-order-lines li { display: flex; justify-content: space-between; gap: 20px; padding: 16px 0; border-bottom: 1px solid #e9ece6; color: #203b30; }
+.account-order-lines li > div { display: grid; gap: 5px; }
+.account-order-lines small { color: #64736b; }
+.account-order-totals { display: grid; gap: 11px; margin: 18px 0 0; }
+.account-order-totals > div, .account-order-meta > div { display: flex; justify-content: space-between; gap: 14px; }
+.account-order-totals dt, .account-order-meta dt { color: #65756c; }
+.account-order-totals dd, .account-order-meta dd { margin: 0; text-align: right; color: #21392f; }
+.account-order-totals .is-total { border-top: 1px solid #dfe6dd; padding-top: 13px; font-size: 1.1rem; font-weight: 700; color: #123e30; }
+.account-order-meta { display: grid; gap: 15px; margin: 0; font-size: 0.92rem; }
+.account-order-meta > div { align-items: flex-start; }
+.account-order-progress { display: grid; grid-template-columns: repeat(4,1fr); margin-top: 30px; }
+.account-order-progress > div { position: relative; display: grid; justify-items: center; gap: 8px; color: #77837b; font-size: 0.8rem; text-transform: capitalize; }
+.account-order-progress > div:not(:last-child)::after { content: ""; position: absolute; height: 2px; width: calc(100% - 24px); background: #dfe5dd; left: calc(50% + 12px); top: 6px; }
+.account-order-progress i { width: 14px; height: 14px; background: #e4e9e3; border: 3px solid white; outline: 1px solid #cbd6ca; border-radius: 50%; z-index: 1; }
+.account-order-progress .is-complete { color: #16543d; font-weight: 600; }
+.account-order-progress .is-complete i { background: #1f7654; outline-color: #a6cbb0; }
+.account-order-progress .is-complete::after { background: #a6cbb0 !important; }
+.account-order-final-status { margin: 20px 0 0; padding: 13px 16px; border-radius: 10px; color: #68451d; background: #f8f0df; text-transform: capitalize; }
+.account-order-actions { display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.account-order-details-link { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; color: #15513c; font-weight: 600; }
+@media (max-width: 760px) { .account-order-detail-grid { grid-template-columns: 1fr; } .account-order-summary { padding: 21px; } .account-order-progress > div { font-size: 0.68rem; } }

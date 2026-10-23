@@ -14,7 +14,7 @@ export type Field = {
 };
 
 export type EntityKey =
-  | "book" | "category" | "promotion" | "banner" | "page" | "member" | "customer" | "settings";
+  | "book" | "category" | "promotion" | "banner" | "page" | "feature-section" | "member" | "customer" | "settings";
 
 export const entities: Record<EntityKey, { table: string; label: string; fields: Field[] }> = {
   book: {
@@ -67,7 +67,7 @@ export const entities: Record<EntityKey, { table: string; label: string; fields:
       { name: "subtitle", label: "Subtitle" },
       { name: "image_url", label: "Image URL" },
       { name: "link_url", label: "Link" },
-      { name: "placement", label: "Placement", type: "select", options: ["homepage_hero", "homepage_strip", "category", "promo"] },
+      { name: "placement", label: "Placement", type: "select", options: ["homepage_hero"] },
       { name: "sort_order", label: "Sort order", type: "number" },
       { name: "active", label: "Active", type: "checkbox" },
     ],
@@ -80,7 +80,18 @@ export const entities: Record<EntityKey, { table: string; label: string; fields:
       { name: "slug", label: "Slug", required: true },
       { name: "path", label: "Path", required: true },
       { name: "description", label: "Description", type: "textarea" },
-      { name: "published", label: "Published", type: "checkbox" },
+      { name: "body", label: "Page content (plain text; leave empty to keep the default page)", type: "textarea" },
+      { name: "published", label: "Publish custom page content (draft keeps the default page)", type: "checkbox" },
+    ],
+  },
+  "feature-section": {
+    table: "featured_sections",
+    label: "featured section",
+    fields: [
+      { name: "key", label: "Section", type: "select", options: ["featured", "bestsellers"], required: true },
+      { name: "title", label: "Section title", required: true },
+      { name: "subtitle", label: "Supporting text" },
+      { name: "active", label: "Visible on homepage", type: "checkbox" },
     ],
   },
   member: {

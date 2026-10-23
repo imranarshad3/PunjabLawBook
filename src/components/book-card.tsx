@@ -49,7 +49,7 @@ export const creditFor = (book: Book) =>
   editorial[book.id]?.credit ?? "Punjab Law Book House catalogue";
 const cartHref = (book: Book) => `/products/${book.id}`;
 const whatsappHref = (book: Book) =>
-  `https://wa.me/923080060188?text=${encodeURIComponent(`Hello, I would like to enquire about ${book.name}. Catalogue no. ${book.id}`)}`;
+  `https://wa.me/923334222005?text=${encodeURIComponent(`Hello, I would like to enquire about ${book.name}. Catalogue no. ${book.id}`)}`;
 
 export function BookCard({
   book,
@@ -69,7 +69,7 @@ export function BookCard({
       >
         <Link href={`/products/${book.id}`} aria-label={`View ${book.name}`}>
           <Image
-            src={photograph ?? book.image}
+            src={book.image}
             alt={book.name}
             fill
             sizes="(max-width: 480px) 90vw, (max-width: 767px) 44vw, (max-width: 1100px) 28vw, 230px"

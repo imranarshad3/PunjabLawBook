@@ -197,7 +197,7 @@
   padding: 2rem;
   background:
     linear-gradient(135deg, #073f30ef, #002c25f5),
-    url("/images/library-detail.webp") center/cover;
+    var(--site-images-library-detail-webp, url("/images/library-detail.webp")) var(--site-images-library-detail-webp-position, center)/var(--site-images-library-detail-webp-size, cover);
 }
 .premium-header .mega-intro h2 {
   font-size: 2rem;

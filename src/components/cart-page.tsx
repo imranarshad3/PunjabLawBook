@@ -119,8 +119,7 @@ export function CartPage() {
               <Icon name="book" />
               <p>
                 Your book bag is saved on this device. Review your selection and
-                estimated subtotal here; checkout and payment services will be
-                connected in the next milestone.
+                estimated subtotal here, then confirm your delivery details at checkout.
               </p>
             </div>
           </div>
@@ -140,8 +139,7 @@ export function CartPage() {
               <strong>Rs. {subtotal.toLocaleString("en-PK")}</strong>
             </div>
             <p>
-              Delivery and final availability will be confirmed when ordering
-              opens.
+              The team confirms delivery charges and final availability before dispatch.
             </p>
             <Link className="button button-green" href="/checkout">
               Review checkout <Icon name="arrow" />
