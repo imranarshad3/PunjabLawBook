@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const { collections } = await getCatalogue();
   return {
-    title: `${collections[slug]?.title ?? "Collection not found"} | Punjab Law Book House`,
+    title: `${collections[slug]?.title ?? "Collection not found"}`,
   };
 }
 async function CollectionContent({ params, searchParams }: Props) {

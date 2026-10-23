@@ -4,7 +4,7 @@ import {
   EllipsisVertical, ChevronRight, ChevronLeft, RefreshCw, Save, Mail, Phone,
   MapPin, Store, CreditCard, Truck, Star, Image, Settings, Search, ArrowRight,
   ExternalLink, Bell, Plus, Download, CalendarDays, Wallet, Menu, Check, CircleAlert,
-  Scale, Landmark, Shield, BriefcaseBusiness, GraduationCap, ScrollText, Gavel,
+  HandHeart, ReceiptText, LibraryBig, Scale, Landmark, Shield, BriefcaseBusiness, GraduationCap, ScrollText, Gavel,
   type LucideIcon,
 } from "lucide-react";
 
@@ -19,6 +19,7 @@ const icons: Record<string, LucideIcon> = {
   arrow: ArrowRight, external: ExternalLink, bell: Bell, plus: Plus,
   down: Download, calendar: CalendarDays, wallet: Wallet, menu: Menu,
   check: Check, alert: CircleAlert,
+  family: HandHeart, receipt: ReceiptText, library: LibraryBig,
   scale: Scale, landmark: Landmark, shield: Shield,
   briefcase: BriefcaseBusiness, graduation: GraduationCap,
   scroll: ScrollText, gavel: Gavel,

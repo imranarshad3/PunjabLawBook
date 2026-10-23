@@ -4,7 +4,7 @@ import Link from "next/link";
 import { PageIntro } from "@/components/page-intro";
 import { Icon } from "@/components/ui";
 export const metadata: Metadata = {
-  title: "Ordering & Delivery Help | Punjab Law Book House",
+  title: "Ordering & Delivery Help",
 };
 const answers = [
   {

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { categoryIcons, categoryIconFor } from "./category-icons";
 import { Glyph } from "./icons";
 import { AdminShell } from "./shell";
 import { useAdminData } from "./use-admin-data";
@@ -13,16 +14,6 @@ import { useAdminData } from "./use-admin-data";
 const slugify = (value: string) =>
   value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80);
 
-const categoryIcons = [
-  ["book", "Books"],
-  ["scale", "Scales of justice"],
-  ["gavel", "Gavel"],
-  ["landmark", "Courts"],
-  ["shield", "Legal protection"],
-  ["briefcase", "Practice"],
-  ["graduation", "Study"],
-  ["scroll", "Legal text"],
-] as const;
 
 export function CategoryForm({ categoryId }: { categoryId?: string }) {
   const router = useRouter();
@@ -62,7 +53,7 @@ function CategoryEditor({ categoryId, initialCategory, saveRecord, orderBadge, e
   const [slug, setSlug] = useState(() => String(initialCategory?.slug ?? ""));
   const [description, setDescription] = useState(() => String(initialCategory?.description ?? ""));
   const [sortOrder, setSortOrder] = useState(() => initialCategory?.sort_order === undefined ? "" : String(initialCategory.sort_order));
-  const [icon, setIcon] = useState(() => String(initialCategory?.icon ?? ""));
+  const [icon, setIcon] = useState(() => categoryIconFor(String(initialCategory?.name ?? ""), initialCategory?.icon as string | undefined));
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 

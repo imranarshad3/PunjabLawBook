@@ -8,6 +8,7 @@ import { useAuth } from "@clerk/nextjs";
 
 import { collections } from "@/data/collections";
 import catalogue from "@/data/catalogue.json";
+import { categoryIconFor } from "./category-icons";
 import { Glyph } from "./icons";
 import { viewPath, type View } from "./navigation";
 import { AdminShell, subtitles } from "./shell";
@@ -36,16 +37,6 @@ const recordTable: Record<string, string> = {
 const money = (amount: number) =>
   new Intl.NumberFormat("en-PK", { maximumFractionDigits: 2 }).format(amount);
 /** Joins table names for prose: "a, b and c". */
-const categoryIconNames = new Set(["book", "scale", "gavel", "landmark", "shield", "briefcase", "graduation", "scroll"]);
-const categoryIconFor = (name: string, savedIcon?: string | null) => {
-  if (savedIcon && categoryIconNames.has(savedIcon)) return savedIcon;
-  const normalized = name.toLowerCase();
-  if (normalized.includes("criminal") || normalized.includes("family")) return "scale";
-  if (normalized.includes("evidence")) return "gavel";
-  if (normalized.includes("tax")) return "file";
-  if (normalized.includes("student") || normalized.includes("exam")) return "graduation";
-  return "book";
-};
 const listed = (names: string[]) =>
   names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`;
 const contentPages = [
@@ -925,34 +916,24 @@ export function AdminWorkspace({ view }: { view: View }) {
                       const record = data.categoryRows.find((row) => row.name === c.name);
                       const icon = categoryIconFor(c.name, record?.icon);
                       return (
-                        <div className="plbh-admin-category-tile" key={c.name}>
-                          <button onClick={() => browseCategory(c.name)}>
-                            <span className="plbh-admin-category-icon">
-                              <Glyph name={icon} size={27} />
-                            </span>
-                            <strong>{c.name}</strong>
-                            <span>{c.count} {c.count === 1 ? "book" : "books"}</span>
-                          </button>
-                          {record && (
-                            <div className="plbh-admin-tile-actions">
-                              <button
-                                className="plbh-admin-icon-button"
-                                aria-label={`Edit ${c.name}`}
-                                onClick={() => router.push(`/admin/categories/${record.id}/edit`)}
-                              >
-                                <Glyph name="pencil" size={15} />
-                              </button>
-                              <button
-                                className="plbh-admin-icon-button"
-                                data-tone="danger"
-                                aria-label={`Delete ${c.name}`}
-                                onClick={() => destroy("categories", record.id, c.name)}
-                              >
-                                <Glyph name="trash" size={15} />
-                              </button>
-                            </div>
-                          )}
-                        </div>
+                        <article className="plbh-admin-category-tile" data-icon={icon} key={record?.id || c.name}>
+                          <div className="plbh-admin-category-card-top">
+                            <span className="plbh-admin-category-icon"><Glyph name={icon} size={34} /></span>
+                            <span className="plbh-admin-category-count">{c.count} {c.count === 1 ? "book" : "books"}</span>
+                          </div>
+                          <div className="plbh-admin-category-copy">
+                            <span className="plbh-admin-category-eyebrow">BOOK SUBJECT</span>
+                            <h3>{c.name}</h3>
+                            <p>{String(record?.description || "Organise and discover the titles in this subject.")}</p>
+                          </div>
+                          <footer className="plbh-admin-category-card-footer">
+                            <button className="plbh-admin-category-browse" onClick={() => browseCategory(c.name)}>Browse books <Glyph name="arrow" size={16} /></button>
+                            {record && <div className="plbh-admin-tile-actions">
+                              <button className="plbh-admin-icon-button" aria-label={`Edit ${c.name}`} title={`Edit ${c.name}`} onClick={() => router.push(`/admin/categories/${record.id}/edit`)}><Glyph name="pencil" size={17} /></button>
+                              <button className="plbh-admin-icon-button" data-tone="danger" aria-label={`Delete ${c.name}`} disabled={c.count > 0} title={c.count > 0 ? "Move the books to another subject before deleting this category." : `Delete ${c.name}`} onClick={() => destroy("categories", record.id, c.name)}><Glyph name="trash" size={17} /></button>
+                            </div>}
+                          </footer>
+                        </article>
                       );
                     })}
                 </div>
@@ -1286,8 +1267,8 @@ export function AdminWorkspace({ view }: { view: View }) {
             <section className="plbh-admin-panel plbh-admin-settings">
               <div className="plbh-admin-panel-heading">
                 <div>
-                  <h2>Workspace & connections</h2>
-                  <p>Current configuration of this project.</p>
+                  <h2>Website identity & store settings</h2>
+                  <p>Manage your website name, logo, contact information and search listing.</p>
                 </div>
                 <button
                   className="plbh-admin-button plbh-admin-button-primary"
@@ -1310,6 +1291,8 @@ export function AdminWorkspace({ view }: { view: View }) {
                   <dl className="plbh-admin-settings-list">
                     {[
                       ["Store name", String(data.settings?.store_name || "Punjab Law Book House")],
+                      ["Tagline", String((data.settings?.social as Record<string, unknown>)?.tagline || "Knowledge builds a fairer Pakistan")],
+                      ["SEO title", String(data.settings?.meta_title || "Uses website name")],
                       ["Store email", String(data.settings?.store_email || "Not set")],
                       ["Phone", String(data.settings?.phone || "Not set")],
                       ["WhatsApp", String(data.settings?.whatsapp || "Not set")],
@@ -1415,7 +1398,7 @@ export function AdminWorkspace({ view }: { view: View }) {
             </section>
           )}
           <footer className="plbh-admin-footer">
-            <span>© 2026 Punjab Law Book House</span>
+            <span>© 2026 {String(data.settings?.store_name || "Punjab Law Book House")}</span>
             <span>
               Thoughtfully built for the business of knowledge.{" "}
               <span className="plbh-admin-footer-mark">✧</span>

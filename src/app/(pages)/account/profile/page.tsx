@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { UserProfile } from "@clerk/nextjs";
 import { PageIntro } from "@/components/page-intro";
 
-export const metadata: Metadata = { title: "Manage Your Account | Punjab Law Book House" };
+export const metadata: Metadata = { title: "Manage Your Account" };
 
 export default function Page() {
   return (

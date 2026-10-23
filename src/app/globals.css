@@ -2467,3 +2467,8 @@ button:focus-visible {
   color: #14402f;
 }
 .account-admin-actions .button-ghost:hover { background: #14402f0f; }
+
+.brand > span { max-width: 210px; overflow-wrap: anywhere; }
+.brand .brand-emblem { object-fit: contain; flex-shrink: 0; }
+.brand small { text-transform: uppercase; }
+.footer-social-links { display: flex; gap: 1rem; margin-bottom: 1rem; font-size: .875rem; }

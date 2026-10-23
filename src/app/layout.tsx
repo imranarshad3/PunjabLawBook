@@ -4,6 +4,8 @@ import { CatalogueProvider } from "@/components/catalogue-context";
 import { SiteImagesProvider } from "@/components/site-image";
 import { getSiteImages } from "@/lib/site-images";
 import { getCatalogue } from "@/lib/catalogue";
+import { SiteSettingsProvider } from "@/components/site-settings";
+import { getSiteSettings } from "@/lib/site-settings";
 import { siteUrl } from "@/lib/site";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
@@ -26,38 +28,22 @@ const sans = Inter({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  // Resolves relative Open Graph and canonical URLs. Set NEXT_PUBLIC_SITE_URL.
-  metadataBase: new URL(siteUrl),
-  title: {
-    default: "Punjab Law Book House | Law Books & Judicial Exam Guides",
-    template: "%s | Punjab Law Book House",
-  },
-  description:
-    "Explore law books, bare acts, legal commentaries and judicial examination guides from Punjab Law Book House, Lahore.",
-  alternates: { canonical: "/" },
-  // The storefront is public; /admin and the signed-in areas set their own
-  // noindex, and robots.ts disallows them.
-  robots: { index: true, follow: true },
-  openGraph: {
-    title: "Punjab Law Book House",
-    description:
-      "Knowledge builds a fairer Pakistan. Explore legal books and examination guides.",
-    url: "/",
-    siteName: "Punjab Law Book House",
-    type: "website",
-    locale: "en_PK",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Punjab Law Book House",
-    description:
-      "Knowledge builds a fairer Pakistan. Explore legal books and examination guides.",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  const title = settings.metaTitle || `${settings.name} | Law Books & Exam Guides`;
+  return {
+    metadataBase: new URL(siteUrl),
+    title: { default: title, template: `%s | ${settings.name}` },
+    description: settings.metaDescription,
+    alternates: { canonical: "/" },
+    robots: { index: true, follow: true },
+    openGraph: { title, description: settings.metaDescription, url: "/", siteName: settings.name, type: "website", locale: "en_PK" },
+    twitter: { card: "summary_large_image", title, description: settings.metaDescription },
+  };
+}
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const [catalogue, images] = await Promise.all([getCatalogue(), getSiteImages()]);
+  const [catalogue, images, settings] = await Promise.all([getCatalogue(), getSiteImages(), getSiteSettings()]);
   return (
     <ClerkProvider
       localization={{
@@ -74,7 +60,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     >
       <html lang="en" data-scroll-behavior="smooth" className={`${serif.variable} ${sans.variable}`}>
         <body>
-          <SiteImagesProvider images={images}><CatalogueProvider value={catalogue}>{children}</CatalogueProvider></SiteImagesProvider>
+          <SiteSettingsProvider settings={settings}><SiteImagesProvider images={images}><CatalogueProvider value={catalogue}>{children}</CatalogueProvider></SiteImagesProvider></SiteSettingsProvider>
         </body>
       </html>
     </ClerkProvider>

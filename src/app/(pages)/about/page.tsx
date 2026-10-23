@@ -5,7 +5,7 @@ import Link from "next/link";
 import { PageIntro } from "@/components/page-intro";
 import { Icon, type IconName } from "@/components/ui";
 export const metadata: Metadata = {
-  title: "Our Story | Punjab Law Book House",
+  title: "Our Story",
 };
 const values: { icon: IconName; title: string; copy: string }[] = [
   {

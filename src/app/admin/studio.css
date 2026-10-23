@@ -1690,3 +1690,34 @@
   .plbh-admin-app .plbh-admin-settings .plbh-admin-panel-heading { align-items: flex-start; flex-direction: column; }
   .plbh-admin-app .plbh-admin-settings .plbh-admin-settings-list > div { grid-template-columns: minmax(6.25rem, 0.72fr) minmax(0, 1.28fr); gap: 0.5rem; }
 }
+
+/* Subject cards: compact symbols, readable descriptions and persistent actions. */
+.plbh-admin-app .plbh-admin-category-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); gap: 1rem; }
+.plbh-admin-app .plbh-admin-category-grid .plbh-admin-category-tile { display: flex; flex-direction: column; align-items: stretch; padding: 1.25rem; text-align: left; gap: 1.15rem; background: var(--s-surface); border: 1px solid var(--s-line); box-shadow: 0 3px 12px #173e3006; }
+.plbh-admin-app .plbh-admin-category-tile:hover { border-color: #9bb6a8; box-shadow: 0 8px 24px #173e300d; }
+.plbh-admin-app .plbh-admin-category-card-top { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.plbh-admin-app .plbh-admin-category-tile .plbh-admin-category-icon { width: 64px; height: 64px; flex: 0 0 64px; border-radius: 18px; background: #e9f2ed; margin: 0; border: 1px solid #dce9e1; box-shadow: none; }
+.plbh-admin-app .plbh-admin-category-icon > svg { width: 34px; height: 34px; color: #235b43; opacity: 1; }
+.plbh-admin-app .plbh-admin-category-tile[data-icon="family"] .plbh-admin-category-icon { background: #edf1fb; border-color: #dfe5f3; }
+.plbh-admin-app .plbh-admin-category-tile[data-icon="family"] .plbh-admin-category-icon > svg { color: #48659c; }
+.plbh-admin-app .plbh-admin-category-tile:is([data-icon="receipt"], [data-icon="landmark"]) .plbh-admin-category-icon { background: #faf0dc; border-color: #eee0bd; }
+.plbh-admin-app .plbh-admin-category-tile:is([data-icon="receipt"], [data-icon="landmark"]) .plbh-admin-category-icon > svg { color: #8f681c; }
+.plbh-admin-app .plbh-admin-category-tile[data-icon="gavel"] .plbh-admin-category-icon { background: #faece9; border-color: #f0dcd7; }
+.plbh-admin-app .plbh-admin-category-tile[data-icon="gavel"] .plbh-admin-category-icon > svg { color: #995145; }
+.plbh-admin-app .plbh-admin-category-count { border-radius: 7px; padding: 5px 9px; font-size: .8125rem; font-weight: 600; color: #345d47; background: #edf4ef; white-space: nowrap; }
+.plbh-admin-app .plbh-admin-category-eyebrow { font-size: .6875rem; letter-spacing: .12em; color: var(--s-muted); font-weight: 600; }
+.plbh-admin-app .plbh-admin-category-copy { flex: 1; min-width: 0; }
+.plbh-admin-app .plbh-admin-category-copy h3 { margin: .4rem 0 .5rem; font: 600 1.375rem/1.25 var(--font-serif), Georgia, serif; color: var(--s-ink); overflow-wrap: anywhere; }
+.plbh-admin-app .plbh-admin-category-copy p { font-size: .875rem; line-height: 1.6; color: var(--s-ink-2); margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.plbh-admin-app .plbh-admin-category-card-footer { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding-top: .9rem; border-top: 1px solid var(--s-line-soft); }
+.plbh-admin-app .plbh-admin-category-grid .plbh-admin-category-browse { display: inline-flex; flex-direction: row; align-items: center; gap: 7px; border: 0; background: transparent; color: var(--s-green); font: 600 .8125rem/1.3 var(--font-body), sans-serif; padding: 6px 0; box-shadow: none; border-radius: 0; text-align: left; }
+.plbh-admin-app .plbh-admin-category-grid .plbh-admin-category-browse:hover { transform: none; box-shadow: none; text-decoration: underline; }
+.plbh-admin-app .plbh-admin-category-tile .plbh-admin-tile-actions { position: static; opacity: 1; display: flex; flex-direction: row; gap: 6px; }
+.plbh-admin-app .plbh-admin-category-grid .plbh-admin-icon-button { padding: 0; width: 34px; min-width: 34px; height: 34px; min-height: 34px; box-shadow: none; }
+.plbh-admin-app .plbh-admin-category-grid .plbh-admin-icon-button:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+.plbh-admin-app .plbh-admin-category-grid button:focus-visible { outline: 2px solid var(--s-green); outline-offset: 4px; }
+.plbh-admin-app .plbh-admin-category-grid button > svg { opacity: 1; transform: none; }
+
+.plbh-admin-custom-brand { display: flex; flex-direction: column; align-items: center; gap: .5rem; padding: 1.25rem .75rem; color: #ebd49e; }
+.plbh-admin-custom-brand strong { font: 600 1.4rem/1.1 var(--font-serif), Georgia, serif; text-align: center; overflow-wrap: anywhere; }
+.plbh-admin-custom-brand small { color: #d9c493; letter-spacing: .22em; font-size: .625rem; }

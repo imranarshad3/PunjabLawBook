@@ -9,7 +9,7 @@ import "./premium.css";
 import "./studio.css";
 
 export const metadata: Metadata = {
-  title: "Admin Studio | Punjab Law Book House",
+  title: "Admin Studio",
   robots: { index: false, follow: false },
 };
 

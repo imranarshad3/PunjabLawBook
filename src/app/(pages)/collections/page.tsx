@@ -5,7 +5,7 @@ import { PageIntro } from "@/components/page-intro";
 import { Icon } from "@/components/ui";
 import { getCatalogue } from "@/lib/catalogue";
 export const metadata: Metadata = {
-  title: "Explore Collections | Punjab Law Book House",
+  title: "Explore Collections",
 };
 const copy: Record<string, { image: string; description: string }> = {
   "Exam Guides": {

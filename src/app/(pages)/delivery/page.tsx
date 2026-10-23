@@ -2,7 +2,7 @@ import { CmsPage } from "@/components/cms-page";
 import type { Metadata } from "next";
 import { InformationPage } from "@/components/information-page";
 export const metadata: Metadata = {
-  title: "Delivery Information | Punjab Law Book House",
+  title: "Delivery Information",
 };
 function Page() {
   return (

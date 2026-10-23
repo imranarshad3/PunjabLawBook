@@ -1,8 +1,10 @@
 "use client";
+import { useSiteSettings } from "./site-settings";
 import { useState } from "react";
 import { Icon } from "./ui";
 import { recordEnquiry } from "@/lib/storefront";
 export function EnquiryForm({ request = false }: { request?: boolean }) {
+  const settings = useSiteSettings();
   const [ready, setReady] = useState(false);
   const [message, setMessage] = useState("");
   return (
@@ -107,8 +109,8 @@ export function EnquiryForm({ request = false }: { request?: boolean }) {
         Prepare {request ? "book request" : "enquiry"} <Icon name="arrow" />
       </button>
       <p className="form-note">
-        Your details stay in this browser until you choose to send them in
-        WhatsApp. This form does not place an order.
+        Preparing this form sends your enquiry to our team. You can also send
+        it through WhatsApp. This form does not place an order.
       </p>
       {ready && (
         <div className="enquiry-ready" role="status">
@@ -118,7 +120,7 @@ export function EnquiryForm({ request = false }: { request?: boolean }) {
           </p>
           <a
             className="button button-gold"
-            href={`https://wa.me/923334222005?text=${encodeURIComponent(message)}`}
+            href={`https://wa.me/${settings.whatsapp}?text=${encodeURIComponent(message)}`}
             target="_blank"
             rel="noreferrer"
           >

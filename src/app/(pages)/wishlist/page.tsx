@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PageIntro } from "@/components/page-intro";
 import { SavedBooks } from "@/components/saved-books";
 export const metadata: Metadata = {
-  title: "Saved Books | Punjab Law Book House",
+  title: "Saved Books",
 };
 export default function Page() {
   return (

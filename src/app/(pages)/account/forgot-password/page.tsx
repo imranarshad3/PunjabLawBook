@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { PageIntro } from "@/components/page-intro";
 import { AccountPreview } from "@/components/account-preview";
 export const metadata: Metadata = {
-  title: "Reset Password | Punjab Law Book House",
+  title: "Reset Password",
 };
 export default function Page() {
   return (

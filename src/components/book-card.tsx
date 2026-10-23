@@ -1,3 +1,4 @@
+import { StoreWhatsAppLink } from "./site-settings";
 import Image from "next/image";
 import Link from "next/link";
 import { Icon } from "./ui";
@@ -48,8 +49,7 @@ export const titleFor = (book: Book) => editorial[book.id]?.title ?? book.name;
 export const creditFor = (book: Book) =>
   editorial[book.id]?.credit ?? "Punjab Law Book House catalogue";
 const cartHref = (book: Book) => `/products/${book.id}`;
-const whatsappHref = (book: Book) =>
-  `https://wa.me/923334222005?text=${encodeURIComponent(`Hello, I would like to enquire about ${book.name}. Catalogue no. ${book.id}`)}`;
+
 
 export function BookCard({
   book,
@@ -98,7 +98,7 @@ export function BookCard({
           title={details.title}
           url={book.url}
           available={available}
-          whatsapp={whatsappHref(book)}
+          whatsapp={`Hello, I would like to enquire about ${book.name}. Catalogue no. ${book.id}`}
         />
       </div>
     </article>
@@ -140,14 +140,14 @@ export function ShowcaseCard({
           >
             <Icon name="cart-plus" />
           </Link>
-          <Link
+          <StoreWhatsAppLink
             className="showcase-action is-whatsapp"
-            href={whatsappHref(book)}
+            message={`Hello, I would like to enquire about ${book.name}. Catalogue no. ${book.id}`}
             aria-label={`Ask about ${title} on WhatsApp`}
             title="Ask on WhatsApp"
           >
             <Icon name="whatsapp" />
-          </Link>
+          </StoreWhatsAppLink>
         </div>
       </div>
       <div className="showcase-body">

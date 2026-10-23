@@ -3,11 +3,12 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { RecordRow } from "./use-admin-data";
+import { publicWebUrl, storeLogoUrl } from "@/lib/store-settings";
 
 export type Field = {
   name: string;
   label: string;
-  type?: "text" | "number" | "textarea" | "select" | "checkbox" | "date" | "email";
+  type?: "text" | "number" | "textarea" | "select" | "checkbox" | "date" | "email" | "url";
   options?: string[];
   required?: boolean;
   step?: string;
@@ -122,6 +123,9 @@ export const entities: Record<EntityKey, { table: string; label: string; fields:
     label: "store settings",
     fields: [
       { name: "store_name", label: "Store name", required: true },
+      { name: "social.tagline", label: "Brand tagline" },
+      { name: "social.announcement", label: "Top announcement" },
+      { name: "social.description", label: "Footer description", type: "textarea" },
       { name: "store_email", label: "Store email", type: "email" },
       { name: "phone", label: "Phone" },
       { name: "whatsapp", label: "WhatsApp" },
@@ -130,6 +134,9 @@ export const entities: Record<EntityKey, { table: string; label: string; fields:
       { name: "country", label: "Country" },
       { name: "currency", label: "Currency" },
       { name: "logo_url", label: "Logo URL" },
+      { name: "social.facebook", label: "Facebook page", type: "url" },
+      { name: "social.instagram", label: "Instagram page", type: "url" },
+      { name: "social.messenger_name", label: "Messenger display name" },
       { name: "shipping_flat_fee", label: "Flat shipping fee", type: "number", step: "0.01" },
       { name: "free_shipping_over", label: "Free shipping over", type: "number", step: "0.01" },
       { name: "meta_title", label: "SEO title" },
@@ -192,13 +199,25 @@ export function EntityForm({
     setError("");
     const data = new FormData(event.currentTarget);
     const values: Record<string, unknown> = {};
+    const social = { ...(row?.social && typeof row.social === "object" ? row.social as Record<string, unknown> : {}) };
     for (const field of config.fields) {
       if (field.type === "checkbox") {
         values[field.name] = data.get(field.name) === "on";
         continue;
       }
       const raw = String(data.get(field.name) ?? "").trim();
+      if (field.name.startsWith("social.")) {
+        if (field.type === "url" && raw && !publicWebUrl(raw).startsWith("https://")) {
+          setError(`${field.label} must be a valid HTTPS link.`); setBusy(false); return;
+        }
+        social[field.name.slice(7)] = raw;
+        continue;
+      }
       values[field.name] = raw === "" ? null : field.type === "number" ? Number(raw) : raw;
+    }
+    if (entity === "settings") {
+      if (values.logo_url && !storeLogoUrl(values.logo_url)) { setError("Upload your logo using the file control, or use a Supabase image URL or local /images/ path."); setBusy(false); return; }
+      values.social = social;
     }
     const failure = await onSubmit(config.table, values, row?.id as string | undefined);
     setBusy(false);
@@ -221,7 +240,7 @@ export function EntityForm({
             <h2>
               {row ? "Edit" : "New"} {config.label}
             </h2>
-            <p>Saved straight to Supabase under row level security.</p>
+            <p>{entity === "settings" ? "Update your brand, contact details and search listing. Saved changes appear across the storefront." : "Update the details below and save your changes."}</p>
           </div>
           <button type="button" className="plbh-admin-icon-button" aria-label="Close" onClick={onClose}>
             ×
@@ -229,7 +248,7 @@ export function EntityForm({
         </div>
         <div className="plbh-admin-form-grid">
           {config.fields.map((field) => {
-            const value = row?.[field.name];
+            const value = field.name.startsWith("social.") ? (row?.social as Record<string, unknown> | undefined)?.[field.name.slice(7)] : row?.[field.name];
             const options =
               field.name === "category_id"
                 ? (categories || []).map((category) => ({ value: category.id, label: category.name }))
@@ -297,7 +316,7 @@ export function EntityForm({
           <button type="button" className="plbh-admin-button" onClick={onClose}>
             Cancel
           </button>
-          <button type="submit" className="plbh-admin-button plbh-admin-button-primary" disabled={busy}>
+          <button type="submit" className="plbh-admin-button plbh-admin-button-primary" disabled={busy || Boolean(uploading)}>
             {busy ? "Saving…" : row ? "Save changes" : `Create ${config.label}`}
           </button>
         </div>

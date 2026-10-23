@@ -1,4 +1,6 @@
+"use client";
 import Link from "next/link";
+import { useSiteSettings } from "./site-settings";
 import { Suspense } from "react";
 import catalogue from "@/data/catalogue.json";
 import { Brand, Icon } from "./ui";
@@ -7,6 +9,7 @@ import { NavbarSearch } from "./navbar-search";
 import { HeaderCart } from "./header-cart";
 import { MobileMenu } from "./store-interactions";
 export function SiteHeader() {
+  const settings = useSiteSettings();
   return (
     <>
       {" "}
@@ -18,15 +21,15 @@ export function SiteHeader() {
           <div className="container announcement-inner">
             <span>
               <Icon name="book" />
-              Legal booksellers &amp; publishers
+              {settings.announcement}
             </span>
             <span>
               <Icon name="truck" />
               Delivering across Pakistan
             </span>
-            <Link href="tel:+923334222005">
+            <Link href={`tel:${settings.phone.replace(/[^+0-9]/g, "")}`}>
               <Icon name="phone" />
-              For enquiries: +92 333 4222005
+              For enquiries: {settings.phone}
             </Link>
           </div>
         </div>
@@ -58,16 +61,20 @@ export function SiteHeader() {
   );
 }
 export function SiteFooter() {
+  const settings = useSiteSettings();
   return (
     <footer className="site-footer" data-section="12-footer">
       <div className="container footer-grid">
         <div className="footer-brand">
           <Brand />
           <p>
-            Legal books, guides and professional resources. Supporting study,
-            practice and a deeper understanding of the law.
+            {settings.description}
           </p>
-          <Link className="text-link" href="https://wa.me/923334222005">
+          <div className="footer-social-links">
+            {settings.facebook && <a href={settings.facebook} target="_blank" rel="noreferrer">Facebook</a>}
+            {settings.instagram && <a href={settings.instagram} target="_blank" rel="noreferrer">Instagram</a>}
+          </div>
+          <Link className="text-link" href={`https://wa.me/${settings.whatsapp}`}>
             <Icon name="whatsapp" />
             Talk to us on WhatsApp
           </Link>
@@ -106,27 +113,23 @@ export function SiteFooter() {
           <p>
             <Icon name="pin" />
             <span>
-              1-Turner Road,
-              <br />
-              Behind High Court,
-              <br />
-              Lahore, Pakistan
+              {settings.address}<br />{settings.city}, {settings.country}
             </span>
           </p>
-          <Link href="tel:+923334222005">
+          <Link href={`tel:${settings.phone.replace(/[^+0-9]/g, "")}`}>
             <Icon name="phone" />
-            +92 333 4222005
+            {settings.phone}
           </Link>
-          <Link href="mailto:civilcriminallawbook@gmail.com">
+          <Link href={`mailto:${settings.email}`}>
             <Icon name="mail" />
-            <span>civilcriminallawbook@gmail.com</span>
+            <span>{settings.email}</span>
           </Link>
         </div>
       </div>
       <div className="container footer-bottom">
-        <p>© {catalogue.verifiedAt.slice(0, 4)} Punjab Law Book House.</p>
+        <p>© {catalogue.verifiedAt.slice(0, 4)} {settings.name}.</p>
         <p>
-          Knowledge for a <em>fairer Pakistan.</em>
+          {settings.tagline}
         </p>
         <Link href="#main">Back to top ↑</Link>
       </div>

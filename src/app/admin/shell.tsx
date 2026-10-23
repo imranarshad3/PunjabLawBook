@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } fro
 import { useRouter, useSearchParams } from "next/navigation";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { Glyph } from "./icons";
+import { useSiteSettings } from "@/components/site-settings";
 import { navigation, viewPath, type View } from "./navigation";
 
 const subscribeHydration = () => () => {};
@@ -80,6 +81,7 @@ export function AdminShell({
   enquiryBadge?: number;
   children: ReactNode;
 }) {
+  const settings = useSiteSettings();
   const router = useRouter();
   const { user } = useUser();
   // The static shell has no Clerk user. Match that first hydration render even
@@ -162,14 +164,14 @@ export function AdminShell({
         aria-label="Workspace navigation"
         className={`plbh-admin-sidebar ${mobile ? "is-open" : ""}`}
       >
-        <Link href="/admin" className="plbh-admin-brand" aria-label="Punjab Book House admin home">
-          <Image
+        <Link href="/admin" className="plbh-admin-brand" aria-label={`${settings.name} admin home`}>
+          {settings.logo ? <Image src={settings.logo} alt={settings.name} width={150} height={100} unoptimized /> : settings.name !== "Punjab Law Book House" ? <span className="plbh-admin-custom-brand"><Glyph name="book" size={40} /><strong>{settings.name}</strong><small>ADMIN STUDIO</small></span> : <Image
             src="/images/admin/brand-lockup.webp"
             alt="Punjab Book House — Admin Panel"
             width={420}
             height={272}
             priority
-          />
+          />}
         </Link>
         <button className="plbh-admin-mobile-close" onClick={() => setMobile(false)} aria-label="Close navigation">
           <Glyph name="left" size={18} />

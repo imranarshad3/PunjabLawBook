@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ProductCatalogue } from "@/components/product-catalogue";
 export const metadata: Metadata = {
-  title: "The Bookshop | Punjab Law Book House",
+  title: "The Bookshop",
   description:
     "Browse legal references, bare acts and examination guides for your next chapter.",
 };

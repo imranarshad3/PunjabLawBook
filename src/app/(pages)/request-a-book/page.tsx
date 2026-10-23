@@ -4,7 +4,7 @@ import Image from "@/components/site-image";
 import { PageIntro } from "@/components/page-intro";
 import { EnquiryForm } from "@/components/enquiry-form";
 export const metadata: Metadata = {
-  title: "Request a Book | Punjab Law Book House",
+  title: "Request a Book",
 };
 function RequestBookPage() {
   return (

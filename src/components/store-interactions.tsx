@@ -1,4 +1,5 @@
 "use client";
+import { useSiteSettings } from "./site-settings";
 
 import { useEffect, useRef, useState } from "react";
 import {
@@ -146,6 +147,7 @@ export function CartActions({
   available: boolean;
   whatsapp: string;
 }) {
+  const settings = useSiteSettings();
   const cart = useCart();
   const quantity = cart.find((item) => item.id === id)?.quantity ?? 0;
   const setQuantity = (value: number) => setCartQuantity(id, value);
@@ -194,7 +196,7 @@ export function CartActions({
         )}
         <Link
           className="whatsapp-button"
-          href={whatsapp}
+          href={`https://wa.me/${settings.whatsapp}?text=${encodeURIComponent(whatsapp)}`}
           aria-label={`Ask about ${title} on WhatsApp`}
           title="Ask on WhatsApp"
         >

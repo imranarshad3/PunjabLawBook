@@ -5,7 +5,7 @@ import Link from "next/link";
 import { AccountPreview } from "@/components/account-preview";
 import { Icon } from "@/components/ui";
 export const metadata: Metadata = {
-  title: "Your Account | Punjab Law Book House",
+  title: "Your Account",
 };
 export default function Page() {
   return (

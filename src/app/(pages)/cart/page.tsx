@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PageIntro } from "@/components/page-intro";
 import { CartPage } from "@/components/cart-page";
 export const metadata: Metadata = {
-  title: "Your Book Bag | Punjab Law Book House",
+  title: "Your Book Bag",
 };
 export default function Page() {
   return (

@@ -1,3 +1,4 @@
+import { getSiteSettings } from "@/lib/site-settings";
 import { CmsPage } from "@/components/cms-page";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -5,9 +6,10 @@ import { PageIntro } from "@/components/page-intro";
 import { Icon } from "@/components/ui";
 import { EnquiryForm } from "@/components/enquiry-form";
 export const metadata: Metadata = {
-  title: "Contact & Visit Us | Punjab Law Book House",
+  title: "Contact & Visit Us",
 };
-function ContactPage() {
+async function ContactPage() {
+  const settings = await getSiteSettings();
   return (
     <main id="main" className="inner-page">
       <PageIntro
@@ -33,7 +35,7 @@ function ContactPage() {
             <div>
               <h3>Message us</h3>
               <p>Book enquiries and order assistance</p>
-              <a href="https://wa.me/923334222005">
+              <a href={`https://wa.me/${settings.whatsapp}`}>
                 Chat on WhatsApp <Icon name="arrow" />
               </a>
             </div>
@@ -42,40 +44,34 @@ function ContactPage() {
             <Icon name="phone" />
             <div>
               <h3>Give us a call</h3>
-              <a href="tel:+923334222005">+92 333 4222005</a>
+              <a href={`tel:${settings.phone.replace(/[^+0-9]/g, "")}`}>{settings.phone}</a>
             </div>
           </div>
           <div className="contact-method">
             <Icon name="mail" />
             <div>
               <h3>Write to us</h3>
-              <a href="mailto:civilcriminallawbook@gmail.com">civilcriminallawbook@gmail.com</a>
+              <a href={`mailto:${settings.email}`}>{settings.email}</a>
             </div>
           </div>
-          <div className="contact-method"><Icon name="chat" /><div><h3>Messenger</h3><p>KLR Law Publishers</p></div></div>
+          <div className="contact-method"><Icon name="chat" /><div><h3>Messenger</h3><p>{settings.messengerName}</p></div></div>
         </div>
         <EnquiryForm />
       </section>
       <section className="container store-visit">
         <div className="store-location-art">
           <Icon name="building" />
-          <p>LAHORE · PAKISTAN</p>
+          <p>{settings.city} · {settings.country}</p>
           <h2>
-            Find us on
-            <br />
-            Turner Road.
+            Visit our<br />bookshop.
           </h2>
-          <span>Behind the High Court</span>
+          <span>{settings.address}</span>
         </div>
         <div className="store-visit-copy">
           <p className="shop-kicker">COME SAY HELLO</p>
           <h2>Your local legal bookshop.</h2>
           <p>
-            Punjab Law Book House
-            <br />
-            1-Turner Road, Behind High Court
-            <br />
-            Lahore, Pakistan
+            {settings.name}<br />{settings.address}<br />{settings.city}, {settings.country}
           </p>
           <p className="muted">
             Please call ahead to confirm opening hours and the availability of
@@ -83,7 +79,7 @@ function ContactPage() {
           </p>
           <a
             className="button button-green"
-            href="https://www.google.com/maps/search/?api=1&query=Punjab+Law+Book+House+1+Turner+Road+Lahore"
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${settings.name} ${settings.address} ${settings.city}`)}`}
             target="_blank"
             rel="noreferrer"
           >

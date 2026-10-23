@@ -1,4 +1,5 @@
 "use client";
+import { StoreWhatsAppLink } from "./site-settings";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -245,9 +246,9 @@ export function ProductCatalogue({
               <p>
                 Let us help you find the right reference for your bookshelf.
               </p>
-              <a href="https://wa.me/923334222005">
+              <StoreWhatsAppLink>
                 Ask our team <Icon name="arrow" />
-              </a>
+              </StoreWhatsAppLink>
             </div>
           </aside>
           <div className="shop-results">
@@ -340,9 +341,9 @@ export function ProductCatalogue({
             library.
           </p>
         </div>
-        <a className="button button-gold" href="https://wa.me/923334222005">
+        <StoreWhatsAppLink className="button button-gold">
           Let’s talk books <Icon name="arrow" />
-        </a>
+        </StoreWhatsAppLink>
       </section>
     </main>
   );

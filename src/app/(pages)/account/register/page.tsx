@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { PageIntro } from "@/components/page-intro";
 import { AccountPreview } from "@/components/account-preview";
 export const metadata: Metadata = {
-  title: "Create an Account | Punjab Law Book House",
+  title: "Create an Account",
 };
 export default function Page() {
   return (
