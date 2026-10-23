@@ -60,6 +60,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const [catalogue, images] = await Promise.all([getCatalogue(), getSiteImages()]);
   return (
     <ClerkProvider
+      localization={{
+        signIn: { start: { title: "Sign in to your bookshelf" } },
+        signUp: { start: { title: "Create your account" } },
+      }}
       appearance={{
         variables: {
           colorPrimary: "#17402f",

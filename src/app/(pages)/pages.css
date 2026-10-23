@@ -1342,3 +1342,11 @@
     height: 220px;
   }
 }
+
+/* Clerk owns verification, device trust, MFA and recovery inside the branded panel. */
+.account-panel .account-auth-widget { width: 100%; min-width: 0; }
+.account-panel .account-auth-card-box { width: 100%; max-width: 100%; box-shadow: none; border: 0; }
+.account-panel .account-auth-card { padding: 1.5rem 0; box-shadow: none; border: 0; background: transparent; }
+.account-panel .account-auth-widget input { min-height: 46px; font-size: 16px; }
+.account-panel .account-auth-widget button { min-height: 40px; }
+.account-panel .account-auth-widget a:focus-visible { outline: 2px solid #17402f; outline-offset: 3px; }
