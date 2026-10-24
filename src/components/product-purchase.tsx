@@ -57,6 +57,7 @@ export function ProductPurchase({ book }: { book: Product }) {
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const available = book.inStock && book.purchasable;
+  const limit = Math.min(99, book.stock ?? 99);
   return (
     <div className="product-purchase">
       <div className="purchase-row">
@@ -75,7 +76,7 @@ export function ProductPurchase({ book }: { book: Product }) {
           <output aria-live="polite">{quantity}</output>
           <button
             aria-label="Increase quantity"
-            disabled={quantity === 99}
+            disabled={quantity >= limit || !available}
             onClick={() => setQuantity((q) => q + 1)}
           >
             +

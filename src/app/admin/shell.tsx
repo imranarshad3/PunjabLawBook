@@ -227,6 +227,7 @@ export function AdminShell({
           >
             <Glyph name="menu" size={20} />
           </button>
+          <div className="plbh-admin-top-context"><small>WORKSPACE</small><strong>{view}</strong></div>
           <form
             className="plbh-admin-topsearch"
             role="search"
@@ -245,6 +246,7 @@ export function AdminShell({
             />
           </form>
           <div className="plbh-admin-top-actions">
+            <Link className="plbh-admin-store-shortcut" href="/" target="_blank" aria-label="Open storefront in a new tab"><Glyph name="external" size={17} /><span>Storefront</span></Link>
             {(view === "Dashboard" || view === "Analytics") && <label className="plbh-admin-range">
               <Glyph name="calendar" size={17} />
               <span className="plbh-admin-visually-hidden">Date range</span>

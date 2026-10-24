@@ -5,6 +5,7 @@ import { useSession } from "@clerk/nextjs";
 import { createClerkSupabaseClient, supabaseConfigured } from "@/lib/supabase";
 import { revalidateCatalogue } from "./actions";
 import { products as fallbackBooks } from "@/data/products";
+import { adminWriteError } from "@/lib/admin-permissions";
 
 export type AdminBook = {
   id: number;
@@ -74,6 +75,17 @@ const asFallback = (): AdminBook[] =>
     publisher: "",
   }));
 
+/** Avoid silently truncating dashboard totals at the API's row limit. */
+async function readPages<T>(query: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>) {
+  const data: T[] = [];
+  for (let from = 0; ; from += 500) {
+    const result = await query(from, from + 499);
+    if (result.error) return { data: null, error: result.error };
+    data.push(...(result.data || []));
+    if ((result.data?.length || 0) < 500) return { data, error: null };
+  }
+}
+
 /** Reads the admin tables through Clerk-authenticated RLS. */
 export function useAdminData(orderId?: string) {
   const { session, isLoaded } = useSession();
@@ -102,6 +114,7 @@ export function useAdminData(orderId?: string) {
   const [failures, setFailures] = useState<string[]>([]);
 
   const getToken = useCallback(async () => (session ? session.getToken() : null), [session]);
+  const writeError = useCallback((table: string) => adminWriteError(team.find((member) => member.clerk_user_id === session?.user.id)?.role, table), [team, session?.user.id]);
 
   useEffect(() => {
     const client = createClerkSupabaseClient(getToken);
@@ -115,8 +128,8 @@ export function useAdminData(orderId?: string) {
           .select("*, categories(id, name)")
           .order("title"),
         orderId ? client.from("orders").select("*").eq("id", orderId)
-          : client.from("orders").select("*").order("placed_at", { ascending: false }).limit(200),
-        client.from("customers").select("*").order("created_at", { ascending: false }).limit(200),
+          : readPages((from, to) => client.from("orders").select("*").order("placed_at", { ascending: false }).order("id").range(from, to)),
+        readPages((from, to) => client.from("customers").select("*").order("created_at", { ascending: false }).order("id").range(from, to)),
         client.from("enquiries").select("*").order("created_at", { ascending: false }).limit(200),
         client.from("promotions").select("*").order("created_at", { ascending: false }).limit(200),
         client.from("content_banners").select("*").order("sort_order"),
@@ -126,7 +139,7 @@ export function useAdminData(orderId?: string) {
         client.from("store_settings").select("*").limit(1).maybeSingle(),
         client.from("categories").select("*").order("name"),
         orderId ? client.from("order_items").select("*, orders(order_number, placed_at, status)").eq("order_id", orderId)
-          : client.from("order_items").select("*, orders(order_number, placed_at, status)").limit(500),
+          : readPages((from, to) => client.from("order_items").select("*, orders(order_number, placed_at, status)").order("id").range(from, to)),
         client.from("media_assets").select("*, books(title)").order("created_at", { ascending: false }).limit(200),
         client.from("book_images").select("*").order("sort_order"),
         client.from("book_reviews").select("*, books(title)").order("created_at", { ascending: false }).limit(500),
@@ -195,6 +208,8 @@ export function useAdminData(orderId?: string) {
   /** Insert or update a row, then refresh. Returns an error message or "". */
   const save = useCallback(
     async (table: string, values: Record<string, unknown>, id?: string) => {
+      const denied = writeError(table);
+      if (denied) return denied;
       const client = createClerkSupabaseClient(getToken);
       if (!client) return "Supabase is not configured.";
       // store_settings is a singleton keyed by the boolean value `true`.
@@ -207,7 +222,14 @@ export function useAdminData(orderId?: string) {
           .select("id")
           .single();
         if (failure) return failure.message;
-        refreshAll();
+        setSettings((current) => ({ ...current, ...values, id: true } as unknown as RecordRow));
+        reload();
+        try {
+          const refreshed = await revalidateCatalogue();
+          if (!refreshed.ok) return "Settings saved, but the website could not refresh. Reload the page to check your changes.";
+        } catch {
+          return "Settings saved, but the website could not refresh. Reload the page to check your changes.";
+        }
         return "";
       }
       const query = id
@@ -218,10 +240,12 @@ export function useAdminData(orderId?: string) {
       refreshAll();
       return "";
     },
-    [getToken, refreshAll],
+    [getToken, refreshAll, reload, writeError],
   );
 
   const saveWithId = useCallback(async (table: string, values: Record<string, unknown>, id?: string) => {
+    const denied = writeError(table);
+    if (denied) return { id: "", error: denied };
     const client = createClerkSupabaseClient(getToken);
     if (!client) return { id: "", error: "Supabase is not configured." };
     const query = id
@@ -231,16 +255,18 @@ export function useAdminData(orderId?: string) {
     if (failure) return { id: "", error: failure.message };
     refreshAll();
     return { id: String(saved.id), error: "" };
-  }, [getToken, refreshAll]);
+  }, [getToken, refreshAll, writeError]);
 
   const saveBookImages = useCallback(async (bookId: string, images: { url: string; altText?: string }[]) => {
+    const denied = writeError("book_images");
+    if (denied) return denied;
     const client = createClerkSupabaseClient(getToken);
     if (!client) return "Supabase is not configured.";
     const { error: failure } = await client.rpc("replace_book_images", { p_book_id: bookId, p_images: images });
     if (failure) return failure.message;
     refreshAll();
     return "";
-  }, [getToken, refreshAll]);
+  }, [getToken, refreshAll, writeError]);
 
   const categoryBookCount = useCallback(
     async (categoryId: string) => {
@@ -254,6 +280,8 @@ export function useAdminData(orderId?: string) {
 
   const remove = useCallback(
     async (table: string, id: string) => {
+      const denied = writeError(table);
+      if (denied) return denied;
       const client = createClerkSupabaseClient(getToken);
       if (!client) return "Supabase is not configured.";
       const { error: failure } = await client.from(table).delete().eq("id", id).select("id").single();
@@ -261,12 +289,14 @@ export function useAdminData(orderId?: string) {
       refreshAll();
       return "";
     },
-    [getToken, refreshAll],
+    [getToken, refreshAll, writeError],
   );
 
   /** Uploads an image to the public `media` bucket and returns its URL. */
   const uploadImage = useCallback(
     async (file: File) => {
+      const denied = writeError("media_assets");
+      if (denied) throw new Error(denied);
       const client = createClerkSupabaseClient(getToken);
       if (!client) throw new Error("Supabase is not configured.");
       const name = `${Date.now().toString(36)}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "-")}`;
@@ -276,12 +306,14 @@ export function useAdminData(orderId?: string) {
       if (failure) throw new Error(failure.message);
       return client.storage.from("media").getPublicUrl(name).data.publicUrl;
     },
-    [getToken],
+    [getToken, writeError],
   );
 
   /** Stock changes go through inventory_movements; a trigger updates books.stock. */
   const adjustStock = useCallback(
     async (bookId: string, delta: number, reason: string) => {
+      const denied = writeError("inventory_movements");
+      if (denied) return denied;
       const client = createClerkSupabaseClient(getToken);
       if (!client) return "Supabase is not configured.";
       const { error: failure } = await client
@@ -291,7 +323,7 @@ export function useAdminData(orderId?: string) {
       refreshAll();
       return "";
     },
-    [getToken, refreshAll],
+    [getToken, refreshAll, writeError],
   );
 
   const categories = useMemo(

@@ -1,6 +1,7 @@
 "use client";
 
 import { Glyph } from "./icons";
+import { orderStatusOptions } from "@/lib/order-status";
 import type { RecordRow } from "./use-admin-data";
 
 const money = (value: unknown) =>
@@ -177,7 +178,7 @@ export function RecordsPanel({
                           value={String(row[schema.statusField || "status"] ?? "")}
                           onChange={(event) => onStatus(row, event.target.value)}
                         >
-                          {schema.statusOptions.map((option) => (
+                          {(view === "Orders" ? orderStatusOptions(String(row.status)) : schema.statusOptions).map((option) => (
                             <option key={option} value={option}>
                               {option.replaceAll("_", " ")}
                             </option>

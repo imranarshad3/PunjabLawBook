@@ -46,3 +46,8 @@
 .account-order-actions { display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
 .account-order-details-link { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; color: #15513c; font-weight: 600; }
 @media (max-width: 760px) { .account-order-detail-grid { grid-template-columns: 1fr; } .account-order-summary { padding: 21px; } .account-order-progress > div { font-size: 0.68rem; } }
+
+.account-order-page .account-order-detail-grid .account-panel-card { padding: 0; }
+.account-order-page .account-order-detail-grid .account-panel-card > header { margin: 0; padding: 24px; }
+.account-order-page .account-order-summary header p:last-child { color: #d1e2d8; }
+.account-order-page .account-order-summary h2 { color: white; font-size: 30px; }

@@ -3,6 +3,7 @@ export type StoreSettings = {
   city: string; country: string; logo: string; tagline: string; announcement: string;
   description: string; metaTitle: string; metaDescription: string;
   facebook: string; instagram: string; messengerName: string;
+  shippingFee: number; freeShippingOver: number | null;
 };
 export const defaultStoreSettings: StoreSettings = {
   name: "Punjab Law Book House", email: "civilcriminallawbook@gmail.com", phone: "+92 333 4222005",
@@ -11,6 +12,7 @@ export const defaultStoreSettings: StoreSettings = {
   description: "Legal books, guides and professional resources. Supporting study, practice and a deeper understanding of the law.",
   metaTitle: "", metaDescription: "Explore law books, bare acts, legal commentaries and judicial examination guides from Punjab Law Book House, Lahore.",
   facebook: "", instagram: "", messengerName: "KLR Law Publishers",
+  shippingFee: 0, freeShippingOver: null,
 };
 export function publicWebUrl(value: unknown): string {
   if (typeof value !== "string") return "";
@@ -31,6 +33,8 @@ export function readStoreSettings(row: Record<string, unknown> | null): StoreSet
   let whatsapp = text(row.whatsapp, defaultStoreSettings.whatsapp).replace(/\D/g, "");
   if (whatsapp.startsWith("0")) whatsapp = `92${whatsapp.slice(1)}`;
   return {
+    shippingFee: Math.max(0, Number(row.shipping_flat_fee) || 0),
+    freeShippingOver: row.free_shipping_over == null ? null : Math.max(0, Number(row.free_shipping_over) || 0),
     name, email: text(row.store_email, defaultStoreSettings.email),
     phone: text(row.phone, defaultStoreSettings.phone), whatsapp,
     address: text(row.address, defaultStoreSettings.address), city, country: text(row.country, defaultStoreSettings.country),

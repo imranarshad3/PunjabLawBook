@@ -1,26 +1,18 @@
 #!/usr/bin/env bash
-# Applies supabase/migrations/*.sql (and optionally supabase/seed.sql) to the
-# database named by SUPABASE_DB_URL in .env. Every file is idempotent.
-#
-#   bash scripts/db-apply.sh            # migrations only
-#   bash scripts/db-apply.sh --seed     # migrations + catalogue seed
+# Use Supabase migration history; never replay the entire historical schema.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-
-if [ -f .env ]; then
-  SUPABASE_DB_URL=$(grep -E '^SUPABASE_DB_URL=' .env | head -1 | cut -d= -f2- | tr -d '"')
+if [ -f .env ] && [ -z "${SUPABASE_DB_URL:-}" ]; then
+  SUPABASE_DB_URL=$(sed -n 's/^SUPABASE_DB_URL=//p' .env | head -1 | tr -d '"')
 fi
-: "${SUPABASE_DB_URL:?Set SUPABASE_DB_URL in .env (Supabase → Project Settings → Database → Connection string → URI)}"
-
-for file in supabase/migrations/*.sql; do
-  echo "→ $file"
-  psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -q -f "$file"
-done
-
+: "${SUPABASE_DB_URL:?Set SUPABASE_DB_URL before applying migrations}"
 if [ "${1:-}" = "--seed" ]; then
-  echo "→ supabase/seed.sql"
-  node scripts/generate-seed.cjs
-  psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -q -f supabase/seed.sql
+  echo "Seeding is separate from migrations and may overwrite catalogue content. Use an isolated test database for fixtures." >&2
+  exit 1
 fi
-
-echo "done"
+# A history mismatch is intentional fail-closed behaviour. Reconcile an old
+# manually managed database before pushing; do not use --include-all blindly.
+if [ "${1:-}" = "--dry-run" ]; then
+  exec npx --no-install supabase db push --skip-vault --db-url "$SUPABASE_DB_URL" --dry-run
+fi
+exec npx --no-install supabase db push --skip-vault --db-url "$SUPABASE_DB_URL"

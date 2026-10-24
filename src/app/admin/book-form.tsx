@@ -286,22 +286,32 @@ export function BookForm({ bookId }: { bookId?: string }) {
                     ) : (
                       <Glyph name="cloud" size={38} />
                     )}
-                    <strong>Upload Book Cover</strong>
-                    <small>Click to upload or drag and drop</small>
+                    <strong>Upload book images</strong>
+                    <small>First image is the cover; remaining images go into the gallery.</small>
                     <small>JPG, PNG or WebP (Max 5MB)</small>
                     <label className="plbh-admin-button plbh-admin-button-primary plbh-admin-upload-button">
-                      Choose Image
+                      {uploads ? "Uploading images…" : "Choose images"}
                       <input
                         type="file"
-                        accept="image/*"
+                        accept="image/jpeg,image/png,image/webp"
+                        multiple
+                        disabled={Boolean(uploads) || saving}
                         className="plbh-admin-visually-hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) void upload(file, setCover);
+                        onChange={async (e) => {
+                          const files = Array.from(e.target.files ?? []);
+                          e.currentTarget.value = "";
+                          if (!files.length) return;
+                          if (gallery.length + files.length - 1 > 20) { setError("Choose one cover and up to 20 gallery images."); return; }
+                          setError("");
+                          setUploads((count) => count + 1);
+                          try {
+                            for (const [index, file] of files.entries()) await upload(file, index === 0 ? setCover : (url) => setGalleryAdds((current) => [...current, url]));
+                          } finally { setUploads((count) => count - 1); }
                         }}
                       />
                     </label>
                   </div>
+                  {gallery.length > 0 && <small>{gallery.length} gallery images selected. Review them in the Images step.</small>}
 
                 </div>
               </div>
@@ -383,11 +393,14 @@ export function BookForm({ bookId }: { bookId?: string }) {
                 <div className="plbh-admin-gallery">
                   <label className="plbh-admin-gallery-add">
                     <Glyph name="cloud" size={22} /><small>Add images</small>
-                    <input type="file" accept="image/jpeg,image/png,image/webp" multiple className="plbh-admin-visually-hidden" onChange={(event) => {
+                    <input type="file" accept="image/jpeg,image/png,image/webp" multiple disabled={Boolean(uploads) || saving} className="plbh-admin-visually-hidden" onChange={async (event) => {
                       const files = Array.from(event.target.files ?? []);
-                      if (gallery.length + files.length > 20) { setError("Choose up to 20 gallery images."); return; }
-                      for (const file of files) void upload(file, (url) => setGalleryAdds((current) => [...current, url]));
                       event.currentTarget.value = "";
+                      if (gallery.length + files.length > 20) { setError("Choose up to 20 gallery images."); return; }
+                      setError("");
+                      setUploads((count) => count + 1);
+                      try { for (const file of files) await upload(file, (url) => setGalleryAdds((current) => [...current, url])); }
+                      finally { setUploads((count) => count - 1); }
                     }} />
                   </label>
                   {gallery.map((url, index) => <span key={`${url}-${index}`} className="plbh-admin-gallery-item">

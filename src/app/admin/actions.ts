@@ -1,6 +1,6 @@
 "use server";
 
-import { updateTag } from "next/cache";
+import { refresh, updateTag } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
 import { createClerkSupabaseClient } from "@/lib/supabase";
 import { CATALOGUE_TAG } from "@/lib/catalogue";
@@ -13,5 +13,6 @@ export async function revalidateCatalogue() {
   const member = await client?.from("admin_members").select("id").eq("clerk_user_id", userId).maybeSingle();
   if (!member?.data) return { ok: false };
   updateTag(CATALOGUE_TAG);
+  refresh();
   return { ok: true };
 }

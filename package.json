@@ -14,7 +14,10 @@
     "check:homepage": "node scripts/check-homepage.cjs",
     "check:admin": "node scripts/check-admin.cjs",
     "db:apply": "bash scripts/db-apply.sh",
-    "db:seed": "bash scripts/db-apply.sh --seed"
+    "db:seed": "bash scripts/db-apply.sh --seed",
+    "test": "node scripts/check-logic.cjs",
+    "test:db": "node scripts/check-db.cjs",
+    "test:http": "node scripts/check-http.cjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.9.19",

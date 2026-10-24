@@ -21,14 +21,16 @@ export async function POST(request: Request) {
     role?: string;
   } | null;
 
-  const email = body?.email?.trim().toLowerCase() ?? "";
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail(400, "Enter a valid email address.");
+  const email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
+  if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail(400, "Enter a valid email address.");
+  if (body?.role !== undefined && !ROLES.includes(body.role as AdminRole)) return fail(400, "Choose a valid team role.");
 
   const invitedRole = (ROLES.includes(body?.role as AdminRole) ? body!.role : "editor") as AdminRole;
   // Nobody may mint an account more powerful than their own.
   if (invitedRole === "owner" && role !== "owner")
     return fail(403, "Only an owner can invite another owner.");
 
+  if (body?.fullName !== undefined && (typeof body.fullName !== "string" || body.fullName.length > 120)) return fail(400, "Enter a name up to 120 characters.");
   const fullName = body?.fullName?.trim() || null;
 
   // The pending row is written first: it mints the token the Clerk invitation
@@ -78,11 +80,13 @@ export async function DELETE(request: Request) {
 
   const { data: invitation } = await client
     .from("admin_invitations")
-    .select("id, clerk_invitation_id, status")
+    .select("id, clerk_invitation_id, status, role")
     .eq("id", id)
     .maybeSingle();
 
   if (!invitation) return fail(404, "That invitation no longer exists.");
+  if (invitation.role === "owner" && role !== "owner") return fail(403, "Only an owner can revoke an owner invitation.");
+  if (invitation.status !== "pending") return fail(409, "Only a pending invitation can be revoked.");
 
   if (invitation.clerk_invitation_id && invitation.status === "pending") {
     try {
@@ -96,7 +100,7 @@ export async function DELETE(request: Request) {
   const { error } = await client
     .from("admin_invitations")
     .update({ status: "revoked" })
-    .eq("id", id);
+    .eq("id", id).eq("status", "pending").select("id").maybeSingle();
 
   if (error) return fail(500, error.message);
   return NextResponse.json({ ok: true });

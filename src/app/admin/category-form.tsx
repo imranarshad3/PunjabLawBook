@@ -174,10 +174,11 @@ function CategoryEditor({ categoryId, initialCategory, saveRecord, orderBadge, e
             <p className="plbh-admin-field-hint">Choose the symbol shown on this category tile.</p>
             <div>
               {categoryIcons.map(([key, label]) => (
-                <label key={key} className={icon === key ? "is-active" : ""}>
+                <label key={key} data-icon={key} className={icon === key ? "is-active" : ""}>
                   <input type="radio" name="icon" value={key} checked={icon === key} onChange={() => setIcon(key)} className="plbh-admin-visually-hidden" />
-                  <span className="plbh-admin-icon-none"><Glyph name={key} size={28} /></span>
+                  <span className="plbh-admin-icon-none"><Glyph name={key} size={32} /></span>
                   <small>{label}</small>
+                  <span className="plbh-category-icon-check"><Glyph name="check" size={12} /></span>
                 </label>
               ))}
             </div>

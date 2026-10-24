@@ -7,6 +7,7 @@ export type OrderCustomer = {
   address?: string;
   city?: string;
   notes?: string;
+  promotion_code?: string;
 };
 
 /**
@@ -17,6 +18,7 @@ export async function placeOrder(
   customer: OrderCustomer,
   items: { legacy_id: number; quantity: number }[],
   getToken?: () => Promise<string | null>,
+  requestId?: string,
 ) {
   if (!supabase) return { error: "Ordering is unavailable right now." };
   const client = getToken ? createClerkSupabaseClient(getToken) : supabase;
@@ -26,6 +28,7 @@ export async function placeOrder(
     p_customer: customer,
     p_items: items,
     p_clerk_user_id: null,
+    p_request_id: requestId ?? crypto.randomUUID(),
   });
   if (error) return { error: error.message };
   const row = Array.isArray(data) ? data[0] : data;

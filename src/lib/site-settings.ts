@@ -8,6 +8,6 @@ export async function getSiteSettings(): Promise<StoreSettings> {
   cacheTag(CATALOGUE_TAG);
   cacheLife("hours");
   if (!supabase) return readStoreSettings(null);
-  const { data, error } = await supabase.from("store_settings").select("store_name,store_email,phone,whatsapp,address,city,country,logo_url,meta_title,meta_description,social").eq("id", true).maybeSingle();
+  const { data, error } = await supabase.from("store_settings").select("store_name,store_email,phone,whatsapp,address,city,country,logo_url,meta_title,meta_description,social,shipping_flat_fee,free_shipping_over").eq("id", true).maybeSingle();
   return readStoreSettings(error ? null : data);
 }

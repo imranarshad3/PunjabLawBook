@@ -18,7 +18,21 @@ export function AccountOrderDetail({ orderId }: { orderId: string }) {
   const [items, setItems] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState("");
   const getToken = useCallback(async () => session ? session.getToken() : null, [session]);
+  async function cancelOrder() {
+    if (cancelling) return;
+    setCancelling(true); setCancelError("");
+    try {
+      const client = createClerkSupabaseClient(getToken);
+      if (!client) throw new Error("Order updates are temporarily unavailable.");
+      const result = await client.rpc("cancel_my_order", { p_order_id: orderId });
+      if (result.error) throw new Error(result.error.message);
+      setOrder((current) => current ? { ...current, status: "cancelled" } : current);
+    } catch (caught) { setCancelError(caught instanceof Error ? caught.message : "Cancellation could not be completed."); }
+    finally { setCancelling(false); }
+  }
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -82,9 +96,11 @@ export function AccountOrderDetail({ orderId }: { orderId: string }) {
                     </section>
                     <aside>
                       <section className="account-panel-card"><header><div><h2>Delivery</h2><p>Where this order is going</p></div></header><dl className="account-order-meta"><div><dt>Name</dt><dd>{String(order.customer_name || user.fullName || "—")}</dd></div><div><dt>Address</dt><dd>{[order.shipping_address, order.shipping_city].filter(Boolean).join(", ") || "To be confirmed by phone"}</dd></div><div><dt>Phone</dt><dd>{String(order.customer_phone || "—")}</dd></div></dl></section>
-                      <section className="account-panel-card"><header><div><h2>Payment</h2><p>Payment is handled on delivery</p></div></header><dl className="account-order-meta"><div><dt>Method</dt><dd>{String(order.payment_method || "Cash on delivery")}</dd></div><div><dt>Status</dt><dd>{String(order.payment_status || "unpaid")}</dd></div><div><dt>Order note</dt><dd>{String(order.notes || "No note added")}</dd></div></dl></section>
+                      <section className="account-panel-card"><header><div><h2>Payment</h2><p>Payment is handled on delivery</p></div></header><dl className="account-order-meta"><div><dt>Method</dt><dd>{String(order.payment_method || "Cash on delivery").replaceAll("_", " ")}</dd></div><div><dt>Status</dt><dd>{String(order.payment_status || "unpaid")}</dd></div><div><dt>Order note</dt><dd>{String(order.notes || "No note added")}</dd></div></dl></section>
                     </aside>
                   </div>
+                  {order.status === "pending" && <div className="account-order-actions"><button className="button button-outline" disabled={cancelling} onClick={() => void cancelOrder()}>{cancelling ? "Cancelling…" : "Cancel pending order"}</button><small>You can cancel while your order is awaiting processing.</small></div>}
+                  {cancelError && <p role="alert">{cancelError}</p>}
                   <div className="account-order-actions"><Link className="button button-outline" href="/account"><Icon name="arrow" /> Back to account</Link><Link className="button button-green" href="/contact"><Icon name="whatsapp" /> Need help with this order?</Link></div>
                 </>}
       </section>

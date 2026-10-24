@@ -16,6 +16,7 @@ import { ProductDetails } from "./product-details";
 import { useAdminData } from "./use-admin-data";
 import { RecordsPanel } from "./records";
 import { EntityForm, type EntityKey } from "./entity-form";
+import AdminLoading from "./loading";
 import { SiteImagesEditor } from "./site-images-editor";
 import { SITE_IMAGE_PREFIX } from "@/lib/site-image-slots";
 import { TeamInvites } from "./team-invites";
@@ -159,6 +160,8 @@ export function AdminWorkspace({ view }: { view: View }) {
   const [selectedBook, setSelectedBook] = useState<AdminBook | null>(null);
   const [selectedBooks, setSelectedBooks] = useState<Set<number>>(new Set());
   const [notice, setNotice] = useState("");
+  const [adjustingBook, setAdjustingBook] = useState("");
+  const [mediaUploading, setMediaUploading] = useState(false);
   const [editing, setEditing] = useState<{ entity: EntityKey; row?: RecordRow | null } | null>(null);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [categorySearch, setCategorySearch] = useState("");
@@ -268,10 +271,10 @@ export function AdminWorkspace({ view }: { view: View }) {
     for (const order of liveOrders) {
       const when = new Date(String(order.placed_at));
       if (Number.isNaN(when.getTime())) continue;
-      const key = when.toLocaleDateString("en-PK", { month: "short", year: "2-digit" });
+      const key = `${when.getFullYear()}-${String(when.getMonth() + 1).padStart(2, "0")}`;
       buckets.set(key, (buckets.get(key) || 0) + Number(order.total || 0));
     }
-    return [...buckets.entries()].slice(-12).map(([name, count]) => ({ name, count }));
+    return [...buckets.entries()].sort(([a], [b]) => a.localeCompare(b)).slice(-12).map(([key, count]) => ({ name: new Date(`${key}-01T12:00:00`).toLocaleDateString("en-PK", { month: "short", year: "2-digit" }), count }));
   })();
   const topTitles = (() => {
     const buckets = new Map<string, number>();
@@ -373,6 +376,14 @@ export function AdminWorkspace({ view }: { view: View }) {
       setSelectedBooks(new Set(visible.map(b => b.id)));
     }
   }, [visible, selectedBooks, setSelectedBooks]);
+  async function adjustInventory(book: AdminBook, delta: number) {
+    if (!book.uuid || adjustingBook) return;
+    setAdjustingBook(book.uuid);
+    try { const failure = await data.adjustStock(book.uuid, delta, delta > 0 ? "restock" : "adjustment"); setNotice(failure || "Stock updated."); }
+    catch { setNotice("Stock could not be updated. Please try again."); }
+    finally { setAdjustingBook(""); }
+  }
+  if (data.loading) return <AdminLoading />;
   return (
     <AdminShell
       view={view}
@@ -974,12 +985,20 @@ export function AdminWorkspace({ view }: { view: View }) {
             </>
           )}
           {(view === "Inventory" || view === "Media Library") && (
-            <section className="plbh-admin-panel">
+            <section className={`plbh-admin-panel ${view === "Inventory" ? "plbh-inventory-panel" : ""}`}>
+              {view === "Inventory" && <div className="plbh-inventory-summary">
+                {[
+                  ["Catalogue titles", products.length, "book"],
+                  ["Tracked units", products.reduce((total, book) => total + (book.stock ?? 0), 0), "box"],
+                  ["Out of stock", products.filter((book) => !book.inStock).length, "alert"],
+                  ["Stock untracked", products.filter((book) => book.stock === null).length, "file"],
+                ].map(([label, count, icon]) => <div key={String(label)}><span><Glyph name={String(icon)} size={20} /></span><div><small>{label}</small><strong>{Number(count).toLocaleString()}</strong></div></div>)}
+              </div>}
               <div className="plbh-admin-panel-heading">
                 <div>
-                  <h2>{view === "Inventory" ? "Catalogue availability" : "Published book covers"} <span className="plbh-admin-count">{filtered.length}</span></h2>
+                  <h2>{view === "Inventory" ? "Stock overview" : "Published book covers"} <span className="plbh-admin-count">{filtered.length}</span></h2>
                   <p>{view === "Inventory"
-                    ? "Source availability flags only. Unit counts, low-stock thresholds and adjustment history are not recorded."
+                    ? "Monitor availability and adjust tracked stock. Use Edit book to start tracking an uncounted title."
                     : "Existing cover assets used by the storefront. Uploads and replacement require protected storage."}</p>
                 </div>
               </div>
@@ -993,20 +1012,30 @@ export function AdminWorkspace({ view }: { view: View }) {
                 </select>
                 {view === "Media Library" && (
                   <label className="plbh-admin-button plbh-admin-upload-button">
-                    <Glyph name="plus" size={15} /> Upload image
+                    <Glyph name="plus" size={15} /> {mediaUploading ? "Uploading images…" : "Upload images"}
                     <input
                       type="file"
                       accept="image/*"
+                      multiple
+                      disabled={mediaUploading}
                       onChange={async (event) => {
-                        const file = event.target.files?.[0];
-                        if (!file) return;
+                        const files = Array.from(event.target.files ?? []);
+                        event.currentTarget.value = "";
+                        if (!files.length) return;
+                        if (files.some((file) => !["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 5 * 1024 * 1024)) { setNotice("Choose JPG, PNG or WebP images up to 5 MB each."); return; }
+                        setMediaUploading(true);
+                        let saved = 0;
                         try {
+                          for (const file of files) {
                           const url = await data.uploadImage(file);
                           const failure = await data.save("media_assets", { url, alt_text: file.name, kind: "gallery" });
-                          setNotice(failure || "Image uploaded.");
+                          if (failure) throw new Error(failure);
+                          saved += 1;
+                          }
+                          setNotice(`${saved} images uploaded.`);
                         } catch (caught) {
-                          setNotice(caught instanceof Error ? caught.message : "Upload failed.");
-                        }
+                          setNotice(`${saved} of ${files.length} uploaded. ${caught instanceof Error ? caught.message : "Upload failed."}`);
+                        } finally { setMediaUploading(false); }
                       }}
                     />
                   </label>
@@ -1015,18 +1044,17 @@ export function AdminWorkspace({ view }: { view: View }) {
               {view === "Inventory" ? (
                 <div className="plbh-admin-table-scroll">
                   <table>
-                    <caption className="plbh-admin-visually-hidden">Published catalogue availability; physical unit counts are unknown</caption>
+                    <caption className="plbh-admin-visually-hidden">Book availability, tracked stock and inventory adjustments</caption>
                     <thead><tr><th scope="col">Book</th><th scope="col">Availability</th><th scope="col">Unit count</th><th scope="col">Price</th><th scope="col">Record</th></tr></thead>
                     <tbody>{visible.map((book) => <tr key={book.id}>
                       <td><div className="plbh-admin-table-book"><Image src={book.image} alt="" width={32} height={44} /><div><strong>{book.name}</strong><small>PLBH-{book.id} · {book.category}</small></div></div></td>
                       <td><span className={`plbh-admin-badge ${book.inStock ? "delivered" : "cancelled"}`}>{book.inStock ? "In stock" : "Out of stock"}</span></td>
                       <td>{book.stock ?? "Not counted"}</td><td className="plbh-admin-amount">Rs. {money(book.price)}</td>
                       <td><div className="plbh-admin-row-actions">
-                        {book.uuid && <><button className="plbh-admin-icon-button plbh-admin-stepper" aria-label={`Remove one from ${book.name}`} title="Remove one" onClick={() => data.adjustStock(book.uuid!, -1, "adjustment")}>−</button>
-                        <button className="plbh-admin-icon-button plbh-admin-stepper" aria-label={`Add one to ${book.name}`} title="Restock one" onClick={() => data.adjustStock(book.uuid!, 1, "restock")}>+</button>
+                        {book.uuid && <><button className="plbh-admin-icon-button plbh-admin-stepper" disabled={Boolean(adjustingBook) || book.stock === null || book.stock === 0 || myRole === "viewer"} aria-label={`Remove one from ${book.name}`} title={book.stock === null ? "Set a stock count in Edit book first" : "Remove one"} onClick={() => void adjustInventory(book, -1)}>−</button>
+                        <button className="plbh-admin-icon-button plbh-admin-stepper" disabled={Boolean(adjustingBook) || book.stock === null || myRole === "viewer"} aria-label={`Add one to ${book.name}`} title={book.stock === null ? "Set a stock count in Edit book first" : "Restock one"} onClick={() => void adjustInventory(book, 1)}>+</button>
                         <button className="plbh-admin-icon-button" aria-label={`Edit ${book.name}`} title="Edit book" onClick={() => router.push(`/admin/books/${book.uuid}/edit`)}><Glyph name="pencil" size={16} /></button>
-                        <button className="plbh-admin-icon-button" aria-label={`View ${book.name}`} title="View details" onClick={() => setSelectedBook(book)}><Glyph name="eye" size={16} /></button>
-                        <button className="plbh-admin-icon-button" data-tone="danger" aria-label={`Delete ${book.name}`} title="Delete book" onClick={() => destroy("books", book.uuid!, book.name)}><Glyph name="trash" size={16} /></button></>}
+                        </>}
                       </div></td>
                     </tr>)}</tbody>
                   </table>
@@ -1152,7 +1180,7 @@ export function AdminWorkspace({ view }: { view: View }) {
               <section className="plbh-admin-panel">
                 <div className="plbh-admin-panel-heading">
                   <div>
-                    <h2>Revenue over time</h2>
+                    <h2>Order value over time</h2>
                     <p>Order value by month for the selected period</p>
                   </div>
                   <span className="plbh-admin-chart-unit"><Glyph name="wallet" size={14} /> Rs. {money(revenue)}</span>
@@ -1229,7 +1257,7 @@ export function AdminWorkspace({ view }: { view: View }) {
               title={view === "Team & Access" ? "Active studio members" : view}
               description={view === "Team & Access" ? "People with direct access to manage this workspace." : subtitles[view] || ""}
               onAdd={
-                recordEntity[view] && view !== "Customers"
+                recordEntity[view] && view !== "Customers" && myRole !== "viewer" && (view !== "Team & Access" || myRole === "owner")
                   ? () => setEditing({ entity: recordEntity[view] })
                   : undefined
               }
@@ -1243,12 +1271,12 @@ export function AdminWorkspace({ view }: { view: View }) {
               onEdit={
                 view === "Orders"
                   ? (row) => router.push(`/admin/orders/${row.id}`)
-                  : recordEntity[view]
+                  : recordEntity[view] && myRole !== "viewer" && (view !== "Team & Access" || myRole === "owner")
                     ? (row) => setEditing({ entity: recordEntity[view], row })
                     : undefined
               }
               onDelete={
-                recordTable[view]
+                recordTable[view] && view !== "Orders" && myRole !== "viewer" && (view !== "Team & Access" || myRole === "owner")
                   ? (row) => destroy(recordTable[view], row.id, "Record")
                   : undefined
               }
@@ -1286,6 +1314,14 @@ export function AdminWorkspace({ view }: { view: View }) {
                 </button>
               </div>
               <div className="plbh-admin-settings-grid">
+                <div className="plbh-admin-settings-section">
+                  <h3>Website logo</h3>
+                  {data.settings?.logo_url ? <Image src={String(data.settings.logo_url)} alt="Current store logo" width={180} height={100} unoptimized style={{ objectFit: "contain" }} /> : <p>Your store name is displayed using the default brand design.</p>}
+                  <p>Use your own logo across the storefront and admin workspace.</p>
+                  <button type="button" className="plbh-admin-button" disabled={data.loading || !data.live} onClick={() => setEditing({ entity: "settings", row: data.settings })}>
+                    <Glyph name="image" size={16} /> Change logo
+                  </button>
+                </div>
                 <div className="plbh-admin-settings-section">
                   <h3>Store information</h3>
                   <dl className="plbh-admin-settings-list">

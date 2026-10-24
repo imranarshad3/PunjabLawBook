@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { RecordRow } from "./use-admin-data";
 import { publicWebUrl, storeLogoUrl } from "@/lib/store-settings";
+import { Glyph } from "./icons";
 
 export type Field = {
   name: string;
@@ -133,7 +134,7 @@ export const entities: Record<EntityKey, { table: string; label: string; fields:
       { name: "city", label: "City" },
       { name: "country", label: "Country" },
       { name: "currency", label: "Currency" },
-      { name: "logo_url", label: "Logo URL" },
+      { name: "logo_url", label: "Website logo" },
       { name: "social.facebook", label: "Facebook page", type: "url" },
       { name: "social.instagram", label: "Instagram page", type: "url" },
       { name: "social.messenger_name", label: "Messenger display name" },
@@ -169,6 +170,13 @@ export function EntityForm({
   onUpload?: (file: File) => Promise<string>;
 }) {
   const config = entities[entity];
+  const groups = entity === "settings" ? [
+    { title: "Brand identity", description: "Give your storefront a recognisable name and logo.", names: ["store_name", "social.tagline", "logo_url", "social.announcement", "social.description"] },
+    { title: "Contact & location", description: "Help readers reach you and find your bookstore.", names: ["store_email", "phone", "whatsapp", "address", "city", "country"] },
+    { title: "Social profiles", description: "Connect your community with your official pages.", names: ["social.facebook", "social.instagram", "social.messenger_name"] },
+    { title: "Shipping & currency", description: "Set the delivery charges shown at checkout.", names: ["currency", "shipping_flat_fee", "free_shipping_over"] },
+    { title: "Search appearance", description: "Choose how your website appears in search results.", names: ["meta_title", "meta_description"] },
+  ] : [{ title: "", description: "", names: config.fields.map((field) => field.name) }];
   const dialog = useRef<HTMLDialogElement>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -177,6 +185,10 @@ export function EntityForm({
 
   async function handleUpload(field: string, file: File) {
     if (!onUpload) return;
+    if (!['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/avif'].includes(file.type) || file.size > 5 * 1024 * 1024) {
+      setError("Choose a PNG, JPG, WebP, GIF or AVIF image up to 5 MB.");
+      return;
+    }
     setUploading(field);
     setError("");
     try {
@@ -228,7 +240,8 @@ export function EntityForm({
   return (
     <dialog
       ref={dialog}
-      className="plbh-admin-detail-dialog"
+      className={`plbh-admin-detail-dialog ${entity === "settings" ? "plbh-settings-dialog" : ""}`}
+      aria-label={entity === "settings" ? "Store settings" : `Edit ${config.label}`}
       onClose={onClose}
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
@@ -243,18 +256,21 @@ export function EntityForm({
             <p>{entity === "settings" ? "Update your brand, contact details and search listing. Saved changes appear across the storefront." : "Update the details below and save your changes."}</p>
           </div>
           <button type="button" className="plbh-admin-icon-button" aria-label="Close" onClick={onClose}>
-            ×
+            <Glyph name="close" size={20} />
           </button>
         </div>
+        <div className="plbh-admin-form-body">
+        {groups.map((group) => <section key={group.title} className={entity === "settings" ? "plbh-settings-form-section" : ""}>
+          {group.title && <div className="plbh-settings-section-heading"><h3>{group.title}</h3><p>{group.description}</p></div>}
         <div className="plbh-admin-form-grid">
-          {config.fields.map((field) => {
+          {group.names.map((name) => config.fields.find((field) => field.name === name)!).map((field) => {
             const value = field.name.startsWith("social.") ? (row?.social as Record<string, unknown> | undefined)?.[field.name.slice(7)] : row?.[field.name];
             const options =
               field.name === "category_id"
                 ? (categories || []).map((category) => ({ value: category.id, label: category.name }))
                 : (field.options || []).map((option) => ({ value: option, label: option.replaceAll("_", " ") }));
             return (
-              <label key={field.name} className={field.type === "textarea" ? "plbh-admin-form-wide" : ""}>
+              <label key={field.name} className={field.type === "textarea" || field.name === "logo_url" ? "plbh-admin-form-wide" : ""}>
                 <span>
                   {field.label}
                   {field.required ? " *" : ""}
@@ -286,7 +302,8 @@ export function EntityForm({
                       <span className="plbh-admin-upload">
                         <input
                           type="file"
-                          accept="image/*"
+                          accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
+                          disabled={busy || Boolean(uploading)}
                           aria-label={`Upload ${field.label}`}
                           onChange={(event) => {
                             const file = event.target.files?.[0];
@@ -298,20 +315,24 @@ export function EntityForm({
                           <Image
                             src={uploads[field.name] || String(value)}
                             alt=""
-                            width={44}
-                            height={60}
+                            width={field.name === "logo_url" ? 180 : 44}
+                            height={field.name === "logo_url" ? 100 : 60}
+                            style={{ objectFit: "contain" }}
                             unoptimized
                           />
                         )}
                       </span>
                     )}
+                    {field.name === "logo_url" && <small>Upload a logo above, then save changes to publish it in the website header and admin sidebar. PNG, JPG, WebP, GIF or AVIF, up to 5 MB. Clear the URL to restore the default logo.</small>}
                   </>
                 )}
               </label>
             );
           })}
         </div>
+        </section>)}
         {error && <p className="plbh-admin-form-error">{error}</p>}
+        </div>
         <div className="plbh-admin-dialog-actions">
           <button type="button" className="plbh-admin-button" onClick={onClose}>
             Cancel

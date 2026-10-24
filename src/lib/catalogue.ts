@@ -15,6 +15,9 @@ export type Product = {
   inStock: boolean;
   purchasable: boolean;
   category: string;
+  stock?: number | null;
+  author?: string; publisher?: string; description?: string; shortDescription?: string;
+  isbn?: string; language?: string; metaTitle?: string; metaDescription?: string;
   uuid?: string;
   gallery?: { url: string; alt: string }[];
   reviews?: { id: string; customer_name: string; rating: number; title: string; body: string; created_at: string }[];
@@ -59,23 +62,31 @@ export type Catalogue = {
 };
 
 type Row = {
+  id: string; author: string | null; publisher: string | null; description: string | null;
+  short_description: string | null; isbn: string | null; language: string | null;
+  meta_title: string | null; meta_description: string | null;
   legacy_id: number | null;
   title: string;
   price: string | number;
   cover_url: string | null;
   stock_status: string;
+  stock: number | null;
   categories: { name: string } | null;
 };
 
 const toProduct = (row: Row): Product => ({
+  uuid: row.id, author: row.author || "", publisher: row.publisher || "", description: row.description || "",
+  shortDescription: row.short_description || "", isbn: row.isbn || "", language: row.language || "",
+  metaTitle: row.meta_title || "", metaDescription: row.meta_description || "",
   id: row.legacy_id ?? 0,
   name: row.title,
   url: `/products/${row.legacy_id}`,
   image: row.cover_url || "/images/book-placeholder.svg",
   price: Number(row.price),
+  stock: row.stock,
   inStock: row.stock_status !== "out_of_stock",
   purchasable: row.stock_status !== "out_of_stock",
-  category: row.categories?.name || "Legal Reference",
+  category: row.categories?.name || "Uncategorised",
 });
 
 const fallback = (): Catalogue => ({
@@ -98,12 +109,15 @@ export async function getCatalogue(): Promise<Catalogue> {
   // Admin writes call /api/revalidate, which flushes this tag.
   cacheTag(CATALOGUE_TAG);
   cacheLife("hours");
-  if (!supabase) return fallback();
+  if (!supabase) {
+    if (process.env.NODE_ENV === "production") throw new Error("Configure Supabase before publishing the storefront.");
+    return fallback();
+  }
 
   const [books, sections, collectionRows] = await Promise.all([
     supabase
       .from("books")
-      .select("legacy_id, title, price, cover_url, stock_status, categories(name)")
+      .select("id, legacy_id, title, author, publisher, description, short_description, isbn, language, meta_title, meta_description, price, cover_url, stock, stock_status, categories(name)")
       .eq("status", "published")
       .not("legacy_id", "is", null)
       .order("title"),
@@ -111,7 +125,7 @@ export async function getCatalogue(): Promise<Catalogue> {
     supabase.from("collections").select("slug, title, description, collection_books(sort_order, books(legacy_id))"),
   ]);
 
-  if (books.error) return fallback();
+  if (books.error) throw new Error("The live catalogue could not be loaded. Please try again shortly.");
 
   const products = (books.data as unknown as Row[]).map(toProduct);
   const byId = new Map(products.map((product) => [product.id, product]));
@@ -130,7 +144,7 @@ export async function getCatalogue(): Promise<Catalogue> {
   // only partially seeded. Header and mobile navigation both link to these
   // stable slugs; an empty live row should not turn a working route into a
   // 404 or an empty collection page.
-  const collections: Catalogue["collections"] = { ...staticCollections };
+  const collections: Catalogue["collections"] = Object.fromEntries(Object.entries(staticCollections).map(([key, entry]) => [key, { ...entry, ids: [] }]));
   for (const row of ((collectionRows.data || []) as unknown as {
     slug: string;
     title: string;
@@ -144,7 +158,7 @@ export async function getCatalogue(): Promise<Catalogue> {
     collections[row.slug] = {
       title: row.title,
       description: row.description || collections[row.slug]?.description || "",
-      ids: ids.length ? ids : collections[row.slug]?.ids || [],
+      ids,
     };
   }
 

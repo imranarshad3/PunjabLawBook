@@ -18,8 +18,9 @@ const PENDING: AdminAccess = { checked: false, isAdmin: false, role: null };
  * just accepted an invite lands on the account page already a member.
  */
 export function useAdminAccess(): AdminAccess {
-  const { isLoaded, isSignedIn } = useUser();
+  const { isLoaded, isSignedIn, user } = useUser();
   const { session } = useSession();
+  const userId = user?.id;
   const [membership, setMembership] = useState<AdminAccess | null>(null);
 
   const getToken = useCallback(async () => (session ? session.getToken() : null), [session]);
@@ -33,14 +34,14 @@ export function useAdminAccess(): AdminAccess {
     let cancelled = false;
     (async () => {
       await fetch("/api/admin/claim", { method: "POST" }).catch(() => null);
-      const { data } = await client.from("admin_members").select("role").limit(1).maybeSingle();
+      const { data } = await client.from("admin_members").select("role").eq("clerk_user_id", userId!).maybeSingle();
       if (cancelled) return;
       setMembership({ checked: true, isAdmin: Boolean(data), role: data?.role ?? null });
     })();
     return () => {
       cancelled = true;
     };
-  }, [canCheck, getToken]);
+  }, [canCheck, getToken, userId]);
 
   if (!isLoaded) return PENDING;
   if (!canCheck) return SIGNED_OUT;

@@ -7,12 +7,16 @@ export function EnquiryForm({ request = false }: { request?: boolean }) {
   const settings = useSiteSettings();
   const [ready, setReady] = useState(false);
   const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
   return (
     <form
       className="enquiry-form"
       onChange={() => setReady(false)}
-      onSubmit={(event) => {
+      onSubmit={async (event) => {
         event.preventDefault();
+        if (busy) return;
+        setBusy(true); setError("");
         const data = new FormData(event.currentTarget);
         const text = request
           ? `Book request from ${data.get("name")}\nTitle: ${data.get("title")}\nAuthor / edition: ${data.get("author") || "Not specified"}\nQuantity: ${data.get("quantity")}\nNotes: ${data.get("message") || "None"}`
@@ -20,7 +24,8 @@ export function EnquiryForm({ request = false }: { request?: boolean }) {
         setMessage(text);
         setReady(true);
         // Keep a record in the admin inbox; WhatsApp stays the reply channel.
-        void recordEnquiry({
+        try {
+        const result = await recordEnquiry({
           customer_name: String(data.get("name") || "Unknown"),
           book_title: (data.get("title") as string) || (data.get("topic") as string) || null,
           phone: (data.get("phone") as string) || null,
@@ -28,6 +33,9 @@ export function EnquiryForm({ request = false }: { request?: boolean }) {
           quantity: Number(data.get("quantity")) || null,
           message: text,
         });
+        if (result.error) setError("Your enquiry could not be saved. Please send the prepared message through WhatsApp to reach our team.");
+        } catch { setError("Your enquiry could not be saved. You can still send it through WhatsApp below."); }
+        finally { setBusy(false); }
       }}
     >
       <p className="shop-kicker">
@@ -105,13 +113,14 @@ export function EnquiryForm({ request = false }: { request?: boolean }) {
           }
         />
       </label>
-      <button className="button button-green" type="submit">
-        Prepare {request ? "book request" : "enquiry"} <Icon name="arrow" />
+      <button className="button button-green" type="submit" disabled={busy}>
+        {busy ? "Saving enquiry…" : `Prepare ${request ? "book request" : "enquiry"}`} <Icon name="arrow" />
       </button>
       <p className="form-note">
         Preparing this form sends your enquiry to our team. You can also send
         it through WhatsApp. This form does not place an order.
       </p>
+      {error && <p role="alert">{error}</p>}
       {ready && (
         <div className="enquiry-ready" role="status">
           <strong>Your message is ready.</strong>

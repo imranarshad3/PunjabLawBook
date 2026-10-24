@@ -7,6 +7,7 @@ import { BookCard, titleFor, creditFor } from "@/components/book-card";
 import { ProductGallery, ProductPurchase } from "@/components/product-purchase";
 import { Icon } from "@/components/ui";
 import { ProductReviews } from "@/components/product-reviews";
+import { StoreWhatsAppLink } from "@/components/site-settings";
 
 type Props = { params: Promise<{ id: string }> };
 export async function generateStaticParams() {
@@ -19,8 +20,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const book = products.find((book) => String(book.id) === id);
   return {
     title: book
-      ? `${titleFor(book)} | Punjab Law Book House`
+      ? book.metaTitle || titleFor(book)
       : "Book not found",
+    description: book?.metaDescription || book?.shortDescription || undefined,
   };
 }
 async function ProductDetails({ params }: Props) {
@@ -76,9 +78,9 @@ async function ProductDetails({ params }: Props) {
               <small>Rs.</small> {book.price.toLocaleString("en-PK")}
             </p>
             <p className="detail-intro">
-              {book.category === "Exam Guides"
+              {book.shortDescription || (book.category === "Exam Guides"
                 ? "Make your next chapter count. A focused resource for your examination preparation and legal studies."
-                : `Make room on your bookshelf for ${titleFor(book)}. Explore this ${book.category.toLowerCase()} title for your studies, reference or professional collection.`}
+                : `Make room on your bookshelf for ${titleFor(book)}. Explore this ${book.category.toLowerCase()} title for your studies, reference or professional collection.`)}
             </p>
             <ProductPurchase book={book} />
             <div className="detail-benefits">
@@ -104,26 +106,27 @@ async function ProductDetails({ params }: Props) {
           <div>
             <p className="shop-kicker">A CLOSER LOOK</p>
             <h2>On your bookshelf.</h2>
-            <p>
+            {book.description ? <p style={{ whiteSpace: "pre-line" }}>{book.description}</p> : <p>
               Whether you are preparing for an examination or building your
               professional library, the right reference is a valuable companion.
               Explore this title from Punjab Law Book House’s{" "}
               {book.category.toLowerCase()} collection.
-            </p>
+            </p>}
             <p>
               Need to confirm the edition, language, contents or binding? Our
               team can help you choose before you order.
             </p>
-            <a
+            <StoreWhatsAppLink
               className="text-link"
-              href={`https://wa.me/923334222005?text=${encodeURIComponent(`Please confirm the edition and book details for ${book.name}. Catalogue no. ${book.id}`)}`}
+              message={`Please confirm the edition and book details for ${book.name}. Catalogue no. ${book.id}`}
             >
               Speak to a book specialist <Icon name="arrow" />
-            </a>
+            </StoreWhatsAppLink>
           </div>
           <div className="book-specifications">
             <h3>Book details</h3>
             <dl>
+              {[["Author", book.author], ["Publisher", book.publisher], ["Language", book.language], ["ISBN", book.isbn]].filter(([, value]) => value).map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
               <div>
                 <dt>Title</dt>
                 <dd>{titleFor(book)}</dd>

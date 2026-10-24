@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useSiteSettings } from "./site-settings";
 import { useSession } from "@clerk/nextjs";
 import { useCart, setCartQuantity } from "./cart-state";
 import { placeOrder } from "@/lib/storefront";
@@ -13,6 +14,9 @@ export function CheckoutPreview() {
   const { session, isLoaded: sessionLoaded } = useSession();
   const { products } = useCatalogue();
   const [busy, setBusy] = useState(false);
+  const submitting = useRef(false);
+  const request = useRef({ payload: "", id: "" });
+  const settings = useSiteSettings();
   const [error, setError] = useState("");
   const [placed, setPlaced] = useState<{ orderNumber: string; total: number } | null>(null);
   const lines = cart.flatMap((item) => {
@@ -23,30 +27,55 @@ export function CheckoutPreview() {
     (sum, line) => sum + line.book.price * line.quantity,
     0,
   );
+  const shipping = settings.freeShippingOver !== null && total >= settings.freeShippingOver ? 0 : settings.shippingFee;
   async function submitOrder(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (busy || !sessionLoaded || lines.length === 0) return;
+    if (submitting.current || busy || !sessionLoaded || lines.length === 0) return;
+    if (lines.some(({ book, quantity }) => !book.inStock || !book.purchasable || (book.stock != null && quantity > book.stock))) {
+      setError("Some books are unavailable or exceed the available stock. Update your book bag before ordering.");
+      return;
+    }
+    submitting.current = true;
     setBusy(true);
     setError("");
     const form = new FormData(event.currentTarget);
-    const result = await placeOrder(
-      {
+    const customer = {
         full_name: String(form.get("full_name") || "").trim(),
         email: String(form.get("email") || "").trim(),
         phone: String(form.get("phone") || "").trim(),
         address: [String(form.get("address") || "").trim(), String(form.get("postal_code") || "").trim()].filter(Boolean).join(", "),
         city: String(form.get("city") || "").trim(),
         notes: String(form.get("notes") || "").trim(),
-      },
-      lines.map((line) => ({ legacy_id: line.book.id, quantity: line.quantity })),
+        promotion_code: String(form.get("promotion_code") || "").trim(),
+      };
+    const orderItems = lines.map((line) => ({ legacy_id: line.book.id, quantity: line.quantity }));
+    const payload = JSON.stringify([customer, orderItems, session?.id]);
+    if (request.current.payload !== payload) {
+      // Retain the retry key across a refresh without storing delivery details.
+      const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(payload));
+      const fingerprint = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+      let id = crypto.randomUUID();
+      try {
+        const previous = JSON.parse(sessionStorage.getItem("plbh-checkout-request") || "null");
+        if (previous?.fingerprint === fingerprint && typeof previous.id === "string") id = previous.id;
+        sessionStorage.setItem("plbh-checkout-request", JSON.stringify({ fingerprint, id }));
+      } catch { /* In-memory retries still work when browser storage is unavailable. */ }
+      request.current = { payload, id };
+    }
+    const result = await placeOrder(
+      customer,
+      orderItems,
       session ? () => session.getToken() : undefined,
+      request.current.id,
     );
+    submitting.current = false;
     setBusy(false);
     if (result.error) {
       setError(result.error);
       return;
     }
     for (const line of lines) setCartQuantity(line.book.id, 0);
+    try { sessionStorage.removeItem("plbh-checkout-request"); } catch {}
     setPlaced({ orderNumber: result.orderNumber!, total: result.total! });
   }
 
@@ -59,6 +88,7 @@ export function CheckoutPreview() {
             Your order number is <strong>{placed.orderNumber}</strong>. We will call you to
             confirm delivery. Payment is collected on delivery.
           </p>
+          <p>Confirmed order total: <strong>Rs. {placed.total.toLocaleString("en-PK")}</strong></p>
           <Link className="button button-green" href="/products">
             Continue browsing <Icon name="arrow" />
           </Link>
@@ -209,12 +239,14 @@ export function CheckoutPreview() {
             </div>
             <div>
               <span>Delivery</span>
-              <span>To be confirmed</span>
+              <span>{shipping ? `Rs. ${shipping.toLocaleString("en-PK")}` : "Free"}</span>
             </div>
             <div className="summary-total">
-              <span>Estimated subtotal</span>
-              <strong>Rs. {total.toLocaleString("en-PK")}</strong>
+              <span>Order total</span>
+              <strong>Rs. {(total + shipping).toLocaleString("en-PK")}</strong>
             </div>
+            <label>Promotion code (optional)<input form="checkout-form" name="promotion_code" maxLength={80} placeholder="Enter your code" disabled={busy} /></label>
+            <small>Eligible discounts are checked when you place the order and shown in your confirmation.</small>
             <button className="button button-green" type="submit" form="checkout-form" disabled={busy || !sessionLoaded}>
               {busy ? "Placing your order…" : "Place your order"} <Icon name="arrow" />
             </button>

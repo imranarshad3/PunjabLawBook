@@ -2472,3 +2472,40 @@ button:focus-visible {
 .brand .brand-emblem { object-fit: contain; flex-shrink: 0; }
 .brand small { text-transform: uppercase; }
 .footer-social-links { display: flex; gap: 1rem; margin-bottom: 1rem; font-size: .875rem; }
+
+/* Shared native dropdowns retain keyboard and mobile picker behaviour. */
+body select:not([multiple]):not([size]) {
+  appearance: none; -webkit-appearance: none; min-height: 46px; max-width: 100%;
+  padding: 11px 42px 11px 14px !important; border: 1px solid #cbd8cf; border-radius: 10px;
+  background-color: #fff; color: #203e30; font-size: 14px; line-height: 1.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23506c5b' stroke-width='1.8' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important; background-position: right 14px center !important;
+  background-size: 16px !important; cursor: pointer; text-overflow: ellipsis;
+  box-shadow: 0 2px 4px #183f2905; color-scheme: light;
+}
+body select:not([multiple]):hover { border-color: #8faa98; }
+body select:not([multiple]):focus-visible { outline: 3px solid #24704b26; outline-offset: 2px; border-color: #28704e; }
+body select option { background: #fff; color: #203e30; padding: 10px; }
+body select:disabled { cursor: not-allowed; opacity: .6; }
+body .plbh-admin-range > svg:last-child { display: none; }
+/* Customer order receipt. */
+.account-order-page { background: #f5f7f3; padding-bottom: 64px; }
+.account-order-page .account-page-heading { padding-block: 36px; }
+.account-order-page .account-panel-card { background: #fff; border: 1px solid #dce5dd; border-radius: 18px; box-shadow: 0 6px 24px #173a2510; overflow: hidden; }
+.account-order-page .account-order-summary { background: linear-gradient(120deg,#123e2e,#215c45); color: #fff; padding: 28px; border: 0; }
+.account-order-summary header h2, .account-order-summary header p { color: inherit; }
+.account-order-summary .shop-kicker { color: #e7cc94; }
+.account-order-summary .account-order-progress { padding-top: 24px; }
+.account-order-summary .account-order-progress > div { color: #c1d4c7; }
+.account-order-summary .account-order-progress .is-complete { color: #fff; }
+.account-order-page .account-order-detail-grid { gap: 24px; margin-top: 24px; }
+.account-order-detail-grid .account-panel-card header { padding: 24px; background: #fbfcf9; border-bottom: 1px solid #e4ebe5; }
+.account-order-detail-grid h2 { font-size: 23px; color: #173e2c; }
+.account-order-page .account-order-lines { padding: 0 24px; }
+.account-order-page .account-order-lines li { padding: 22px 0; gap: 24px; }
+.account-order-page .account-order-lines strong { font-size: 16px; line-height: 1.6; }
+.account-order-page .account-order-totals { margin: 12px 24px 24px; padding-top: 20px; border-top: 1px solid #dce5dd; }
+.account-order-page .account-order-totals .is-total { padding: 18px; background: #edf5ef; border-radius: 12px; font-size: 21px; color: #174c32; }
+.account-order-page .account-order-meta { padding: 24px; }
+.account-order-page .account-order-meta > div { font-size: 15px; line-height: 1.6; }
+@media(max-width:640px) { .account-order-page .account-order-summary { padding: 20px; } .account-order-page .account-order-lines strong { font-size: 14px; } }

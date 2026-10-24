@@ -5,7 +5,7 @@ import {
   MapPin, Store, CreditCard, Truck, Star, Image, Settings, Search, ArrowRight,
   ExternalLink, Bell, Plus, Download, CalendarDays, Wallet, Menu, Check, CircleAlert,
   HandHeart, ReceiptText, LibraryBig, Scale, Landmark, Shield, BriefcaseBusiness, GraduationCap, ScrollText, Gavel,
-  type LucideIcon,
+  X, type LucideIcon,
 } from "lucide-react";
 
 const icons: Record<string, LucideIcon> = {
@@ -18,7 +18,7 @@ const icons: Record<string, LucideIcon> = {
   truck: Truck, star: Star, image: Image, settings: Settings, search: Search,
   arrow: ArrowRight, external: ExternalLink, bell: Bell, plus: Plus,
   down: Download, calendar: CalendarDays, wallet: Wallet, menu: Menu,
-  check: Check, alert: CircleAlert,
+  check: Check, alert: CircleAlert, close: X,
   family: HandHeart, receipt: ReceiptText, library: LibraryBig,
   scale: Scale, landmark: Landmark, shield: Shield,
   briefcase: BriefcaseBusiness, graduation: GraduationCap,

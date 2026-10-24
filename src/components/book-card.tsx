@@ -12,6 +12,7 @@ export type Book = {
   price: number;
   inStock: boolean;
   purchasable: boolean;
+  uuid?: string; author?: string; publisher?: string;
 };
 // Readable titles and credits transcribed from the source catalogue and covers.
 const editorial: Record<number, { title: string; credit: string }> = {
@@ -45,9 +46,9 @@ const editorial: Record<number, { title: string; credit: string }> = {
     credit: "For practice & examination",
   },
 };
-export const titleFor = (book: Book) => editorial[book.id]?.title ?? book.name;
+export const titleFor = (book: Book) => book.uuid ? book.name : editorial[book.id]?.title ?? book.name;
 export const creditFor = (book: Book) =>
-  editorial[book.id]?.credit ?? "Punjab Law Book House catalogue";
+  book.author ? `By ${book.author}` : book.publisher || (book.uuid ? "Legal books & reference" : editorial[book.id]?.credit ?? "Legal books & reference");
 const cartHref = (book: Book) => `/products/${book.id}`;
 
 
@@ -125,7 +126,7 @@ export function ShowcaseCard({
           aria-label={`View ${title}`}
         >
           <Image
-            src={photograph ?? book.image}
+            src={book.uuid ? book.image : photograph ?? book.image}
             alt={book.name}
             fill
             sizes="(max-width: 600px) 85vw, (max-width: 1100px) 45vw, 300px"

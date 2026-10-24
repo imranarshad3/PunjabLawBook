@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { SITE_IMAGE_PREFIX, siteImageSlots, readImageDisplay } from "@/lib/site-image-slots";
 import type { RecordRow } from "./use-admin-data";
+import { Glyph } from "./icons";
 
 export function SiteImagesEditor({ rows, upload, save }: {
   rows: RecordRow[];
@@ -11,9 +12,9 @@ export function SiteImagesEditor({ rows, upload, save }: {
   save: (table: string, values: Record<string, unknown>, id?: string) => Promise<string>;
 }) {
   const [selected, setSelected] = useState<string>("/images/hero-library.webp");
-  return <section className="plbh-admin-panel plbh-admin-content-overview">
+  return <section className="plbh-admin-panel plbh-admin-content-overview plbh-content-image-panel">
     <div className="plbh-admin-panel-heading"><div><h2>Website images</h2><p>Replace page artwork and shared backgrounds. Book covers and galleries can be changed in Books.</p></div></div>
-    <label>Choose image placement <select value={selected} onChange={(event) => setSelected(event.target.value)}>
+    <label className="plbh-image-placement"><span><Glyph name="image" size={18} /> Image placement</span><select value={selected} onChange={(event) => setSelected(event.target.value)}>
       {siteImageSlots.map((src) => <option key={src} value={src}>{src.replace("/images/", "").replace(".webp", "").replaceAll("-", " ")}</option>)}
     </select></label>
     <ImageEditor key={selected} original={selected}
@@ -46,7 +47,7 @@ function ImageEditor({ original, row, upload, save }: {
   }
   return <div className="plbh-site-image-editor">
     <div className="plbh-site-image-previews">{["Desktop preview", "Mobile preview"].map((label, index) => <div key={label}><span>{label}</span><div className={index ? "is-mobile" : ""}><Image src={url} alt="Selected website image preview" fill unoptimized sizes="500px" style={{ objectFit: fit, objectPosition: position }} /></div></div>)}</div>
-    <p>Show full image keeps every edge visible. Fill frame crops the edges without stretching. Previews show typical wide and narrow frames; page layouts keep their own dimensions. These display settings also apply to shared background artwork.</p>
+    <p className="plbh-image-preview-hint"><Glyph name="eye" size={17} /> Preview the full image or crop it to fit. Your page keeps its own layout dimensions.</p>
     <div className="plbh-admin-form-grid">
       <label>Upload replacement<input type="file" accept="image/jpeg,image/png,image/webp,image/avif,image/gif" disabled={busy} onChange={async (event) => {
         const file = event.target.files?.[0]; if (!file) return;
@@ -63,6 +64,6 @@ function ImageEditor({ original, row, upload, save }: {
       <label>Focus position<select value={position} disabled={busy} onChange={(event) => setPosition(event.target.value)}>{["center", "top", "bottom", "left", "right"].map((value) => <option key={value}>{value}</option>)}</select></label>
     </div>
     <div className="plbh-admin-dialog-actions"><button type="button" className="plbh-admin-button" disabled={busy || !row} onClick={() => void persist(true)}>Restore original</button><button type="button" className="plbh-admin-button plbh-admin-button-primary" disabled={busy} onClick={() => void persist()}>{busy ? "Working…" : "Save image"}</button></div>
-    <p role="status">{message}</p>
+    {message && <p className="plbh-image-save-message" role="status">{message}</p>}
   </div>;
 }
